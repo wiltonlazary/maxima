@@ -112,7 +112,7 @@ Maximaは、積分を扱うためのいくつかのルーチンを持ってい�
 @deffn {関数} dblint (@var{f}, @var{r}, @var{s}, @var{a}, @var{b})
 
 トップレベルMaximaで書かれ、翻訳され機械語にコンパイルされた二重積分ルーチン。
-このパッケージをアクセスするには@code{load (dblint)}を使ってください。
+このパッケージをアクセスするには@code{load ("dblint")}を使ってください。
 以下を計算するため、xとy方向に関して
 シンプソンの規則方法を使います。
 
@@ -771,7 +771,8 @@ o executing
 @end example
 
 @opencatbox
-@category{Integral calculus} @category{Complex variables}
+@category{Integral calculus}
+@category{Complex variables}
 @closecatbox
 @end deffn
 
@@ -815,7 +816,7 @@ o executing
 @c NEEDS EXPANSION, CLARIFICATION, AND EXAMPLES
 
 @c -----------------------------------------------------------------------------
-@anchor{residue}
+@anchor{tldefint}
 @deffn {関数} tldefint (@var{expr}, @var{x}, @var{a}, @var{b})
 
 @code{tlimswitch}が@code{true}に設定されている@code{ldefint}と同値です。
@@ -830,7 +831,6 @@ o executing
 @c -----------------------------------------------------------------------------
 @node Introduction to QUADPACK, Functions and Variables for QUADPACK, Functions and Variables for Integration, Integration
 @section Introduction to QUADPACK
-@anchor{residue}
 
 @c FOLLOWING TEXT ADAPTED WITH HEAVY MODIFICATION FROM http://www.netlib.org/slatec/src/qpdoc.f
 
@@ -994,7 +994,10 @@ $\beta > -1$
 @end table
 
 @opencatbox
-@category{Integral calculus} @category{Numerical methods} @category{Share packages} @category{Package quadpack}
+@category{Integral calculus}
+@category{Numerical methods}
+@category{Share packages}
+@category{Package quadpack}
 @closecatbox
 
 @c -----------------------------------------------------------------------------
@@ -1097,7 +1100,8 @@ $$\int_a^b {f(x) \, dx}$$
 @end example
 
 @opencatbox
-@category{Numerical methods} @category{Package quadpack}
+@category{Numerical methods}
+@category{Package quadpack}
 @closecatbox
 @end deffn
 
@@ -1187,7 +1191,8 @@ $$\int_a^b {f(x) \, dx}$$
 効率的であることに注意してください。
 
 @opencatbox
-@category{Numerical methods} @category{Package quadpack}
+@category{Numerical methods}
+@category{Package quadpack}
 @closecatbox
 @end deffn
 
@@ -1299,7 +1304,8 @@ Maximaのラムダ式またはMaximaの一般式として指定されるかも�
 @end example
 
 @opencatbox
-@category{Numerical methods} @category{Package quadpack}
+@category{Numerical methods}
+@category{Package quadpack}
 @closecatbox
 @end deffn
 
@@ -1418,7 +1424,8 @@ Principal Value
 @end example
 
 @opencatbox
-@category{Numerical methods} @category{Package quadpack}
+@category{Numerical methods}
+@category{Package quadpack}
 @closecatbox
 @end deffn
 
@@ -1531,7 +1538,8 @@ Maximaのラムダ式またはMaximaの一般式として指定されるかも�
 @end example
 
 @opencatbox
-@category{Numerical methods} @category{Package quadpack}
+@category{Numerical methods}
+@category{Package quadpack}
 @closecatbox
 @end deffn
 
@@ -1678,7 +1686,8 @@ Maximaのラムダ式またはMaximaの一般式として指定されるかも�
 @end example
 
 @opencatbox
-@category{Numerical methods} @category{Package quadpack}
+@category{Numerical methods}
+@category{Package quadpack}
 @closecatbox
 @end deffn
 
@@ -1815,7 +1824,8 @@ pos;
 @end example
 
 @opencatbox
-@category{Numerical methods} @category{Package quadpack}
+@category{Numerical methods}
+@category{Package quadpack}
 @closecatbox
 @end deffn
 

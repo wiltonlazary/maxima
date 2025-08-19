@@ -5,13 +5,10 @@
 * Functions and Variables for worldmap::
 @end menu
 
-
-
-@node Introduction to draw, Functions and Variables for draw, draw-pkg, draw-pkg
+@node Introduction to draw, Functions and Variables for draw, Package draw, Package draw
 @section Introduction to draw
 
-
-@code{draw} is a Maxima-Gnuplot and a Maxima-vtk interface.
+@code{draw} is a Maxima-Gnuplot and a Maxima-VTK interface.
 
 There are three main functions to be used at Maxima level: 
 @itemize @bullet
@@ -37,11 +34,11 @@ A selection of useful objects a scene can be made up from are:
 A short description of all draw commands and options including example plots
 (in the html and pdf version of this manual) can be found in the section
 @xref{Functions and Variables for draw}. An online version of the html manual can be
-found at @url{maxima.sourceforge.net/docs/manual/maxima_singlepage.html#draw}. 
+found at @url{https://maxima.sourceforge.io/docs/manual/maxima_singlepage.html#draw}.
 More elaborated examples of this package can be found at the following locations:
 
-@url{http://tecnostats.net/Maxima/gnuplot} @*
-@url{http://tecnostats.net/Maxima/vtk} 
+@url{http://riotorto.users.sourceforge.net/Maxima/gnuplot/} @*
+@url{http://riotorto.users.sourceforge.net/Maxima/vtk/}
 
 Example:
 
@@ -63,14 +60,19 @@ front end @code{wxdraw}, @code{wxdraw2d} and @code{wxdraw3d} are drop-in
 replacements for draw that do the same as @mrefcomma{draw} @mref{draw2d} and
 @mref{draw3d} but embed the resulting plot in the worksheet.
 
-@opencatbox
+If you want to use VTK with draw, you need VTK with the Python interface installed
+(the @ref{Package dynamics} uses VTK with the TCL interface!) and set the variable:
+
+@code{draw_renderer: 'vtk $}
+
+@opencatbox{Categories:}
 @category{Plotting}
 @category{Share packages}
 @category{Package draw}
 @closecatbox
 
 
-@node Functions and Variables for draw, Functions and Variables for pictures, Introduction to draw, draw-pkg
+@node Functions and Variables for draw, Functions and Variables for pictures, Introduction to draw, Package draw
 @section Functions and Variables for draw
 
 
@@ -136,7 +138,7 @@ and @mrefdot{draw2d}
 @figure{draw_scene}
 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -162,7 +164,7 @@ dimensions:@*
 
 See also @mref{draw} and @mrefdot{draw3d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -176,7 +178,7 @@ See also @mref{draw} and @mrefdot{draw3d}
 
 
 @anchor{draw}
-@deffn {Function} draw (<arg_1>, ...)
+@deffn {Function} draw (@code{<arg_1>, ...})
 
 Plots a series of scenes; its arguments are @code{gr2d} and/or @code{gr3d} 
 objects, together with some options, or lists of scenes and options.
@@ -238,7 +240,7 @@ End of animation sequence
 @figure{draw_equiv}
 See also @mrefcomma{gr2d} @mrefcomma{gr3d} @mref{draw2d} and @mrefdot{draw3d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @category{File output}
 @closecatbox
@@ -254,11 +256,11 @@ See also @mrefcomma{gr2d} @mrefcomma{gr3d} @mref{draw2d} and @mrefdot{draw3d}
 This function is a shortcut for
 @code{draw(gr2d(@var{options}, ..., @var{graphic_object}, ...))}.
 
-It can be used to plot an unique scene in 2d, as can be seen in most examples below.
+It can be used to plot a unique scene in 2d, as can be seen in most examples below.
 
 See also @mref{draw} and @mrefdot{gr2d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @category{File output}
 @closecatbox
@@ -275,11 +277,11 @@ See also @mref{draw} and @mrefdot{gr2d}
 This function is a shortcut for
 @code{draw(gr3d(@var{options}, ..., @var{graphic_object}, ...))}.
 
-It can be used to plot an unique scene in 3d, as can be seen in many examples below.
+It can be used to plot a unique scene in 3d, as can be seen in many examples below.
 
 See also @mref{draw} and @mrefdot{gr3d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @category{File output}
 @closecatbox
@@ -303,7 +305,7 @@ Example:
                 dimensions = [5,5]) $
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @category{File output}
 @closecatbox
@@ -346,7 +348,7 @@ Example:
 @end example
 @figure{draw_multiplot}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @category{File output}
 @closecatbox
@@ -378,17 +380,13 @@ Example:
       draw2d(explicit(((1+x)**2/(1+x*x))-1,x,-10,10))$
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
 @end deffn
 
-
-
-
-@subsection Graphics options
-
+@subsection Plot options for draw programs
 
 @anchor{adapt_depth_draw}
 @defvr {Graphic option} adapt_depth
@@ -400,12 +398,11 @@ This option is relevant only for 2d @code{explicit} functions.
 
 See also @code{nticks}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
 @end defvr
-
 
 @anchor{allocation}
 @defvr {Graphic option} allocation
@@ -451,7 +448,7 @@ Multiplot with selected dimensions.
 
 See also option @mrefdot{columns}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -477,7 +474,7 @@ Example:
 
 See also @mrefcomma{axis_bottom}  @mrefcomma{axis_left} @mrefcomma{axis_top} and @mref{axis_right} for axis in 2d.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -504,7 +501,7 @@ Example:
 
 See also @mrefcomma{axis_left}  @mrefcomma{axis_top} @mref{axis_right} and @mrefdot{axis_3d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -530,7 +527,7 @@ Example:
 
 See also @mrefcomma{axis_bottom}  @mrefcomma{axis_top} @mref{axis_right} and @mrefdot{axis_3d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -556,7 +553,7 @@ Example:
 
 See also @mrefcomma{axis_bottom}  @mrefcomma{axis_left} @mref{axis_top} and @mrefdot{axis_3d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -582,7 +579,7 @@ Example:
 
 See also @mrefcomma{axis_bottom}   @mrefcomma{axis_left}  @mrefcomma{axis_right}  and @mrefdot{axis_3d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -599,11 +596,11 @@ Sets the background color for terminals. Default background color is white.
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-This option das not work with terminals @code{epslatex} and @code{epslatex_standalone}.
+This option does not work with terminals @code{epslatex} and @code{epslatex_standalone}.
 
 See also @code{color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -637,7 +634,7 @@ Example:
 @end example
 @figure{draw_border}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -666,7 +663,7 @@ Example:
 @end example
 @figure{draw_tube_extremes}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -705,7 +702,7 @@ Example:
 
 See also @mrefcomma{enhanced3d}  @mref{colorbox} and @mrefdot{cbtics}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 @end defvr
@@ -738,7 +735,7 @@ Example :
 
 See also @mrefcomma{enhanced3d}  @mref{colorbox} and @mrefdot{cbrange}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -752,7 +749,7 @@ Default value: @code{blue}
 polygons and labels.
 
 Colors can be given as names or in hexadecimal @i{rgb} code. If a gnuplot
-version >= 5.0 is used and the terminal that is in use supports this
+version @code{>= 5.0} is used and the terminal that is in use supports this
 @i{rgba} colors with transparency information are also supported.
 
 Available color names are:
@@ -780,7 +777,7 @@ brown            orange           dark_orange      violet
 dark_violet      plum             purple
 @end verbatim
 
-Cromatic componentes in hexadecimal code are introduced in the form @code{"#rrggbb"}.
+Cromatic components in hexadecimal code are introduced in the form @code{"#rrggbb"}.
 
 Example:
 
@@ -849,7 +846,7 @@ Example:
 
 See also @mrefdot{fill_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -893,7 +890,7 @@ Color scale and 3D coloured object.
 
 See also @mrefdot{palette_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -923,7 +920,7 @@ Example:
 @end example
 @figure{draw_columns}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -984,7 +981,7 @@ Example:
 @end example
 @figure{draw_contour2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1053,7 +1050,7 @@ Isolines at levels -7, -6, 0.8 and 5.
 
 See also @mrefdot{contour}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1073,7 +1070,7 @@ does not matter. It can be also used as an argument of function @code{draw}.
 
 See example in @code{gnuplot_file_name}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1109,7 +1106,7 @@ any other case.
 
 See also @mrefcomma{terminal} and @code{dimensions}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1126,14 +1123,16 @@ the width and the height. The meaning of the two numbers depends on
 the terminal you are working with.
 
 With terminals @code{gif}, @code{animated_gif}, @code{png}, @code{jpg},
-@code{svg}, @code{screen}, @code{wxt}, and @code{aquaterm},
-the integers represent the number of points in each direction. If they
-are not integers, they are rounded.
+@code{svg}, @code{screen}, @code{wxt}, @code{qt}, @code{x11},
+@code{windows} and @code{aquaterm}, the integers represent the number of
+points in each direction. If they are not integers, they are rounded.
 
-With terminals @code{eps}, @code{eps_color}, @code{pdf}, and 
-@code{pdfcairo}, both numbers represent hundredths of cm, which
-means that, by default, pictures in these formats are 6 cm in
-width and 5 cm in height.
+With terminals @code{eps}, @code{epslatex}, @code{epslatex_standalone},
+@code{eps_color}, @code{multipage_eps}, @code{multipage_eps_color},
+@code{pdf}, @code{multipage_pdf}, @code{pdfcairo},
+@code{multipage_pdfcairo}, @code{tikz}, and @code{tikz_standalone}, both
+numbers represent hundredths of cm, which means that, by default,
+pictures in these formats are 6 cm in width and 5 cm in height.
 
 Since this is a global graphics option, its position in the scene description
 does not matter. It can be also used as an argument of function @code{draw}.
@@ -1165,7 +1164,7 @@ We want an eps file with A4 portrait dimensions.
         explicit(x^2-y^2,x,-2,2,y,-2,2)) $
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1194,7 +1193,7 @@ Example:
         parametric(x,sqrt(x^2  - 4*x) - x + 1, x, -1, 5) );
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1355,7 +1354,7 @@ being @code{k} an ordering parameter.
 @end example
 @figure{draw_enhanced3d11}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1399,7 +1398,7 @@ Example:
 
 See also @mrefcomma{terminal}  @mrefdot{dimensions_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1416,7 +1415,7 @@ Default value: @code{"red"}
 
 See @code{color} to learn how colors are specified.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1477,7 +1476,7 @@ defined by option @code{filled_func}. Note that the variable in
 @figure{draw_filledfunc2}
 See also @mref{fill_color} and @mrefdot{explicit}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1522,7 +1521,7 @@ the menu of the graph window.
 @item
 @i{png, jpeg, gif}:
 The @i{libgd} library uses the font path stored in the environment
-variable @code{GDFONTPATH}; in this case, it is only necessary to
+variable @env{GDFONTPATH}; in this case, it is only necessary to
 set option @code{font} to the font's name. It is also possible to
 give the complete path to the font file.
 
@@ -1590,7 +1589,7 @@ Default is @code{"Times-Roman"}.
 
 The gnuplot documentation is an important source of information about terminals and fonts.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1611,7 +1610,7 @@ does not matter.
 
 See also @mrefdot{font}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1644,7 +1643,7 @@ Example:
 
 See also @mrefdot{data_file_name}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1679,7 +1678,7 @@ Example:
 @end example
 @figure{draw_grid2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1725,7 +1724,7 @@ Example:
 
 See also @mrefcomma{head_both}  @mrefcomma{head_length}  and @mrefdot{head_type} 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1756,7 +1755,7 @@ Example:
 
 See also @mrefcomma{head_length}  @mrefcomma{head_angle}  and @mrefdot{head_type} 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1789,7 +1788,7 @@ Example:
 
 See also @mrefcomma{head_both}  @mrefcomma{head_angle}  and @mrefdot{head_type} 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1825,7 +1824,7 @@ Example:
 
 See also @mrefcomma{head_both}  @mrefcomma{head_angle}  and @mrefdot{head_length} 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1912,7 +1911,7 @@ Interpolating colors in parametric surfaces can give unexpected results.
 
 See also @mrefdot{enhanced3d} 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1928,7 +1927,7 @@ Default value: @code{[50, 50]}
 
 This option is relevant only for @code{implicit} objects.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1944,7 +1943,7 @@ Default value: @code{[5, 5]}
 
 This option is relevant only for @code{implicit} objects.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -1981,7 +1980,7 @@ Example:
              explicit(cos(x),x,0,10) )$
 @end example
 @figure{draw_key}
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2023,7 +2022,7 @@ Example:
 @end example
 @figure{draw_key_pos}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2059,7 +2058,7 @@ Example:
 
 See also @mrefcomma{label_orientation}  and @code{color} 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2095,7 +2094,7 @@ Package @code{draw} needs always data to draw an scene.
 
 See also @mref{label_alignment} and @code{color} 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2135,7 +2134,7 @@ Example:
 
 See also @mrefdot{line_width}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2174,7 +2173,7 @@ Example:
 
 See also @mrefdot{line_type}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2210,7 +2209,7 @@ Example:
 
 See also @mrefcomma{enhanced3d}  @mref{colorbox} and @mrefdot{cbrange}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2238,7 +2237,7 @@ Example:
 
 See also @mrefcomma{logy}  @mrefcomma{logx_secondary}  @mrefcomma{logy_secondary}  and @mrefdot{logz}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2277,7 +2276,7 @@ Example:
 
 See also @mrefcomma{logx_draw}  @mrefcomma{logy_draw}  @mrefcomma{logy_secondary}  and @mrefdot{logz}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2304,7 +2303,7 @@ Example:
 
 See also @mrefcomma{logx_draw}  @mrefcomma{logx_secondary}  @mrefcomma{logy_secondary}  and @mrefdot{logz}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2342,7 +2341,7 @@ Example:
 
 See also @mrefcomma{logx_draw}  @mrefcomma{logy_draw}  @mrefcomma{logx_secondary}  and @mrefdot{logz}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2369,7 +2368,7 @@ Example:
 
 See also @mref{logx_draw} and @mrefdot{logy_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2405,7 +2404,7 @@ Example:
 @end example
 @figure{draw_nticks}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2446,7 +2445,7 @@ negative numbers mean negative colour component.
 @code{palette = gray} and @code{palette = color} are short cuts for
 @code{palette = [3,3,3]} and @code{palette = [7,5,15]}, respectively.
 
-Second, @code{palette} can be an user defined lookup table. In this case,
+Second, @code{palette} can be a user defined lookup table. In this case,
 the format for building a lookup table of length @code{n} is
 @code{palette=[color_1, color_2, ..., color_n]}, where @code{color_i} is
 a well formed color (see option @code{color}) such that @code{color_1} is
@@ -2483,7 +2482,7 @@ It also works with gray images.
 @end example
 @figure{draw_palette2}
 
-@code{palette} can be an user defined lookup table.
+@code{palette} can be a user defined lookup table.
 In this example, low values of @code{x} are colored
 in red, and higher values in yellow.
 
@@ -2497,7 +2496,7 @@ in red, and higher values in yellow.
 
 See also @mref{colorbox} and @mrefdot{enhanced3d}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2533,7 +2532,7 @@ Example:
 @end example
 @figure{draw_point_size}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2589,7 +2588,7 @@ Example:
 @end example
 @figure{draw_point_type}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2635,7 +2634,7 @@ Example:
 @end example
 @figure{draw_points_joined}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2686,7 +2685,7 @@ Multiplot.
 @end example
 @figure{draw_proportional_axis2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2713,7 +2712,7 @@ Example:
 @end example
 @figure{draw_surface_hide}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2730,7 +2729,8 @@ Selects the terminal to be used by Gnuplot; possible values are:
 @code{eps}, @code{eps_color}, @code{epslatex}, @code{epslatex_standalone}, 
 @code{svg}, @code{canvas}, @code{dumb}, @code{dumb_file}, @code{pdf}, @code{pdfcairo}, 
 @code{wxt}, @code{animated_gif}, @code{multipage_pdfcairo}, @code{multipage_pdf}, 
-@code{multipage_eps}, @code{multipage_eps_color}, and @code{aquaterm}.
+@code{multipage_eps}, @code{multipage_eps_color}, @code{tikz}, @code{tikz_standalone}
+and @code{aquaterm}.
 
 Terminals @code{screen}, @code{wxt}, @code{windows} and @code{aquaterm} can
 be also defined as a list
@@ -2769,6 +2769,11 @@ Examples:
 (%i6) /* wxwidgets window */
       draw2d(explicit(x^2,x,-1,1),
              terminal  = 'wxt)$
+(%i7) /* tikz file */
+      draw2d(explicit(x^2,x,-1,1),
+             file_name = "mytikz",
+             dimensions = [8,8], /* in cms */
+             terminal = 'tikz)$
 @end example
 
 Multiple windows.
@@ -2805,7 +2810,7 @@ Multipage output in eps format.
 
 See also @mrefcomma{file_name}  @mref{dimensions_draw} and @mrefdot{delay}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2831,7 +2836,7 @@ Example:
 @end example
 @figure{draw_title}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2883,7 +2888,7 @@ Translation in 3D.
         explicit(20*exp(-x^2-y^2)-10,x,-3,3,y,-3,3) )$
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 @end defvr
@@ -2913,7 +2918,7 @@ Example:
 @end example
 @figure{draw_transparent}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2944,7 +2949,7 @@ Example:
 @end example
 @figure{draw_unit_vectors}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -2990,7 +2995,7 @@ Tell gnuplot to draw all contour lines in black
 @end example
 @figure{draw_user_preamble2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3029,7 +3034,7 @@ Example:
 @end example
 @figure{draw_view2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3042,7 +3047,7 @@ Example:
 @defvr {Graphic option} wired_surface
 Default value: @code{false}
 
-Indicates whether 3D surfaces in @code{enhanced3d} mode show the grid joinning
+Indicates whether 3D surfaces in @code{enhanced3d} mode show the grid joining
 the points or not.
 
 Since this is a global graphics option, its position in the scene description
@@ -3058,7 +3063,7 @@ Example:
 @end example
 @figure{draw_wired_surface}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3076,7 +3081,7 @@ be used by the @i{marching cubes algorithm} implemented
 by the 3d @code{implicit} object. It is also used by graphic
 object @mrefdot{region}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3105,7 +3110,7 @@ Example:
 
 See also @mrefcomma{xaxis_width}  @mref{xaxis_type} and @mrefdot{xaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3134,7 +3139,7 @@ Example:
 
 See also @mrefcomma{xaxis}  @mref{xaxis_width} and @mrefdot{xaxis_type}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3168,7 +3173,7 @@ Example:
 See also @mrefcomma{xrange_secondary}  @mrefcomma{xtics_secondary}  @mrefcomma{xtics_rotate_secondary} 
 @code{xtics_axis_secondary} and @mrefdot{xaxis_secondary}
 @c TODO: Document xtics_axis_secondary
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3197,7 +3202,7 @@ Example:
 
 See also @mrefcomma{xaxis}  @mref{xaxis_width} and @mrefdot{xaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3225,7 +3230,7 @@ Example:
 
 See also @mrefcomma{xaxis}  @mref{xaxis_type} and @mrefdot{xaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3253,7 +3258,7 @@ Example:
 
 See also @mrefcomma{xlabel_secondary}  @mrefcomma{ylabel}  @mref{ylabel_secondary} and @mrefdot{zlabel_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3285,7 +3290,7 @@ Example:
 
 See also @mrefcomma{xlabel_draw}  @mrefcomma{ylabel_draw}  @mref{ylabel_secondary} and @mrefdot{zlabel_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3315,7 +3320,7 @@ Example:
 
 See also @mref{yrange} and @mrefdot{zrange}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3338,7 +3343,7 @@ does not matter.
 
 See also @mrefcomma{xrange}  @mrefcomma{yrange}  @mref{zrange} and @mrefdot{yrange_secondary}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 @end defvr
@@ -3416,9 +3421,9 @@ Labeled tics.
              explicit(x^3,x,-1,1)  )$
 @end example
 
-See also @mrefcomma{ytics}  and @mrefdot{ztics}
+See also @mrefcomma{ytics_draw}  and @mrefdot{ztics_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3436,7 +3441,7 @@ along the @var{x} axis, if it is @code{false} tics are plotted on the border.
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3454,7 +3459,7 @@ If @code{xtics_rotate} is @code{true}, tic marks on the @var{x} axis are rotated
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3471,7 +3476,7 @@ If @code{xtics_rotate_secondary} is @code{true}, tic marks on the secondary @var
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3485,9 +3490,9 @@ Default value: @code{auto}
 
 This graphic option controls the way tic marks are drawn on the second @var{x} axis.
 
-See @code{xtics} for a complete description.
+See @mref{xtics_draw} for a complete description.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3505,7 +3510,7 @@ along the secondary @var{x} axis, if it is @code{false} tics are plotted on the 
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3537,7 +3542,7 @@ Example:
 
 See also @mrefdot{yv_grid}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3557,7 +3562,7 @@ no coordinates are saved.
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3585,7 +3590,7 @@ Example:
              explicit(x^2+y^2,x,-1,1,y,-1,1))$
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3603,7 +3608,7 @@ be used by the @i{marching cubes algorithm} implemented
 by the 3d @code{implicit} object. It is also used by graphic
 object @mrefdot{region}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3630,7 +3635,7 @@ Example:
 
 See also @mrefcomma{yaxis_width}  @mref{yaxis_type} and @mrefdot{yaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3658,7 +3663,7 @@ Example:
 
 See also @mrefcomma{yaxis}  @mref{yaxis_width} and @mrefdot{yaxis_type}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3691,7 +3696,7 @@ See also @mrefcomma{yrange_secondary}  @mrefcomma{ytics_secondary}  @mref{ytics_
 and @code{ytics_axis_secondary}
 @c TODO: Document ytics_axis_secondary
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3719,7 +3724,7 @@ Example:
 
 See also @mrefcomma{yaxis}  @mref{yaxis_width} and @mrefdot{yaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3747,7 +3752,7 @@ Example:
 
 See also @mrefcomma{yaxis}  @mref{yaxis_type} and @mrefdot{yaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3775,7 +3780,7 @@ Example:
 
 See also @mrefcomma{xlabel_draw}  @mrefcomma{xlabel_secondary}  @mrefcomma{ylabel_secondary}  and @mrefdot{zlabel_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3811,7 +3816,7 @@ Example:
 
 See also @mrefcomma{xlabel_draw}  @mrefcomma{xlabel_secondary}  @mref{ylabel_draw} and @mrefdot{zlabel_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3842,7 +3847,7 @@ Example:
 
 See also @mrefcomma{xrange}  @mref{yrange_secondary} and @mrefdot{zrange}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3878,7 +3883,7 @@ Example:
 
 See also @mrefcomma{xrange}  @mref{yrange} and @mrefdot{zrange}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 @end defvr
@@ -3893,7 +3898,7 @@ This graphic option controls the way tic marks are drawn on the @var{y} axis.
 
 See @code{xtics} for a complete description.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3911,7 +3916,7 @@ along the @var{y} axis, if it is @code{false} tics are plotted on the border.
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3930,7 +3935,7 @@ If @code{ytics_rotate} is @code{true}, tic marks on the @var{y} axis are rotated
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3948,7 +3953,7 @@ If @code{ytics_rotate_secondary} is @code{true}, tic marks on the secondary @var
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3964,7 +3969,7 @@ This graphic option controls the way tic marks are drawn on the second @var{y} a
 
 See @code{xtics} for a complete description.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -3982,7 +3987,7 @@ along the secondary @var{y} axis, if it is @code{false} tics are plotted on the 
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4015,7 +4020,7 @@ Example:
 
 See also @mrefdot{xu_grid}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4030,7 +4035,7 @@ Default value: 10
 be used by the @i{marching cubes algorithm} implemented
 by the 3d @code{implicit} object.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4058,7 +4063,7 @@ Example:
 
 See also @mrefcomma{zaxis_width}  @mref{zaxis_type} and @mrefdot{zaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4088,7 +4093,7 @@ Example:
 
 See also @mrefcomma{zaxis}  @mref{zaxis_width} and @mrefdot{zaxis_type}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4117,7 +4122,7 @@ Example:
 
 See also @mrefcomma{zaxis}  @mref{zaxis_width} and @mrefdot{zaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4147,7 +4152,7 @@ Example:
 
 See also @mrefcomma{zaxis}  @mref{zaxis_type} and @mrefdot{zaxis_color}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4176,7 +4181,7 @@ Example:
 
 See also @mrefcomma{xlabel_draw}  @mrefcomma{ylabel_draw}  and @mrefdot{zlabel_rotate}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4208,7 +4213,7 @@ Example:
 
 See also @mrefdot{zlabel_draw}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4241,21 +4246,21 @@ Example:
 
 See also @mref{xrange} and @mrefdot{yrange}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 @end defvr
 
 
-@anchor{ztics}
+@anchor{ztics_draw}
 @defvr {Graphic option} ztics
 Default value: @code{true}
 
 This graphic option controls the way tic marks are drawn on the @var{z} axis.
 
-See @code{xtics} for a complete description.
+See @mref{xtics_draw} for a complete description.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4274,7 +4279,7 @@ along the @var{z} axis, if it is @code{false} tics are plotted on the border.
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4291,7 +4296,7 @@ If @code{ztics_rotate} is @code{true}, tic marks on the @var{z} axis are rotated
 Since this is a global graphics option, its position in the scene description
 does not matter.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4334,7 +4339,7 @@ Example:
 @end example
 @figure{draw_bars}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4364,7 +4369,7 @@ Example:
 @end example
 @figure{draw_cylindrical}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4402,7 +4407,7 @@ Example:
 @end example
 @figure{draw_elevation_grid}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4424,7 +4429,7 @@ semi axis @var{a} and @var{b}, respectively, starting at angle @var{ang1} with a
 equal to angle @var{ang2}.
 
 This object is affected by the following @i{graphic options}: @mrefcomma{nticks} 
-@mrefcomma{transparent} @mrefcomma{fill_color} @mrefcomma{border} @code{line_width}, 
+@mrefcomma{transparent} @mrefcomma{fill_color} @mrefcomma{fill_density} @mrefcomma{border} @code{line_width}, 
 @mrefcomma{line_type} @mref{key} and @code{color}
 
 Example:
@@ -4446,7 +4451,7 @@ Example:
 @end example
 @figure{draw_ellipse}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4497,7 +4502,7 @@ Vertical and horizontal error bars.
 @end example
 @figure{draw_errors2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4520,7 +4525,7 @@ with variable @var{var} taking values from @var{minval} to @var{maxval}.
 
 This object is affected by the following @i{graphic options}: @mrefcomma{nticks} 
 @code{adapt_depth}, @mrefcomma{draw_realpart} @mrefcomma{line_width} @mrefcomma{line_type} @mrefcomma{key} 
-@mrefcomma{filled_func} @mref{fill_color} and @code{color}
+@mrefcomma{filled_func} @mrefcomma{fill_color} @mrefcomma{fill_density} and @code{color}
 
 Example:
 
@@ -4564,7 +4569,7 @@ Example:
 
 See also @mref{filled_func} for filled functions.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4677,7 +4682,7 @@ See also @mrefcomma{make_level_picture}  @mref{make_rgb_picture} and @mrefdot{re
 @url{http://www.telefonica.net/web2/biomates/maxima/gpdraw/image}@*
 contains more elaborated examples.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4740,7 +4745,7 @@ Example:
 @end example
 @figure{draw_implicit2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 @end deffn
@@ -4794,7 +4799,7 @@ Example:
 @end example
 @figure{draw_label2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4852,7 +4857,7 @@ Two quadrilaterals.
 @end example
 @figure{draw_mesh3}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4906,7 +4911,7 @@ Example:
 @end example
 @figure{draw_parametric2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -4946,7 +4951,7 @@ Example:
 @end example
 @figure{draw_parametric3}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5133,7 +5138,7 @@ Color numbers explicitly specified by the user.
 @end example
 @figure{draw_points8}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5169,7 +5174,7 @@ Example:
 @end example
 @figure{draw_polar}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5193,7 +5198,7 @@ the plane a polygon with vertices @code{[@var{x1}, @var{y1}]}, @code{[@var{x2},
 @var{y2}]}, etc.
 
 This object is affected by the following @i{graphic options}: @mrefcomma{transparent} 
-@mrefcomma{fill_color} @mrefcomma{border} @mrefcomma{line_width} @mrefcomma{key}
+@mrefcomma{fill_color} @mrefcomma{fill_density} @mrefcomma{border} @mrefcomma{line_width} @mrefcomma{key}
  @mref{line_type} and @code{color}.
 
 Example:
@@ -5208,7 +5213,7 @@ Example:
 @end example
 @figure{draw_polygon}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5251,7 +5256,7 @@ This object is affected by the following @i{graphic options}: @mrefcomma{line_ty
 @mrefcomma{line_width} @mrefcomma{color} @mrefcomma{key} @mref{enhanced3d} and
 @mrefdot{transform}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 @end deffn
@@ -5287,7 +5292,7 @@ Example:
 @end example
 @figure{draw_rectangle}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5305,7 +5310,7 @@ Plots a region on the plane defined by inequalities.
 @code{and}, @code{or}, and @mrefdot{not} The region is bounded by the rectangle
 defined by @math{[@var{minval1}, @var{maxval1}]} and @math{[@var{minval2}, @var{maxval2}]}.
 
-This object is affected by the following @i{graphic options}: @mrefcomma{fill_color} 
+This object is affected by the following @i{graphic options}: @mrefcomma{fill_color} @mrefcomma{fill_density}
 @mrefcomma{key} @mref{x_voxel} and @mrefdot{y_voxel}
 
 Example:
@@ -5343,7 +5348,7 @@ Example:
 @end example
 @figure{draw_spherical}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5380,7 +5385,7 @@ Example:
 This object is affected by the following @i{graphic options}: @mrefcomma{line_type} 
 @mrefcomma{line_width} @mrefcomma{color} @mrefcomma{key} @mref{enhanced3d} and @mrefdot{transform}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5413,7 +5418,7 @@ Example:
 @end example
 @figure{draw_tube}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5469,17 +5474,31 @@ Example:
 @end example
 @figure{draw_vector2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
 @end deffn
 
+@anchor{draw_renderer}
+@defvr {Variable} draw_renderer
+@c gnuplot_pipes is the default value here, it might also be gnuplot?
+Default value: @code{gnuplot_pipes}
+
+The only permitted values are @code{gnuplot_pipes}, @code{gnuplot},
+@code{vtk}, @code{vtk6} or @code{vtk7}. When @code{draw_renderer} is set
+to @code{vtk}, the VTK interface is used for draw.
+
+@opencatbox{Categories:}
+@category{Package draw}
+@closecatbox
+
+@end defvr
 
 
 
 
-@node Functions and Variables for pictures, Functions and Variables for worldmap, Functions and Variables for draw, draw-pkg
+@node Functions and Variables for pictures, Functions and Variables for worldmap, Functions and Variables for draw, Package draw
 @section Functions and Variables for pictures
 
 
@@ -5489,7 +5508,7 @@ Example:
 Returns pixel from picture. Coordinates @var{x} and @var{y} range from 0 to
 @code{width-1} and @code{height-1}, respectively.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5536,7 +5555,7 @@ Level picture from numeric list.
 (%o1)            picture(level, 2, 2, @{Array:  #(0 0 54 3)@})
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5576,7 +5595,7 @@ Example:
               @{Array:  #(3 54 123 2 23 82 7 73 45 255 0 33)@})
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5590,7 +5609,7 @@ Example:
 @deffn  {Function} negative_picture (@var{pic})
 Returns the negative of a (@var{level} or @var{rgb}) picture.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 @end deffn
@@ -5603,7 +5622,7 @@ Returns the negative of a (@var{level} or @var{rgb}) picture.
 @deffn  {Function} picture_equalp (@var{x},@var{y})
 Returns @code{true} in case of equal pictures, and @code{false} otherwise.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @category{Predicate functions}
 @closecatbox
@@ -5618,7 +5637,7 @@ Returns @code{true} in case of equal pictures, and @code{false} otherwise.
 Returns @code{true} if the argument is a well formed image,
 and @code{false} otherwise.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @category{Predicate functions}
 @closecatbox
@@ -5631,7 +5650,7 @@ and @code{false} otherwise.
 @deffn  {Function} read_xpm (@var{xpm_file})
 Reads a file in xpm and returns a picture object.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5645,7 +5664,7 @@ Reads a file in xpm and returns a picture object.
 Transforms an @var{rgb} picture into a @var{level} one by
 averaging the red, green and blue channels.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5675,22 +5694,16 @@ Example:
 (%o5)           picture(level, 2, 2, @{Array:  #(54 23 73 0)@})
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
 @end deffn
 
-
-
-
-
-@node Functions and Variables for worldmap,  , Functions and Variables for pictures, draw-pkg
+@node Functions and Variables for worldmap,  , Functions and Variables for pictures, Package draw
 @section Functions and Variables for worldmap
 
 @subsection Variables and Functions
-
-
 
 @anchor{boundaries_array}
 @defvr {Global variable} boundaries_array
@@ -5704,7 +5717,7 @@ point quantities, the coordinates of a polygonal segment or map boundary.
 
 See also @mrefdot{geomap}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5725,13 +5738,13 @@ Example:
 Map of Europe labeling borders with their component number in
 @code{boundaries_array}.
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) european_borders: 
            region_boundaries(-31.81,74.92,49.84,32.06)$
 (%i3) numbered_boundaries(european_borders)$
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5751,7 +5764,7 @@ or a list of countries.
 Example:
 
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) /* A continent */
       make_poly_continent(Africa)$
 (%i3) apply(draw2d, %)$
@@ -5764,7 +5777,7 @@ Example:
 @end example
 @figure{worldmap_make_poly_continent2}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5783,13 +5796,13 @@ just one polygon.
 Example:
 
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) make_poly_country(India)$
 (%i3) apply(draw2d, %)$
 @end example
 @figure{worldmap_make_poly_country}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5817,11 +5830,11 @@ arrays have two coordinates in the extremes in common. In this
 example, the two first components of @code{boundaries_array[171]} are
 equal to the last two coordinates of @code{boundaries_array[173]}, and 
 the two first of @code{boundaries_array[173]} are equal to the two first
-of @code{boundaries_array[1143]}; in conclussion, boundary numbers
+of @code{boundaries_array[1143]}; in conclusion, boundary numbers
 171, 173 and 1143 (in this order) are compatible and the colored 
 polygon can be drawn.
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) Bhutan;
 (%o2)                        [[171, 173, 1143]]
 (%i3) boundaries_array[171];
@@ -5858,7 +5871,7 @@ polygon can be drawn.
 @end example
 @figure{worldmap_make_polygon}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5878,14 +5891,14 @@ Example:
 
 Returns segment numbers for plotting southern Italy.
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) region_boundaries(10.4,41.5,20.7,35.4);
 (%o2)                [1846, 1863, 1864, 1881, 1888, 1894]
 (%i3) draw2d(geomap(%))$
 @end example
 @figure{worldmap_region_boundaries}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5902,7 +5915,7 @@ containing at least one vertex in the rectangle defined by vertices (@var{x1},@v
 Example:
 
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) region_boundaries_plus(10.4,41.5,20.7,35.4);
 (%o2) [1060, 1062, 1076, 1835, 1839, 1844, 1846, 1858,
        1861, 1863, 1864, 1871, 1881, 1888, 1894, 1897]
@@ -5910,7 +5923,7 @@ Example:
 @end example
 @figure{worldmap_region_boundaries_plus}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 
@@ -5950,7 +5963,7 @@ Examples:
 
 A simple map defined by hand:
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) /* Vertices of boundary #0: @{(1,1),(2,5),(4,3)@} */
    ( bnd0: make_array(flonum,6),
      bnd0[0]:1.0, bnd0[1]:1.0, bnd0[2]:2.0,
@@ -5990,7 +6003,7 @@ continents and coastlines as lists with the necessary components of
 for more information). Package @code{worldmap} automatically loads 
 package @code{worldmap}.
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) c1: gr2d(geomap([Canada,United_States,
                        Mexico,Cuba]))$
 (%i3) c2: gr2d(geomap(Africa))$
@@ -6009,7 +6022,7 @@ object is used instead. Since lists are now used and not
 arrays, maps rendering will be slower. See also @mref{make_poly_country}
 and @mref{make_poly_continent} to understand the following code.
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) mymap: append(
    [color      = white],  /* borders are white */
    [fill_color = red],             make_poly_country(Bolivia),
@@ -6037,7 +6050,7 @@ Available 3D projections:
 @code{[spherical_projection,@var{x},@var{y},@var{z},@var{r}]}: projects map boundaries on the sphere of
 radius @var{r} centered at (@var{x},@var{y},@var{z}).
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) draw3d(geomap(Australia), /* default projection */
              geomap(Australia,
                     [spherical_projection,2,2,2,3]))$
@@ -6048,7 +6061,7 @@ radius @var{r} centered at (@var{x},@var{y},@var{z}).
 @code{[cylindrical_projection,@var{x},@var{y},@var{z},@var{r},@var{rc}]}: re-projects spherical map boundaries on the cylinder of radius
 @var{rc} and axis passing through the poles of the globe of radius @var{r} centered at (@var{x},@var{y},@var{z}).
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) draw3d(geomap([America_coastlines,Eurasia_coastlines],
                     [cylindrical_projection,2,2,2,3,4]))$
 @end example
@@ -6059,17 +6072,17 @@ radius @var{r} centered at (@var{x},@var{y},@var{z}).
 with axis passing through the poles of the globe of radius @var{r} centered at (@var{x},@var{y},@var{z}). Both 
 the northern and southern cones are tangent to sphere.
 @example
-(%i1) load(worldmap)$
+(%i1) load("worldmap")$
 (%i2) draw3d(geomap(World_coastlines,
                     [conic_projection,0,0,0,1,90]))$
 @end example
 @end itemize
 @figure{worldmap_geomap6}
 
-See also @url{http://riotorto.users.sf.net/gnuplot/geomap}
+See also @url{https://riotorto.users.sourceforge.net/Maxima/gnuplot/geomap/}
 for more elaborated examples.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package draw}
 @closecatbox
 

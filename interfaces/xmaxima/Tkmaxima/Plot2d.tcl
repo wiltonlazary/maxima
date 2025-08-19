@@ -1,36 +1,30 @@
-# -*-mode: tcl; fill-column: 75; tab-width: 8; coding: iso-latin-1-unix -*-
+###### Plot2d.tcl ####################################################
 #
-#       $Id: Plot2d.tcl,v 1.20 2011-03-09 11:28:25 villate Exp $
+# Copyright (C) 1998 William F. Schelter 
+# For distribution under GNU public License.  See COPYING.tcl
 #
-###### Plot2d.tcl ######
-############################################################
-# Netmath       Copyright (C) 1998 William F. Schelter     #
-# For distribution under GNU public License.  See COPYING. #
-############################################################
-
-global p
-set p .plot
-if {[winfo exists $p]} {catch { destroy $p }}
+#     Modified by Jaime E. Villate
+#     Time-stamp: "2024-03-26 20:25:15 villate"
+#
+######################################################################
 
 global plot2dOptions
 set plot2dOptions {
     {xradius 10 "Width in x direction of the x values" }
     {yradius 10 "Height in y direction of the y values"}
-    {width 560 "Width of canvas in pixels"}
-    {height 560 "Height of canvas in pixels" }
+    {width 700 "Width of canvas in pixels"}
+    {height 600 "Height of canvas in pixels" }
     {xcenter 0.0 {(xcenter,ycenter) is the origin of the window}}
     {xfun "" {function of x to plot eg: sin(x) or "sin(x);x^2+3" }}
     {parameters "" "List of parameters and values eg k=3,l=7+k"}
     {sliders "" "List of parameters ranges k=3:5,u"}
-    {nsteps "100" "mininmum number of steps in x direction"}
+    {nsteps "100" "minimum number of steps in x direction"}
     {ycenter 0.0 "see xcenter"}
     {bbox "" "xmin ymin xmax ymax .. overrides the -xcenter etc"}
-    {screenwindow "20 20 700 700" "Part of canvas on screen"}
-
     {windowname ".plot2d" "window name"}
     {nolines 0 "If not 0, plot points and nolines"}
     {bargraph 0 "If not 0 this is the width of the bars on a bar graph" }
-    {linewidth "0.6" "Width of plot lines" }
+    {linewidth "1.5" "Width of plot lines" }
     {plotpoints 0 "if not 0 plot the points at pointsize" }
     {pointsize 2 "radius in pixels of points" }
     {linecolors {blue green red brown gray black} "colors to use for lines in data plots"}
@@ -38,7 +32,6 @@ set plot2dOptions {
     {xaxislabel "" "Label for the x axis"}
     {yaxislabel "" "Label for the y axis"}
     {autoscale "y" "Set {x,y}center and {x,y}range depending on data and function. Value of y means autoscale in y direction, value of {x y} means scale in both.  Supplying data will automatically turn this on."}
-    {zoomfactor "1.6 1.6" "Factor to zoom the x and y axis when zooming.  Zoom out will be reciprocal" }
     {errorbar 0 "If not 0 width in pixels of errorbar.  Two y values supplied for each x: {y1low y1high y2low y2high  .. }"}
     {data "" "List of data sets to be plotted.  Has form { {xversusy {x1 x2 ... xn} {y1 .. yn ... ym}} .. {againstIndex {y1 y2 .. yn}}  .. }"}
     {psfile "" "A filename where the graph will be saved in PostScript."}
@@ -53,19 +46,20 @@ proc argSuppliedp { x } {
 }
 
 proc mkPlot2d { args } {
-    global plot2dOptions  printOption axisGray
-    #puts "args=<$args>"
-    # global  screenwindow c xmax xmin ymin ymax
-    # eval global [optionFirstItems $plot2dOptions]
+    global plot2dOptions printOption axisGray
     set win [assoc -windowname $args]
     if { "$win" == "" } {
 	set win [getOptionDefault windowname $plot2dOptions]
     }
     global  [oarray $win]
     set data [assoc -data $args ]
-    # puts ranges=[plot2dGetDataRange $data]
-
+    
     getOptions $plot2dOptions $args -usearray [oarray $win]
+    # Makes extra vertical space for sliders
+    linkLocal $win sliders height
+    if {[string length $sliders] > 0} {
+        oset $win height [expr {$height + 40*[llength [split $sliders ,]]}]}
+
     linkLocal $win autoscale
     if { [argSuppliedp -data] && ![argSuppliedp -autoscale] && \
 	     ![argSuppliedp -xradius] } {
@@ -88,18 +82,15 @@ proc mkPlot2d { args } {
 
 }
 
-proc  makeFrame2d  { win } {
+proc makeFrame2d  { win } {
     set w [makeFrame $win 2d]
     set top $w
     catch { set top [winfo parent $w]}
     catch {
-	wm title $top [mc "Xmaxima: Plot2d"]
+	wm title $top {Xmaxima: plot2d}
 	wm iconname $top "plot2d"
-	# wm geometry $top 750x700-0+20
     }
-    pack $w
     return $w
-
 }
 
 proc doConfig2d { win } {
@@ -114,33 +105,6 @@ proc doConfig2d { win } {
 	mkentry $wb1.$w [oloc $win $w] $w $buttonFont
 	pack $wb1.$w -side bottom -expand 1 -fill x
     }
-}
-
-proc doHelp2d {win } {
-    global Parser
-
-    doHelp $win [join [list \
-			[mc {
-
-XMAXIMA'S PLOTTER FOR TWO-DIMENSIONAL GRAPHICS
-
-To quit this help click anywhere on this text.
-
-Clicking on Config will open a menu where several settings can be changed, \
-such as the function being plotted, the line width, and the \
-x and y centers and radii. Replot is used to update the plot with the \
-changes made in the Config menu.
-
-By clicking on Zoom, the mouse will allow you to zoom in on a region \
-of the plot. Each click near a point magnifies the plot, keeping the center \
-at the point you clicked. Depressing the SHIFT key while clicking \
-zooms in the opposite direction.
-
-Holding the right mouse button down while moving the mouse will drag \
-(translate) the plot sideways or up and down.
-
-The plot can be saved as a postscript file, by clicking on Save.
-}] $Parser(help)]]
 }
 
 global plot
@@ -328,14 +292,13 @@ proc nextColor { win } {
 }
 
 
-proc plot2d {args } {
-    #puts "args=$args"
-    set win [mxapply mkPlot2d $args]
+proc plot2d { args } {
+    set win [mkPlot2d {*}$args]
     replot2d $win
     return $win
 }
 
-proc replot2d {win } {
+proc replot2d { win } {
     global printOption axisGray plot2dOptions
     linkLocal $win xfundata data psfile nobox axes
     foreach v $data {
@@ -349,10 +312,7 @@ proc replot2d {win } {
 	addSliders $win
     }
     set xfundata ""
-    #   puts xfun=$xfun,parameters=$parameters,[oget $win xradius],[oget $win xmax]
     foreach v [sparseListWithParams $xfun x $parameters] {
-	#	puts v=$v
-	#	proc _xf {  x  } "return \[expr { $v } \]"
 	proc _xf {  x  } "expr { $v }"	
 	regsub "\\$" $v "" label
 	lappend xfundata [list label $label] \
@@ -371,7 +331,8 @@ proc replot2d {win } {
 	}
     }
 
-    setUpTransforms $win 0.8
+    set_xy_region $win 0.8
+    set_xy_transforms $win
     set rtosx rtosx$win ; set rtosy rtosy$win
     makeLocal $win xmin ymin xmax ymax
     set x1 [rtosx$win $xmin]
@@ -417,20 +378,21 @@ proc replot2d {win } {
     }
     # Write down the axes labels
     $c del axislabel
+    set width [oget $win width]
+    set height [oget $win height]
     if {$nobox != 0  && $xmin*$xmax < 0  && ($axes == {y} || $axes == {xy})} {
-	set xbound [expr { [$rtosx 0] - 30}]
+	set xbound [expr { [$rtosx 0] - 0.08*$width}]
     } else {
-	set xbound [expr {$x1 - 30}]
+	set xbound [expr {$x1-0.08*$width}]
     }
-    $c create text $xbound [expr {$y1 - 6}] -anchor sw \
+    $c create text $xbound [expr {($y1+$y2)/2.0}] -anchor center -angle 90 \
        -text [oget $win yaxislabel] -font {helvetica 16 normal} -tags axislabel
     if {$nobox != 0  && $ymin*$ymax < 0  && ($axes == {x} || $axes == {xy})} {
-	$c create text [expr {$x2 - 5}] [expr { [$rtosy 0] + 15}] \
-	    -anchor ne -text [oget $win xaxislabel] \
-	    -font {helvetica 16 normal} \
-	    -tags axislabel
+	$c create text [expr {$x2-0.01*$width}] \
+            [expr { [$rtosy 0]+0.02*$height}] -anchor ne -tags axislabel \
+            -text [oget $win xaxislabel] -font {helvetica 16 normal}
     } else {
-	$c create text [expr {($x1 + $x2)/2}] [expr {$y2 + 35}] \
+	$c create text [expr {($x1 + $x2)/2}] [expr {$y2 + 0.08*$height}] \
 	    -anchor center -text [oget $win xaxislabel] \
 	    -font {helvetica 16 normal} -tags axislabel
     }
@@ -650,7 +612,7 @@ proc redraw2dData { win  args } {
 		if { [lsearch { xfun color plotpoints linecolors pointsize \
 				    nolines bargraph errorbar maintitle \
 				    linewidth labelposition xaxislabel \
-				    yaxislabel dydx } $type] >= 0 } {
+				    yaxislabel dydx nolegend} $type] >= 0 } {
 		    # puts "setting oset $win $type [lindex $d 1]"
 		    oset $win $type [lindex $d 1]
 		} elseif { "$type" == "text" } {
@@ -700,9 +662,14 @@ proc RealtoScreen { win listPts } {
 }
 
 proc drawPlot {win listpts args } {
-    makeLocal $win  c nolines nolegend plotpoints  pointsize bargraph linewidth
-    #    set linewidth 2.4
+    makeLocal $win c nolines nolegend plotpoints  pointsize bargraph \
+        linewidth xmin xmax ymin ymax
+    # set linewidth 2.4
     # puts ll:[llength $listpts]
+    set x1 [rtosx$win $xmin]
+    set x2 [rtosx$win $xmax]
+    set y1 [rtosy$win $ymax]
+    set y2 [rtosy$win $ymin]
     set tags [assoc -tags $args ""]
     if { [lsearch $tags path] < 0 } {lappend tags path}
     set fill [assoc -fill $args black]
@@ -714,114 +681,205 @@ proc drawPlot {win listpts args } {
     catch { set fill [oget $win color] }
 
     if { $nolines == 1 && $plotpoints == 0 && $bargraph == 0} {
-	set plotpoints 1
-    }
+	set plotpoints 1}
 
-    catch {
-	foreach pts $listpts {
-	    if { $bargraph } {
-		set rtosy rtosy$win
-		set rtosx rtosx$win
-		set width [expr {abs([$rtosx $bargraph] - [$rtosx 0])}]
-		set w2 [expr {$width/2.0}]
-		# puts "width=$width,w2=$w2"
-		set ry0 [$rtosy 0]
-		foreach { x y } $pts {
-		    $c create rectangle [expr {$x-$w2}] $y  [expr {$x+$w2}] \
-			$ry0 -tags $tags -fill $fill }
-	    } else {
-		if { $plotpoints } {
-		    set im [getPoint $pointsize $fill]
-		
-		    # there is no eval, so we need this.
-		    if { "$im" != "" } {
-			foreach { x y } $pts {
-			    $c create image $x $y -image $im -anchor center \
-				-tags "$tags point"
-			}
-		    } else {
-			foreach { x y } $pts {
-			    $c create oval [expr {$x -$pointsize}] \
-				[expr {$y -$pointsize}] [expr {$x +$pointsize}] \
-				[expr {$y +$pointsize}] -tags $tags \
-				-fill $fill -outline {}
-			
-			}
-		    }
-		}
-		
-		if { $nolines == 0 } {
-		    set n [llength $pts]
-		    set i 0
-		    set res "$win create line "
-		    #puts npts:[llength $pts]
-		    if { $n >= 6 } {
-			eval $c create line $pts -tags [list $tags] -width $linewidth -fill $fill
-		    }
-		}
-	    }
-	
-	}
-    }
-    if { $nolegend == 0 } {
-	plot2dDrawLabel $win $label $fill
-    }
-}
-
-
+    foreach pts $listpts {
+        if { $bargraph } {
+            set rtosy rtosy$win
+            set rtosx rtosx$win
+            set width [expr {abs([$rtosx $bargraph] - [$rtosx 0])}]
+            set w2 [expr {$width/2.0}]
+            # puts "width=$width,w2=$w2"
+            set ry0 [$rtosy 0]
+            foreach { x y } $pts {
+                $c create rectangle [expr {$x-$w2}] $y  [expr {$x+$w2}] \
+                    $ry0 -tags $tags -fill $fill }
+        } else {
+            if { $plotpoints } {
+                set im [getPoint $pointsize $fill]
+                # there is no eval, so we need this.
+                if {$im ne {}} {
+                    foreach { x y } $pts {
+                        $c create image $x $y -image $im -anchor center \
+                            -tags "$tags point"}
+                } else {
+                    foreach { x y } $pts {
+                        $c create oval [expr {$x-$pointsize}] \
+                            [expr {$y-$pointsize}] [expr {$x +$pointsize}] \
+                            [expr {$y+$pointsize}] -tags $tags \
+                            -fill $fill -outline {}}}}
+            if { $nolines == 0 } {
+                set first 1
+                # puts "box: ($x1,$y1), ($x2,$y2)"
+                foreach {x y} $pts {
+                    if {$first} {
+                        set p1 [list $x $y]
+                        set c1 [PointCode $p1 $x1 $y1 $x2 $y2]
+                        # puts "point $p1 with code $c1"
+                        if {!$c1} {
+                            set inpts [list $p1]
+                        } else {set inpts {}}
+                        set first 0
+                    } else {
+                        set p2 [list $x $y]
+                        set c2 [PointCode $p2 $x1 $y1 $x2 $y2]
+                        # puts "point $p2 with code $c2"
+                        if {$c1|$c2} {
+                            set clip [ClipLine $p1 $p2 $c1 $c2 $x1 $y1 $x2 $y2]
+                            if {[llength $clip]} {
+                                lappend inpts {*}$clip}
+                            if {$c2 && ([llength $inpts] >= 2)} {
+                                eval $c create line {*}$inpts -tags \
+                                    [list $tags] -width $linewidth -fill $fill
+                                set inpts {}}
+                        } else {lappend inpts $p2}
+                        set p1 $p2
+                        set c1 $c2}}
+                if {[llength $inpts] >= 2} {
+                    eval $c create line {*}$inpts -tags [list $tags] \
+                        -width $linewidth -fill $fill}
+                set res "$win create line "}}}
+    if { $nolegend == 0 } {plot2dDrawLabel $win $label $fill}}
 
 proc drawPointsForPrint { c } {
     global maxima_priv
     foreach v [$c find withtag point] {
 	set tags [ldelete point [$c gettags $v]]
 	desetq "x y" [$c coords $v]
-	
-	
 	desetq "pointsize fill" $maxima_priv(pointimage,[$c itemcget $v -image])
 	catch {
 	    $c create oval [expr {$x -$pointsize}] \
 		[expr {$y -$pointsize}] [expr {$x +$pointsize}] \
 		[expr {$y +$pointsize}] -tags $tags \
 		-fill $fill -outline {}
-	    $c delete $v			
-	}
-
-
-    }
-
-}
+	    $c delete $v}}}
 
 proc getPoint { size color } {
     global maxima_priv
-    set im ""
+    set im {}
     if { ![catch { set im $maxima_priv(pointimage,$size,$color) }] } {
 	return $im
     }
     catch { set data $maxima_priv(bitmap,disc[expr {$size * 2}])
 	set im [image create bitmap -data $data -foreground $color]
 	set maxima_priv(pointimage,$size,$color) $im
-	set maxima_priv(pointimage,$im) "$size $color"
-    }
-    return $im
-}
-
-
-
+	set maxima_priv(pointimage,$im) "$size $color"}
+    return $im}
 
 proc sliderCommandPlot2d { win var val } {
     linkLocal $win recompute
-
     updateParameters $win $var $val
     set com "recomputePlot2d $win"
     # allow for fast move of slider...
     #mike FIXME: this is a wrong use of after cancel
     after cancel $com
-    after 10 $com
-}
+    after 10 $com}
 
-proc recomputePlot2d { win } {
-    replot2d $win
-}
+proc recomputePlot2d { win } {replot2d $win}
 
+# Assign an integer code between 0 and 10 to a given point, according
+# to its position relative to the box with vertices (xmin,ymin) and (xmax,ymax)
+proc PointCode {point xmin ymin xmax ymax} {
+    set code 0
+    set x [lindex $point 0]
+    set y [lindex $point 1]
+    if {$x < $xmin} {incr code 1} elseif {$x > $xmax} {incr code 2}
+    if {$y < $ymin} {incr code 4} elseif {$y > $ymax} {incr code 8}
+    return $code}
+
+# Finds the intersection of the segment from point p1 to point p2 with
+# the left edge of the box with vertices (xmin,ymin) and (xmax,ymax)
+proc ClipLeft {p1 p2 xmin ymin xmax ymax} {
+    set x1 [lindex $p1 0]
+    set y1 [lindex $p1 1]
+    set x2 [lindex $p2 0]
+    set y2 [lindex $p2 1]
+    set y [expr {$y1 + ($y2-1.0*$y1)*($xmin-$x1)/($x2-$x1)}]
+    if {($y >= $ymin) && ($y <= $ymax)} {
+        return "$xmin $y"
+    } else {return}}
+
+# Finds the intersection of the segment from point p1 to point p2 with
+# the right edge of the box with vertices (xmin,ymin) and (xmax,ymax)
+proc ClipRight {p1 p2 xmin ymin xmax ymax} {
+    set x1 [lindex $p1 0]
+    set y1 [lindex $p1 1]
+    set x2 [lindex $p2 0]
+    set y2 [lindex $p2 1]
+    set y [expr {$y1 + ($y2-1.0*$y1)*($xmax-$x1)/($x2-$x1)}]
+    if {($y >= $ymin) && ($y <= $ymax)} {
+        return "$xmax $y"
+    } else {return}}
+
+# Finds the intersection of the segment from point p1 to point p2 with
+# the bottom edge of the box with vertices (xmin,ymin) and (xmax,ymax)
+proc ClipBottom {p1 p2 xmin ymin xmax ymax} {
+    set x1 [lindex $p1 0]
+    set y1 [lindex $p1 1]
+    set x2 [lindex $p2 0]
+    set y2 [lindex $p2 1]
+    set x [expr {$x1 + ($x2-1.0*$x1)*($ymin-$y1)/($y2-$y1)}]
+    if {($x >= $xmin) && ($x <= $xmax)} {
+        return "$x $ymin"
+    } else {return}}
+
+# Finds the intersection of the segment from point p1 to point p2 with
+# the top edge of the box with vertices (xmin,ymin) and (xmax,ymax)
+proc ClipTop {p1 p2 xmin ymin xmax ymax} {
+    set x1 [lindex $p1 0]
+    set y1 [lindex $p1 1]
+    set x2 [lindex $p2 0]
+    set y2 [lindex $p2 1]
+    set x [expr {$x1 + ($x2-1.0*$x1)*($ymax-$y1)/($y2-$y1)}]
+    if {($x >= $xmin) && ($x <= $xmax)} {
+        return "$x $ymax"
+    } else {return}}
+
+# Returns the intersection points of the segment from point1 to ppoint2
+# and the box with vertices in (xmin,ymin) and (xmax,ymax). 
+proc ClipLine {p1 p2 code1 code2 xmin ymin xmax ymax} {
+    set clipped {}
+    # puts "ClipLine: codes = $code1 $code2"
+    if {$code1 & $code2} {
+        return
+    } else {
+        foreach code [list $code1 $code2] i [list 0 1] {
+            switch $code {
+                0 {if {$i} {lappend clipped $p2}}
+                1 {set p [ClipLeft $p1 $p2 $xmin $ymin $xmax $ymax]
+                    if {[llength $p]} {lappend clipped $p} else {return}}
+                2 {set p [ClipRight $p1 $p2 $xmin $ymin $xmax $ymax]
+                    if {[llength $p]} {lappend clipped $p} else {return}}
+                4 {set p [ClipBottom $p1 $p2 $xmin $ymin $xmax $ymax]
+                    if {[llength $p]} {lappend clipped $p} else {return}}
+                8 {set p [ClipTop $p1 $p2 $xmin $ymin $xmax $ymax]
+                    if {[llength $p]} {lappend clipped $p} else {return}}
+                5 {set p [ClipLeft $p1 $p2 $xmin $ymin $xmax $ymax]
+                    if {[llength $p]} {
+                        lappend clipped $p
+                    } else {
+                        set p [ClipBottom $p1 $p2 $xmin $ymin $xmax $ymax]
+                        if {[llength $p]} {lappend clipped $p} else {return}}}
+                6 {set p [ClipRight $p1 $p2 $xmin $ymin $xmax $ymax]
+                    if {[llength $p]} {
+                        lappend clipped $p
+                    } else {
+                        set p [ClipBottom $p1 $p2 $xmin $ymin $xmax $ymax]
+                        if {[llength $p]} {lappend clipped $p} else {return}}}
+                9 {set p [ClipLeft $p1 $p2 $xmin $ymin $xmax $ymax]
+                    if {[llength $p]} {
+                        lappend clipped $p
+                    } else {
+                        set p [ClipTop $p1 $p2 $xmin $ymin $xmax $ymax]
+                        if {[llength $p]} {lappend clipped $p} else {return}}}
+                10 {set p [ClipRight $p1 $p2 $xmin $ymin $xmax $ymax]
+                    if {[llength $p]} {
+                        lappend clipped $p
+                    } else {
+                        set p [ClipTop $p1 $p2 $xmin $ymin $xmax $ymax]
+                        if {[llength $p]} {lappend clipped $p} else {return}}}
+                default {return}}}
+        # puts "$clipped"
+        return $clipped}}
 
 ## endsource plot2d.tcl

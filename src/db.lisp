@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -400,16 +400,16 @@
       (setq +labs nil))
     isp))
 
+;; Return NIL for all non-symbols.
 (defun kindp (x y)
-  (unless (symbolp x)
-    (merror (intl:gettext "declare: argument must be a symbol; found ~M") x))
-  (clear)
-  (beg x 1)
-  (do ((p (dq+) (dq+)))
-      ((null p))
-    (if (eq y p)
-	(return t)
-	(mark+ p (+labs p)))))
+  (when (symbolp x)
+    (clear)
+    (beg x 1)
+    (do ((p (dq+) (dq+)))
+        ((null p))
+        (if (eq y p)
+          (return t)
+          (mark+ p (+labs p))))))
 
 (defun true* (pat)
   (let ((dum (semant pat)))
@@ -419,7 +419,7 @@
 (defun fact (fun arg val)
   (cntxt (ind (datum (list fun arg val))) context))
 
-(defun kind (x y &aux #+kcl (y y))
+(defun kind (x y)
   (setq y (datum (list 'kind x y)))
   (cntxt y context)
   (addf y x))
@@ -714,7 +714,7 @@
 
 (defun mark+3 (dat)
   (if (/= 0 (logand (unlab (+labz (caddar dat)))
-		    (unlab (dbv (+labz (cadar dat)) (-labz (caar dat))))))
+		    (dbv (+labz (cadar dat)) (-labz (caar dat)))))
       (beg- (sel dat wn) *world*)))
 
 (defun mark+0 (cl lab fact)

@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -14,23 +14,30 @@
 
 (load-macsyma-macros rzmac)
 
-(declare-top (special checkcoefsignlist var zerosigntest productcase))
-
-(defun hasvar (exp) (not (freevar exp)))
-
 (defun zerp (a) (equal a 0))
 
 (defun integerpfr (a) (if (not (maxima-integerp a)) (integerp1 a)))
 
 (defun nonzerp (a) (not (equal a 0)))
 
-(defun freevnz (a) (and (freevar a) (not (equal a 0))))
+(defun hasvar2 (exp var2)
+  (not (freevar2 exp var2)))
+
+(defun freevnz2 (a var2)
+  (and (freevar2 a var2)
+       (not (equal a 0))))
+
 
 (defun inte (funct x)
-  (let ((checkcoefsignlist nil)
+  (let ((*checkcoefsignlist* nil)
 	(*globalcareflag* nil)
 	($radexpand t))
-    (declare (special checkcoefsignlist *globalcareflag* $radexpand))
+    ;; It would be nice to remove *GLOBALCAREFLAG*, which is only used
+    ;; here, INTIRFACTOROOT, and CAREFULFACTOR.  But to do that, we'd
+    ;; have to pass the value of *GLOBALCAREFACTOR* through many
+    ;; functions because CAREFULFACTOR is near or at the bottom of the
+    ;; call tree.
+    (declare (special *globalcareflag*))
     (intir-ref funct x)))
 
 (defun intir-ref (fun x)
@@ -158,9 +165,9 @@
 	  (t
 	   (zs-intir3 x e f d p r0 e0)))))
 
-(defun root+anything (exp var)
-  (m2 exp '((mplus)
-	    ((coeffpt) (c nonzerp) ((mexpt) (u hasvar) (v integerpfr)))
+(defun root+anything (exp var2)
+  (m2 exp `((mplus)
+	    ((coeffpt) (c nonzerp) ((mexpt) (u hasvar2 ,var2) (v integerpfr)))
 	    ((coeffpp) (c true)))))
 
 ;; Handle d*p(x)/(e*x^2+f*x+g)*r0(x)^e0.  We know that e*x^2+f*x+g has
@@ -299,11 +306,11 @@
 ;;
 ;; If EXPR is of the form A^B and is not free of VAR, use CAREFULFACTOR to try
 ;; to factor it. Otherwise just return EXPR.
-(defun factoroot (expr var)
+(defun factoroot (expr var2)
   (if (and (mexptp expr)
-           (hasvar expr)
+           (hasvar2 expr var2)
            (integerpfr (caddr expr)))
-      (carefulfactor expr var)
+      (carefulfactor expr var2)
       expr))
 
 ;; CAREFULFACTOR
@@ -320,19 +327,19 @@
 
 ;; RESTOREX
 ;;
-;; Multiply EXPR by VAR^EXPT, trying to insert the factor of VAR inside terms in
+;; Multiply EXPR by VAR2^EXPT, trying to insert the factor of VAR2 inside terms in
 ;; a product if possible.
-(defun restorex (expr var expt)
+(defun restorex (expr var2 expt)
   (cond
     ((and (mexptp expr)
           (equal expt (caddr expr)))
-     (power (restorex (cadr expr) var 1) (caddr expr)))
+     (power (restorex (cadr expr) var2 1) (caddr expr)))
 
     ((mtimesp expr)
-     (distrestorex (cdr expr) var expt))
+     (distrestorex (cdr expr) var2 expt))
 
     (t
-     (mul (power var expt) expr))))
+     (mul (power var2 expt) expr))))
 
 ;; DISTRESTOREX
 ;;
@@ -340,19 +347,19 @@
 ;; these factors, but after multiplying one of them by VAR to try to multiply
 ;; the entire product by VAR^EXPT. If it's not possible to multiply factors to
 ;; do so, add a factor of VAR^EXPT to the end.
-(defun distrestorex (factors var expt)
+(defun distrestorex (factors var2 expt)
   (if (null factors)
-      (power var expt)
+      (power var2 expt)
       (let ((start (first factors)))
         (if (and (mexptp start)
                  (equal expt (caddr start)))
 
             (lmul
-             (cons (power ($expand (mul var (cadr start)))
+             (cons (power ($expand (mul var2 (cadr start)))
                           (caddr start))
                    (rest factors)))
 
-            (mul start (distrestorex (rest factors) var expt))))))
+            (mul start (distrestorex (rest factors) var2 expt))))))
 
 (defun timestest (expr)
   (if (mtimesp expr)
@@ -362,10 +369,9 @@
 ;; Integrate a function of the form d*p(y)*y^m*(a*y^2+b*x+c)^n.
 ;; n is half of an integer.
 (defun intira (funct x)
-  (prog (a b c *ec-1* d m n (assoclist (jmaug (specrepcheck funct) x))
+  (prog (a b c ec-1 d m n (assoclist (jmaug (specrepcheck funct) x))
 	 pluspowfo1 pluspowfo2 minuspowfo
 	 polfact signn poszpowlist negpowlist)
-     (declare (special *ec-1*))
      (setq n (cdras 'n assoclist))
      ;; r12 1//2)
      ;; (format t "n = ~A~%" n)
@@ -385,7 +391,7 @@
 	   ;; divided by 2.
 	   n (cadr n)
 	   signn (checksigntm n)
-	   *ec-1* (power c -1)
+	   ec-1 (power c -1)
 	   b (cdras 'b assoclist)
 	   a (cdras 'c assoclist)
 	   ;; pluspowfo1 = 1/2*(n-1), That is, the original exponent - 1/2.
@@ -416,18 +422,18 @@
 	 (return (augmult (mul d
 			       (nummnumn poszpowlist
 					 pluspowfo1
-					 minuspowfo c b a x)))))
+					 minuspowfo c b a x ec-1)))))
        (return (augmult (mul d
 			     (nummdenn poszpowlist
-				       pluspowfo2 c b a x)))))
+				       pluspowfo2 c b a x ec-1)))))
      (when (and (null poszpowlist)
 		(not (null negpowlist)))
        ;; No polynomial parts
        (when (eq signn '$positive)
 	 (return (augmult (mul d
-			       (denmnumn negpowlist minuspowfo c b a x)))))
+			       (denmnumn negpowlist minuspowfo c b a x ec-1)))))
        (return (augmult (mul d
-			     (denmdenn negpowlist pluspowfo2 c b a x)))))
+			     (denmdenn negpowlist pluspowfo2 c b a x ec-1)))))
      (when (and (not (null negpowlist))
 		(not (null poszpowlist)))
        ;; Positive and negative powers.
@@ -435,57 +441,57 @@
 	 (return (add (augmult (mul d
 				    (nummnumn poszpowlist
 					      pluspowfo1
-					      minuspowfo c b a x)))
+					      minuspowfo c b a x ec-1)))
 		      (augmult (mul d
 				    (denmnumn negpowlist
-					      minuspowfo c b a x))))))
+					      minuspowfo c b a x ec-1))))))
        (return (add (augmult (mul d
 				  (nummdenn poszpowlist
-					    pluspowfo2 c b a x)))
+					    pluspowfo2 c b a x ec-1)))
 		    (augmult (mul d
 				  (denmdenn negpowlist
-					    pluspowfo2 c b a x))))))))
+					    pluspowfo2 c b a x ec-1))))))))
 
 ;; Match d*p(x)*(f*x+e)^m*(a*x^2+b*x+c)^n.  p(x) is a polynomial, m is
 ;; an integer, n is half of an integer.  a, b, c, e, and f are
 ;; expressions independent of x (var).
-(defun jmaug (exp var)
-  (m2 exp '((mtimes)
-	    ((coefftt) (d freevar))
-	    ((coefftt) (p polyp))
-	    ((mexpt) ((mplus) ((coeffpt) (f freevar) (x varp))
-		      ((coeffpp)(e freevar)))
+(defun jmaug (exp var2)
+  (m2 exp `((mtimes)
+	    ((coefftt) (d freevar2 ,var2))
+	    ((coefftt) (p polyp-var ,var2))
+	    ((mexpt) ((mplus) ((coeffpt) (f freevar2 ,var2) (x varp2 ,var2))
+		      ((coeffpp)(e freevar2 ,var2)))
 	     (m maxima-integerp))
 	    ((mexpt) ((mplus)
-		      ((coeffpt) (a freevar) ((mexpt) (x varp) 2))
-		      ((coeffpt) (b freevar) (x varp))
-		      ((coeffpp) (c freevar)))
+		      ((coeffpt) (a freevar2 ,var2) ((mexpt) (x varp2 ,var2) 2))
+		      ((coeffpt) (b freevar2 ,var2) (x varp2 ,var2))
+		      ((coeffpp) (c freevar2 ,var2)))
 	     (n integerp1)))))
 
 ;; Match d*p(x)*r1(x)^e1*r2(x)^e2*r0(x)^e0, where p(x) is a
 ;; polynomial, e1 and e2 are both half an odd integer, and e3 is an
 ;; integer.
-(defun factpow (exp var)
-  (m2 exp '((mtimes) ((coefftt) (d freevar))
-	    ((coefftt) (p polyp))
-	    ((mexpt) (r1 hasvar)
+(defun factpow (exp var2)
+  (m2 exp `((mtimes) ((coefftt) (d freevar2 ,var2))
+	    ((coefftt) (p polyp-var ,var2))
+	    ((mexpt) (r1 hasvar2 ,var2)
 	     (e1 integerpfr))
-	    ((mexpt) (r2 hasvar)
+	    ((mexpt) (r2 hasvar2 ,var2)
 	     (e2 integerpfr))
-	    ((mexpt) (r0 hasvar)
+	    ((mexpt) (r0 hasvar2 ,var2)
 	     (e0 maxima-integerp)))))
 
 ;; Match EXP to the form
 ;; d*p/(e*x^2+f*x+g)*r0(x)^e0.  p is a polynomial in x.
-(defun elliptquad (exp var)
-  (m2 exp '((mtimes)
-	    ((coefftt) (d freevar))
-	    ((coefftt) (p polyp))
-	    ((mexpt) ((mplus) ((coeffpt) (e freevnz) ((mexpt) (x varp) 2))
-		      ((coeffpt) (f freevar) (x varp))
-		      ((coeffpp) (g freevar)))
+(defun elliptquad (exp var2)
+  (m2 exp `((mtimes)
+	    ((coefftt) (d freevar2 ,var2))
+	    ((coefftt) (p polyp-var ,var2))
+	    ((mexpt) ((mplus) ((coeffpt) (e freevnz2 ,var2) ((mexpt) (x varp2 ,var2) 2))
+		      ((coeffpt) (f freevar2 ,var2) (x varp2 ,var2))
+		      ((coeffpp) (g freevar2 ,var2)))
 	     -1)
-	    ((mexpt) (r0 hasvar)
+	    ((mexpt) (r0 hasvar2 ,var2)
 	     (e0 integerpfr)))))
 
 ;; From the set of coefficients, generate the polynomial c*x^2+b*x+a.
@@ -505,8 +511,8 @@
 ;; Thus (x+3)^2/x^2 = 1 + 6/x + 9/x^2 returns
 ;;
 ;; '(((0 1)) ((1 6) (2 9)))
-(defun powercoeflist (fun m var)
-  (prog ((expanfun (unquote ($expand (mul (prevconstexpan fun var) (power var m)))))
+(defun powercoeflist (fun m var2)
+  (prog ((expanfun (unquote ($expand (mul (prevconstexpan fun var2) (power var2 m)))))
 	 maxpowfun powfun coef poszpowlist negpowlist)
      (when (and (equal fun 1) (plusp m))
        (return (cons nil (list (list (cons m (list 1)))))))
@@ -514,9 +520,9 @@
        (return (cons nil (list (list (cons (- m) (list 1)))))))
      (when (equal expanfun 1)
        (return (cons (list (cons 0 (list 1))) (list nil))))
-     (setq maxpowfun ($hipow expanfun var)
-	   powfun ($lopow expanfun var))
-     loop (setq coef ($coeff expanfun (power var powfun)))
+     (setq maxpowfun ($hipow expanfun var2)
+	   powfun ($lopow expanfun var2))
+     loop (setq coef ($coeff expanfun (power var2 powfun)))
      (when (numberp coef) (go testjump))
      (go nojump)
      testjump (when (and (not (zerop powfun)) (zerop coef))
@@ -527,7 +533,7 @@
      (when (zerop powfun)
        (setq poszpowlist
 	     (append poszpowlist
-		     (list (cons 0 (list (consterm (cdr expanfun) var)))))))
+		     (list (cons 0 (list (consterm (cdr expanfun) var2)))))))
      (when (minusp powfun)
        (setq negpowlist (append negpowlist (list (cons (- powfun) (list coef))))))
      (when (= powfun maxpowfun)
@@ -535,40 +541,40 @@
      jump (incf powfun)
      (go loop)))
 
-(defun consterm (fun var)
+(defun consterm (fun var2)
   (cond ((null fun) 0)
-	((freeof var (car fun))
-	 (add (car fun) (consterm (cdr fun) var)))
-	(t (consterm (cdr fun) var))))
+	((freeof var2 (car fun))
+	 (add (car fun) (consterm (cdr fun) var2)))
+	(t (consterm (cdr fun) var2))))
 
-(defun prevconstexpan (fun var)
+(defun prevconstexpan (fun var2)
   (cond ((atom fun) fun)
 	((eq (caar fun) 'mplus)
-	 (cond ((and (freeof var fun)
+	 (cond ((and (freeof var2 fun)
 		     (not (inside fun 'mexpt)))
 		(list '(mquote) fun))
-	       ((and (freeof var fun) (inside fun 'mexpt))
+	       ((and (freeof var2 fun) (inside fun 'mexpt))
 		(list '(mquote)
-		      (distrinplusprev (cdr fun) var)))
+		      (distrinplusprev (cdr fun) var2)))
 	       ((inside fun 'mexpt)
-		(distrinplusprev (cdr fun) var))
+		(distrinplusprev (cdr fun) var2))
 	       (t fun)))
 	((eq (caar fun) 'mtimes)
-	 (distrintimesprev (cdr fun) var))
-	((and (not (inside (cdr fun) var))
+	 (distrintimesprev (cdr fun) var2))
+	((and (not (inside (cdr fun) var2))
 	      (eq (caar fun) 'mexpt))
-	 (power (prevconstexpan (cadr fun) var) (caddr fun)))
+	 (power (prevconstexpan (cadr fun) var2) (caddr fun)))
 	(t fun)))
 
-(defun distrinplusprev (fun var)
+(defun distrinplusprev (fun var2)
   (cond ((null fun) 0)
-	(t (add (prevconstexpan (car fun) var)
-		(distrinplusprev (cdr fun) var)))))
+	(t (add (prevconstexpan (car fun) var2)
+		(distrinplusprev (cdr fun) var2)))))
 
-(defun distrintimesprev (fun var)
+(defun distrintimesprev (fun var2)
   (cond ((null fun) 1)
-	(t (mul (prevconstexpan (car fun) var)
-		(distrintimesprev (cdr fun) var)))))
+	(t (mul (prevconstexpan (car fun) var2)
+		(distrintimesprev (cdr fun) var2)))))
 
 (defun inside (fun arg)
   (cond ((atom fun)(equal fun arg))
@@ -579,33 +585,36 @@
   (cond ((not (inside fun 'mquote)) fun)
 	(t (unquote (meval fun)))))
 
-(defun checksigntm (expr)
-  (prog (aslist quest zerosigntest productcase)
-     (setq aslist checkcoefsignlist)
-     (cond ((atom expr) (go loop)))
-     (cond ((eq (caar expr) 'mtimes)(setq productcase t)))
+(let (zerosigntest productcase)
+  (defun checksigntm (expr)
+    (prog (aslist quest)
+       (setf zerosigntest nil
+             productcase nil)
+       (setq aslist *checkcoefsignlist*)
+       (cond ((atom expr) (go loop)))
+       (cond ((eq (caar expr) 'mtimes)(setq productcase t)))
      loop (cond ((null aslist)
-		 (setq checkcoefsignlist
-		       (append checkcoefsignlist
+		 (setq *checkcoefsignlist*
+		       (append *checkcoefsignlist*
 			       (list (cons expr
 					   (list
 					    (setq quest (checkflagandact expr)))))))
 		 (return quest)))
-     (cond ((equal (caar aslist) expr) (return (cadar aslist))))
-     (setq aslist (cdr aslist))
-     (go loop)))
+       (cond ((equal (caar aslist) expr) (return (cadar aslist))))
+       (setq aslist (cdr aslist))
+       (go loop)))
 
-(defun checkflagandact (expr)
-  (cond (productcase
-	 (setq productcase nil)
-	 (findsignoftheirproduct (findsignofactors (cdr expr))))
-	(t (asksign ($realpart expr)))))
+  (defun checkflagandact (expr)
+    (cond (productcase
+	   (setq productcase nil)
+	   (findsignoftheirproduct (findsignofactors (cdr expr))))
+	  (t (asksign ($realpart expr)))))
 
-(defun findsignofactors (listofactors)
-  (cond ((null listofactors) nil)
-	((eq zerosigntest '$zero) '$zero)
-	(t (append (list (setq zerosigntest (checksigntm (car listofactors))))
-		   (findsignofactors (cdr listofactors))))))
+  (defun findsignofactors (listofactors)
+    (cond ((null listofactors) nil)
+	  ((eq zerosigntest '$zero) '$zero)
+	  (t (append (list (setq zerosigntest (checksigntm (car listofactors))))
+		     (findsignofactors (cdr listofactors)))))))
 
 (defun findsignoftheirproduct (llist)
   (prog (sign)
@@ -722,10 +731,9 @@
 	       '$positive
 	       (signdiscr c b a)))))
 
-(defun signdis3 (c b a signa)
-  (declare (special *ec-1*))
+(defun signdis3 (c b a signa ec-1)
   (cond ((equal b 0)
-	 (if (equal (checksigntm *ec-1*) signa)
+	 (if (equal (checksigntm ec-1) signa)
 	     '$negative
 	     '$positive))
 	(t (signdiscr c b a))))
@@ -733,10 +741,9 @@
 ;; Integrate things like x^m*R^(p-1/2), p > 0, m > 0.
 ;;
 ;; I think pluspowfo1 = p - 1.
-(defun nummnumn (poszpowlist pluspowfo1 p c b a x)
-  (declare (special *ec-1*))
+(defun nummnumn (poszpowlist pluspowfo1 p c b a x ec-1)
   (let ((expr (power (polfoo c b a x) (add p 1//2))) ;; expr = R^(p+1/2)
-	(expo *ec-1*)				     ;; expo = 1/c
+	(expo ec-1)				     ;; expo = 1/c
 	(ex (power c -2)))			     ;; ex = 1/c^2
     (prog ((result 0)
 	   (controlpow (caar poszpowlist))
@@ -745,7 +752,7 @@
        #+nil (format t "p = ~A~%pluspowfo1 = ~A~%" p pluspowfo1)
        (when (zerop controlpow)
 	 ;; Integrate R^(p-1/2)
-	 (setq result (augmult (mul coef (numn pluspowfo1 c b a x)))
+	 (setq result (augmult (mul coef (numn pluspowfo1 c b a x ec-1)))
 	       count 1)
 	 (go loop))
 
@@ -760,7 +767,7 @@
        (setq res1 (add (augmult (mul expr expo
 				     (power (+ p p 1) -1)))
 		       (augmult (mul -1 b 1//2 expo
-				     (numn pluspowfo1 c b a x)))))
+				     (numn pluspowfo1 c b a x ec-1)))))
        (when (equal controlpow 1)
 	 (setq result (add result (augmult (mul coef res1)))
 	       count 2)
@@ -790,7 +797,7 @@
 				     (add (mul (power b 2)
 					       (+ p p 3))
 					  (mul -4 a c))
-				     (numn pluspowfo1 c b a x)))))
+				     (numn pluspowfo1 c b a x ec-1)))))
        (when (equal controlpow 2)
 	 (setq result (add result (augmult (mul coef res2)))
 	       count 3)
@@ -838,9 +845,8 @@
        (go jump3))))
 
 ;; Integrate R^(p+1/2)
-(defun numn (p c b a x)
-  (declare (special *ec-1*))
-  (let ((exp1 *ec-1*)			      ;; exp1 = 1/c
+(defun numn (p c b a x ec-1)
+  (let ((exp1 ec-1)			      ;; exp1 = 1/c
 	(exp2 (add b (mul 2 c x)))	      ;; exp2 = b+2*c*x
 	(exp4 (add (mul 4 a c) (mul -1 b b))) ;; exp4 = 4*a*c-b^2
         (exp5 (div 1 (1+ p))))                ;; exp5 = 1/(p+1)
@@ -873,13 +879,13 @@
 	     (augmult (mul '((rat simp) 1 8)
 			   exp1 exp5 (+ p p 1)
 			   exp4
-			   (numn (1- p) c b a x)))))))
+			   (numn (1- p) c b a x ec-1)))))))
 
 (defun augmult (x)
   ($multthru (simplifya x nil)))
 
 ;; Integrate things like 1/x^m/R^(p+1/2), p > 0.
-(defun denmdenn (negpowlist p c b a x)
+(defun denmdenn (negpowlist p c b a x ec-1)
   (let ((exp1 (power (polfoo c b a x) (add 1//2 (- p)))))  ;; exp1 = 1/R^(p-1/2)
     (prog (result controlpow coef count res1 res2 m partres
 	   (signa (checksigntm (simplifya a nil)))
@@ -899,7 +905,7 @@
 
        jump1
        ;; Handle 1/x/R^(p+1/2)
-       (setq res1 (den1denn p c b a x))
+       (setq res1 (den1denn p c b a x ec-1))
        (when (equal controlpow 1)
 	 (setq result (add result (augmult (mul coef res1)))
 	       count 2)
@@ -916,7 +922,7 @@
        ;;     -2*p*c/a*integrate(1/sqrt(R^(2*p+1)),x)
        (setq res2 (add (augmult (mul -1 ea-1 (power x -1) exp1))
 		       (augmult (mul -1 b (+ 1 p p) 1//2
-				     ea-1 (den1denn p c b a x)))
+				     ea-1 (den1denn p c b a x ec-1)))
 		       (augmult (mul -2 p c ea-1 (denn p c b a x)))))
        (when (equal controlpow 2)
 	 (setq result (add result (augmult (mul coef res2)))
@@ -975,8 +981,7 @@
 	(exp1 (add b (mul 2 c x)))             ;; exp1 = b + 2*c*x;
 	(exp2 (add (mul 4 a c)	(mul b b -1))) ;; exp2 = (4*a*c-b^2)
 	(exp3 (inv (+ p p -1)))		       ;; exp3 = 1/(2*p-1)
-	(*ec-1* (inv c)))
-    (declare (special *ec-1*))
+	(ec-1 (inv c)))
     #+nil (format t "signdisc = ~A~%p = ~A~%" signdisc p)
     (cond ((and (eq signdisc '$zero) (zerop p))
 	   ;; 1/sqrt(R), and R has duplicate roots.  That is, we have
@@ -984,8 +989,8 @@
 	   ;;
 	   ;; We return 1/sqrt(c)*log(x+b/2/c).  Shouldn't we return
 	   ;; 1/c*log(|x+b/2/c|)?
-	   (augmult (mul* (power *ec-1* 1//2)
-			  `((%log) ,(add x (mul b 1//2 *ec-1*))))))
+	   (augmult (mul* (power ec-1 1//2)
+			  `((%log) ,(add x (mul b 1//2 ec-1))))))
 	  ((and (eq signdisc '$zero) (plusp p))
 	   ;; 1/sqrt(R^(2*p+1)), with duplicate roots.
 	   ;;
@@ -994,7 +999,7 @@
 	   ;; -1/2/p*c^(-p-1/2)/(x+b/2/c)^(2*p)
 	   (augmult (mul (div -1 (+ p p))
 			 (power c (mul -1//2 (+ p p 1)))
-			 (power (add x (mul b 1//2  *ec-1*)) (* -2 p)))))
+			 (power (add x (mul b 1//2  ec-1)) (* -2 p)))))
 	  ((zerop p)
 	   ;; 1/sqrt(R)
 	   (den1 c b a x))
@@ -1023,7 +1028,7 @@
 			      (denn (1- p) c b a x))))))))
 
 ;; Integral of 1/x/(c*x^2+b*x+a)^(p+1/2), p > 0.
-(defun den1denn (p c b a x)
+(defun den1denn (p c b a x ec-1)
   (let ((signa (checksigntm (power a 2))) ;; signa = sign of a^2
 	(ea-1 (inv a)))		  ;; ea-1 = 1/a
     (cond ((eq signa '$zero)
@@ -1034,7 +1039,7 @@
 	   (noconstquad 1 p c b x))
 	  ((zerop p)
 	   ;; 1/x/sqrt(c*x^2+b*x+a)
-	   (den1den1 c b a x))
+	   (den1den1 c b a x ec-1))
 	  (t
 	   ;; The general case.  See G&R 2.268:
 	   ;;
@@ -1049,7 +1054,7 @@
 			      ea-1
 			      (power (polfoo c b a x)
 				     (add 1//2 (- p)))))
-		(augmult (mul ea-1 (den1denn (1- p) c b a x)))
+		(augmult (mul ea-1 (den1denn (1- p) c b a x ec-1)))
 		(augmult (mul -1 1//2 ea-1 b (denn p c b a x))))))))
 
 ;; Integral of 1/x/sqrt(c*x^2+b*x+a).
@@ -1058,7 +1063,7 @@
 ;; discriminant 4*a*c-b^2.  (I think this is the opposite of what we
 ;; compute below for the discriminant.)
 ;;
-(defun den1den1 (c b a x)
+(defun den1den1 (c b a x ec-1)
   (let ((exp2 (add (mul b x) a a))                ; exp2 = b*x+2*a
         (exp3 (inv (simplify (list '(mabs) x))))) ; exp3 = 1/abs(x)
     (prog (signdiscrim
@@ -1067,7 +1072,7 @@
 	   exp1)
        (when (eq signa '$zero)
 	 (return (noconstquad '((1 1)) 0 c b x)))
-       (setq signdiscrim (signdis3 c b a signa)
+       (setq signdiscrim (signdis3 c b a signa ec-1)
 	     exp1 (power a (inv -2)))
        #+nil (format t "signa = ~A~%signdiscrim = ~A~%" signa signdiscrim)
 
@@ -1122,7 +1127,7 @@
        ;; FIXME:  Why the multiplication by -1?
        (return (mul #+nil -1
 		    (power -1 1//2)
-		    (den1den1 (mul -1 c) (mul -1 b) (mul -1 a) x))))))
+		    (den1den1 (mul -1 c) (mul -1 b) (mul -1 a) x ec-1))))))
 
 ;; Integral of d/x^m/(c*x^2+b*x)^(p+1/2), p > 0.  The values of m and
 ;; d are in NEGPOWLIST.
@@ -1214,12 +1219,11 @@
 
 ;; Integrate pl(x)/(c*x^2+b*x+a)^(p+1/2) where pl(x) is a polynomial
 ;; and p > 0.  The polynomial is given in POSZPOWLIST.
-(defun nummdenn (poszpowlist p c b a x)
-  (declare (special *ec-1*))
+(defun nummdenn (poszpowlist p c b a x ec-1)
   (let ((exp1 (inv (+ p p -1)))	;; exp1 = 1/(2*p-1)
 	(exp2 (power (polfoo c b a x) (add 1//2 (- p)))) ;; exp2 = (a*x^2+b*x+c)^(p-1/2)
 	(exp3 (add (mul 4 a c) (mul -1 b b))) ;; exp3 = (4*a*c-b^2) (negative of the discriminant)
-	(exp4 (add x (mul b 1//2 *ec-1*)))    ;; exp4 = x+b/2/c
+	(exp4 (add x (mul b 1//2 ec-1)))    ;; exp4 = x+b/2/c
 	(exp5 (power c -2))		      ;; exp5 = 1/c^2
 	(exp6 (+ 2 (* -2 p)))		      ;; exp6 = -2*p+2
 	(exp7 (1+ (* -2 p))))		      ;; exp7 = -2*p+1
@@ -1270,8 +1274,8 @@
        ;;         -b/2/c*integrate(R^(p+1/2),x)
        ;;
        (setq res1
-	     (add (augmult (mul -1  *ec-1* exp1 exp2))
-		  (augmult (mul b -1//2 *ec-1* (denn p c b a x)))))
+	     (add (augmult (mul -1  ec-1 exp1 exp2))
+		  (augmult (mul b -1//2 ec-1 (denn p c b a x)))))
        (when (= controlpow 1)
 	 ;; Integrate coef*x/R^(p+1/2).
 	 ;;
@@ -1284,11 +1288,11 @@
        (when (and (plusp p) (not (eq signdiscrim '$zero)))
 	 ;; p > 0, no repeated roots
 	 (setq res2
-	       (add (augmult (mul *ec-1* exp1 (inv exp3) exp2
+	       (add (augmult (mul ec-1 exp1 (inv exp3) exp2
 				  (add (mul 2 a b)
 				       (mul 2 b b x)
 				       (mul -4 a c x))))
-		    (augmult (mul *ec-1* (inv exp3) exp1
+		    (augmult (mul ec-1 (inv exp3) exp1
 				  (add (mul 4 a c)
 				       (mul 2 b b p)
 				       (mul -3 b b))
@@ -1333,7 +1337,7 @@
 	       ;; (add (augmult (mul* b b (list '(rat) 1 4)
 	       ;;			   (power c -3)
 	       ;;			   (list '(%log) exp4)))
-	       ;;	    (augmult (mul *ec-1* 1//2 (power exp4 2)))
+	       ;;	    (augmult (mul ec-1 1//2 (power exp4 2)))
 	       ;;	    (augmult (mul -1 b x exp5)))
 	       (add (augmult (mul* b b '((rat) 1 4)
 				   (power c (div -5 2))
@@ -1354,7 +1358,7 @@
 	 ;;
 	 ;; where z = b/2/c.
 	 (setq res2
-	       ;; (add (augmult (mul* *ec-1* (list '(%log) exp4)))
+	       ;; (add (augmult (mul* ec-1 (list '(%log) exp4)))
 	       ;;	    (augmult (mul b exp5 (power exp4 -1)))
 	       ;;	    (augmult (mul (list '(rat) -1 8)
 	       ;;			  (power c -3)
@@ -1388,7 +1392,7 @@
 	 ;;  - b/c^(p+3/2)/(2*p-1)/(x+d)^(2*p-1)
 	 ;;  + b^2/8/c^(p+5/2)/p/(x+d)^(2*p)
 	 (setq res2
-	       ;; (add (augmult (mul *ec-1*
+	       ;; (add (augmult (mul ec-1
 	       ;;			  (power exp4 exp6)
 	       ;;			  (inv exp6)))
 	       ;;	    (augmult (mul -1 b exp5 (inv exp7)
@@ -1437,13 +1441,13 @@
 	       ;; The two integrals here were computed above in res2
 	       ;; and res1, respectively.
 	       (add (augmult (mul* (power x (1- m))
-				   *ec-1* (div -1 denom)
+				   ec-1 (div -1 denom)
 				   (power (polfoo c b a x)
 					  (add 1//2 (- p)))))
 		    (augmult (mul b (+ p p 1 (* -2 m))
 				  -1//2
-				  *ec-1* (inv denom) res2))
-		    (augmult (mul a (1- m) *ec-1* (inv denom) res1)))))
+				  ec-1 (inv denom) res2))
+		    (augmult (mul a (1- m) ec-1 (inv denom) res1)))))
        on
        ;; Move on to next higher power
        (incf m)
@@ -1455,7 +1459,7 @@
 	     res2 partres)
        (when (= m (+ p p))
 	 (setq partres
-	       (let ((expr (nummdenn (list (list (1- m) 1)) p c b a x)))
+	       (let ((expr (nummdenn (list (list (1- m) 1)) p c b a x ec-1)))
 		 (add (mul x expr)
 		      (mul -1 (distrint (cdr ($expand expr)) x)))))
 	 (go on))
@@ -1472,7 +1476,7 @@
 
 ;; Integrate functions of the form coef*R^(pow-1/2)/x^m.  NEGPOWLIST
 ;; contains the list of coef's and m's.
-(defun denmnumn (negpowlist pow c b a x)
+(defun denmnumn (negpowlist pow c b a x ec-1)
   (let ((exp1 (inv x))		    ;; exp1 = 1/x
 	(exp2 (+ pow pow -1)))	    ;; exp2 = 2*pow-1
     (prog (result controlpow coef count res1 res2 m partres signa ea-1
@@ -1485,7 +1489,7 @@
 	 (go there))
        (setq signa (checksigntm (power a 2)))
        (when (eq signa '$zero)
-	 (return (nonconstquadenum negpowlist p c b x)))
+	 (return (nonconstquadenum negpowlist p c b x ec-1)))
        (setq ea-1 (inv a))
        there
        (setq result 0
@@ -1496,12 +1500,12 @@
 	 ;; I don't think we can normally get here.
 	 (setq result (augmult (mul coef
 				    (numn (add (mul p 1//2) 1//2)
-					  c b a x)))
+					  c b a x ec-1)))
 	       count 1)
 	 (go loop))
        jump1
        ;; Handle integrate(sqrt(R^(2*pow-1))/x),x
-       (setq res1 (den1numn pow c b a x))
+       (setq res1 (den1numn pow c b a x ec-1))
        (when (equal controlpow 1)
 	 (setq result (add result (augmult (mul coef res1)))
 	       count 2)
@@ -1522,8 +1526,8 @@
 				  (power (polfoo c b a x)
 					 (add pow -1//2))))
 		    (augmult (mul b (div exp2 2)
-				  (den1numn (1- pow) c b a x)))
-		    (augmult (mul c exp2 (numn (- pow 2) c b a x))))))
+				  (den1numn (1- pow) c b a x ec-1)))
+		    (augmult (mul c exp2 (numn (- pow 2) c b a x ec-1))))))
        (when (= p 1)
 	 ;; integrate(sqrt(R)/x^2,x)
 	 ;;
@@ -1536,7 +1540,7 @@
 	 ;;
 	 (setq res2 (add (augmult (mul -1 (power (polfoo c b a x) 1//2)
 					    exp1))
-			      (augmult (mul b 1//2 (den1den1 c b a x)))
+			      (augmult (mul b 1//2 (den1den1 c b a x ec-1)))
 			      (augmult (mul c (den1 c b a x))))))
        (when (equal controlpow 2)
 	 (setq result (add result (augmult (mul coef res2)))
@@ -1593,55 +1597,54 @@
        (go jump3))))
 
 ;; Like denmnumn, but a = 0.
-(defun nonconstquadenum (negpowlist p c b x)
+(defun nonconstquadenum (negpowlist p c b x ec-1)
   (prog (result coef m)
      (cond ((equal p 1)
-	    (return (case1 negpowlist c b x))))
+	    (return (case1 negpowlist c b x ec-1))))
      (setq result 0)
      loop
      (setq m (caar negpowlist)
 	   coef (cadar negpowlist))
-     (setq result (add result (augmult (mul coef (casegen m p c b x))))
+     (setq result (add result (augmult (mul coef (casegen m p c b x ec-1))))
 	   negpowlist (cdr negpowlist))
      (cond ((null negpowlist) (return result)))
      (go loop)))
 
 ;; Integrate (c*x^2+b*x)^(p-1/2)/x^m
-(defun casegen (m p c b x)
+(defun casegen (m p c b x ec-1)
   (let ((exp1 (power (polfoo c b 0 x) (div p 2)))    ;; exp1 = R^(p/2)
 	(exp3 (power x (1+ (- m)))))                 ;; exp3 = 1/x^(m-1)
     (cond ((= p 1)
 	   ;; sqrt(c*x^2+b*x)/x^m
-	   (case1 (list (list m 1)) c b x))
+	   (case1 (list (list m 1)) c b x ec-1))
 	  ((zerop m)
 	   ;; (c*x^2+b*x)^(p-1/2)
-	   (case0 p c b x))
+	   (case0 p c b x ec-1))
 	  ((= m (1+ p))
 	   ;; (c*x^2+b*x)^(p-1/2)/x^(p+1)
 	   (add (augmult (mul -1 exp1 (inv (1- m)) exp3))
-		(augmult (mul b 1//2 (casegen (1- m) (- p 2) c b x)))
-		(augmult (mul c (casegen (- m 2) (- p 2) c b x)))))
+		(augmult (mul b 1//2 (casegen (1- m) (- p 2) c b x ec-1)))
+		(augmult (mul c (casegen (- m 2) (- p 2) c b x ec-1)))))
 	  ((= m 1)
 	   ;; (c*x^2+b*x)^(p-1/2)/x
 	   ;;
 	   (add (augmult (mul (inv p) exp1))
-		(augmult (mul b 1//2 (case0 (- p 2) c b x)))))
+		(augmult (mul b 1//2 (case0 (- p 2) c b x ec-1)))))
 	  (t
 	   ;; (c*x^2+b*x)^(p-1/2)/x^m
 	   (add (augmult (mul -1 exp1 (inv (- m (1+ p))) exp3))
 		(augmult (mul -1 p b 1//2 (inv (- m (1+ p)))
-			      (casegen (1- m) (- p 2) c b x))))))))
+			      (casegen (1- m) (- p 2) c b x ec-1))))))))
 
 ;; Integrate things like sqrt(c*x^2+b*x))/x^m.
-(defun case1 (negpowlist c b x)
-  (declare (special *ec-1*))
+(defun case1 (negpowlist c b x ec-1)
   (let ((exp1 (power c -1//2)) ;; exp1 = 1/sqrt(c)
 	(eb-1 (inv b)))	       ;; eb-1 = 1/b
     (prog ((result 0) (controlpow (caar negpowlist)) (coef (cadar negpowlist))
 	   m1 count res1 res2 m signc signb partres res)
        (setq m1 (- controlpow 2))
        (when (zerop controlpow)
-	 (setq result (augmult (mul coef (case0 1 c b x)))
+	 (setq result (augmult (mul coef (case0 1 c b x ec-1)))
 	       count 1)
 	 (go loop))
        jump1
@@ -1649,7 +1652,7 @@
        (when (= controlpow 1)
 	 (setq result
 	       (add result
-		    (augmult (mul coef (den1numn 1 c b 0 x))))
+		    (augmult (mul coef (den1numn 1 c b 0 x ec-1))))
 	       count 2)
 	 (go loop))
        jump2
@@ -1658,7 +1661,7 @@
 	 (setq result
 	       (add result
 		    (augmult (mul coef
-				  (denmnumn '(t (2 1)) 1 c b 0 x))))
+				  (denmnumn '(t (2 1)) 1 c b 0 x ec-1))))
 	       count 3)
 	 (go loop))
        jump3
@@ -1668,7 +1671,7 @@
 	 (go jump5))
        (setq count 4
 	     m 0
-	     signc (checksigntm *ec-1*))
+	     signc (checksigntm ec-1))
        (when (eq signc '$positive)
 	 (setq res
 	       (augmult (mul* 2 exp1
@@ -1730,7 +1733,7 @@
   (div 1 m))
 
 ;; Integrate (c*x^2+b*x)^(p-1/2)
-(defun case0 (power c b x)
+(defun case0 (power c b x ec-1)
   (let ((exp1 '((rat simp) 1 4))
 	(exp2 (add b (mul 2 c x)))
 	(exp3 (power c '((rat simp) -3 2)))
@@ -1739,16 +1742,15 @@
     ;; exp2 = b+2*c*x
     ;; exp3 = 1/c^(3/2)
     ;; exp4 = 2*c*x-b
-    (declare (special *ec-1*))
     (prog (signc p result)
-       (setq signc (checksigntm *ec-1*)
+       (setq signc (checksigntm ec-1)
 	     p 1)
        ;; sqrt(c*x^2+b*x)
        ;;
        ;; This could be handled by numn.  Why don't we?
        (when (eq signc '$positive)
 	 (setq result
-	       (add (augmult (mul exp1 *ec-1* exp2
+	       (add (augmult (mul exp1 ec-1 exp2
 				  (power (polfoo c b 0 x) 1//2)))
 		    (augmult (mul* b b '((rat) -1 8)
 				   exp3
@@ -1759,7 +1761,7 @@
 						(power (polfoo c b 0 x) 1//2)))))))))
        (when (eq signc '$negative)
 	 (setq result
-	       (add (augmult (mul exp1 *ec-1* exp4
+	       (add (augmult (mul exp1 ec-1 exp4
 				  (power (polfoo (mul -1 c) b 0 x) 1//2)))
 		    (augmult (mul* b b '((rat) 1 8)
 				   exp3
@@ -1772,15 +1774,15 @@
        ;;   (2*c*x+b)/4/(n+1)/c*sqrt(R^(2*n+1))
        ;;     + (2*n+1)*del/8/(n+1)/c*integrate(sqrt(R^(2*n-1)),x)
 
-       (setq result (add (augmult (mul 1//2 *ec-1* (inv (1+ p)) exp2
+       (setq result (add (augmult (mul 1//2 ec-1 (inv (1+ p)) exp2
 				       (power (polfoo c b 0 x)
 					      (div p 2))))
 			 (augmult (mul p b b '((rat simp) -1 4)
-				       *ec-1* (inv (1+ p)) result))))
+				       ec-1 (inv (1+ p)) result))))
        (go loop))))
 
 ;; Integrate R^(p-1/2)/x, p >= 1.
-(defun den1numn (p c b a x)
+(defun den1numn (p c b a x ec-1)
   (cond ((= p 1)
 	 ;; integrate(sqrt(R)/x,x)
 	 ;;
@@ -1791,7 +1793,7 @@
 	 ;;    + a*integrate(1/x/sqrt(R),x)
 	 ;;    + b/2*integrate(1/sqrt(R),x)
 	 (add (power (polfoo c b a x) 1//2)
-	      (augmult (mul a (den1den1 c b a x)))
+	      (augmult (mul a (den1den1 c b a x ec-1)))
 	      (augmult (mul b 1//2 (den1 c b a x)))))
 	(t
 	 ;; General case
@@ -1805,8 +1807,8 @@
 	 (add (augmult (mul (power (polfoo c b a x)
 				   (add p -1//2))
 			    (inv (+ p p -1))))
-	      (augmult (mul a (den1numn (+ p -1) c b a x)))
-	      (augmult (mul b 1//2 (numn (+ p -2) c b a x)))))))
+	      (augmult (mul a (den1numn (+ p -1) c b a x ec-1)))
+	      (augmult (mul b 1//2 (numn (+ p -2) c b a x ec-1)))))))
 
 ;; L is a list of expressions that INTIRA should be applied to.
 ;; Sum up the results of applying INTIRA to each.

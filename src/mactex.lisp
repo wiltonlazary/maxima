@@ -56,9 +56,17 @@
 ;; in case a file-name is supplied, the output will be sent
 ;; (perhaps appended) to that file.
 
-(declare-top (special lop rop $labels $inchar))
+(declare-top (special lop rop))
 
 (defvar *tex-environment-default* '("$$" . "$$"))
+
+(defmfun $get_tex_environment_default ()
+  `((mlist) ,(car *tex-environment-default*) ,(cdr *tex-environment-default*)))
+
+(defmfun $get_tex_environment (x)
+  (if (getopr x) (setq x (getopr x)))
+  (let ((e (get-tex-environment x)))
+    `((mlist) ,(car e) ,(cdr e))))
 
 (defmfun $set_tex_environment_default (env-open env-close)
   (setq env-open ($sconcat env-open))
@@ -66,20 +74,12 @@
   (setq *tex-environment-default* `(,env-open . ,env-close))
   ($get_tex_environment_default))
 
-(defmfun $get_tex_environment_default ()
-  `((mlist) ,(car *tex-environment-default*) ,(cdr *tex-environment-default*)))
-
 (defmfun $set_tex_environment (x env-open env-close)
   (setq env-open ($sconcat env-open))
   (setq env-close ($sconcat env-close))
   (if (getopr x) (setq x (getopr x)))
   (setf (get x 'tex-environment) `(,env-open . ,env-close))
   ($get_tex_environment x))
-
-(defmfun $get_tex_environment (x)
-  (if (getopr x) (setq x (getopr x)))
-  (let ((e (get-tex-environment x)))
-    `((mlist) ,(car e) ,(cdr e))))
 
 (defun get-tex-environment (x)
   (cond
@@ -207,7 +207,7 @@
 ;;; the size of the output for purposes of allowing the TeX file to
 ;;; have a reasonable line-line. myprinc will break it at a space
 ;;; once it crosses a threshold.
-;;; this has nothign to do with breaking the resulting equations.
+;;; this has nothing to do with breaking the resulting equations.
 
 ;;-      arg:    chstr -  string or number to princ
 ;;-      scheme: This function keeps track of the current location
@@ -220,7 +220,7 @@
 
   (defun myprinc (chstr &optional (texport nil))
     (prog (chlst)
-       (cond ((and (> (+ (length (setq chlst (exploden chstr))) ccol) 70.)
+       (cond ((and (> (+ (length (setq chlst (exploden chstr))) ccol) $linel)
                    (or (stringp chstr) (equal chstr '| |)))
 	      (terpri texport)      ;would have exceeded the line length
 	      (setq ccol 1.)
@@ -252,14 +252,14 @@
                       ((stringp x)
                        (tex-string (quote-% (if $stringdisp (concatenate 'string "``" x "''") x))))
                       ((characterp x) (tex-char x))
-		      ((not ($mapatom x))
+		      ((symbolp x) (tex-stripdollar (or (get x 'reversealias) x)))
+		      (t
 		       (let ((x (if (member (marray-type x) '(array hash-table $functional))
 				    ($sconcat x)
 				  (format nil "~A" x))))
-			 (tex-string (quote-chars (if $stringdisp (concatenate 'string "``" x "''") x)
-						  "#$%&_"))))
-			 
-		      (t (tex-stripdollar (or (get x 'reversealias) x)))))
+			 ;; Do not apply stringdisp here -- we are outputting a string
+			 ;; only because we don't have a better way to handle Lisp arrays.
+			 (tex-string (quote-chars x "#$%&_"))))))
 	  r))
 
 (defun tex-string (x)
@@ -272,7 +272,7 @@
       (concatenate 'string "\\mbox{\\verb|" (string x) "|}")))
 
 ;; Read forms from file F1 and output them to F2
-(defun tex-forms (f1 f2 &aux tem (eof *mread-eof-obj*))
+(defun tex-forms (f1 f2 &aux tem (eof nil))
   (with-open-file (st f1)
     (loop while (not (eq (setq tem (mread-raw st eof)) eof))
 	   do (tex1 (third tem) f2))))
@@ -296,24 +296,29 @@
 ;; Given a string foo_mm_nn, return foo, mm, and nn,
 ;; where mm and nn are integers (not strings of digits).
 ;; Return NIL if argument doesn't have trailing digits.
-
 (defun extract-trailing-digits (s)
   (let (nn-list)
     ;; OK (loop while (funcall #.(maxima-nregex::regex-compile "[^_](__*)([0-9][0-9]*)$") s)
     ;; NOPE (loop while (funcall #.(maxima-nregex::regex-compile "[^0-9_](_*)([0-9][0-9]*)$") s)
-    (loop with nn-string while
-          (or (and
-                (funcall #.(maxima-nregex::regex-compile "[^_](__*)([0-9][0-9]*)$") s)
-                (let*
-                  ((group-_ (aref maxima-nregex::*regex-groups* 1))
-                   (group-nn (aref maxima-nregex::*regex-groups* 2)))
-                  (setq nn-string (subseq s (first group-nn) (second group-nn)))
-                  (setq s (subseq s 0 (first group-_)))))
-              (and
-                (funcall #.(maxima-nregex::regex-compile "[^_]([0-9][0-9]*)$") s)
-                (let* ((group-nn (aref maxima-nregex::*regex-groups* 1)))
-                  (setq nn-string (subseq s (first group-nn) (second group-nn)))
-                  (setq s (subseq s 0 (first group-nn))))))
+    (loop with nn-string
+	  while (or (and
+		     (let ((matches (pregexp:pregexp-match-positions
+				     '#.(pregexp:pregexp "[^_](__*)([0-9][0-9]*)$")
+				     s)))
+		       (when matches
+			 (let*
+			     ((group-_ (elt matches 1))
+			      (group-nn (elt matches 2)))
+			   (setq nn-string (subseq s (car group-nn) (cdr group-nn)))
+			   (setq s (subseq s 0 (car group-_)))))))
+		    (and
+		     (let ((matches (pregexp:pregexp-match-positions
+				     '#.(pregexp:pregexp "[^_]([0-9][0-9]*)$")
+				     s)))
+		       (when matches
+			 (let* ((group-nn (elt matches 1)))
+			   (setq nn-string (subseq s (car group-nn) (cdr group-nn)))
+			   (setq s (subseq s 0 (car group-nn))))))))
           do (push (parse-integer nn-string) nn-list))
     (and nn-list (cons s nn-list))))
 
@@ -534,6 +539,7 @@
 (defprop $tau "\\tau" texword)
 (defprop $upsilon "\\upsilon" texword)
 (defprop $phi "\\varphi" texword)
+(defprop $%phi "\\varphi" texword)
 (defprop $chi "\\chi" texword)
 (defprop $psi "\\psi" texword)
 (defprop $omega "\\omega" texword)
@@ -596,7 +602,7 @@
     (let ((r (exploden number)))
       (member 'e r :test #'string-equal))))
 
-(defvar *tex-mexpt-trig-like-fns* '(%sin %cos %tan %sinh %cosh %tanh %asin %acos %atan %asinh %acosh %atanh))
+(defvar *tex-mexpt-trig-like-fns* '(%sin %cos %tan %csc %sec %cot %sinh %cosh %tanh %asin %acos %atan %asinh %acosh %atanh))
 (defun tex-mexpt-trig-like-fn-p (f)
   (member f *tex-mexpt-trig-like-fns*))
 (defun maybe-tex-mexpt-trig-like (x l r)
@@ -613,8 +619,10 @@
        (doit (and
 	      f ; there is such a function
 	      (tex-mexpt-trig-like-fn-p f) ; f is trig-like
+          ;; I THINK THIS NEXT TEST IS UNNECESSARY BECAUSE IF IT PASSES THE PRECEDING TEST, IT IS ACCEPTABLE. REVISIT.
 	      (member (get-first-char f) '(#\% #\$) :test #'char=) ;; insist it is a % or $ function
 	      (not (member 'array (cdar fx) :test #'eq)) ; fix for x[i]^2
+          ;; I THINK THIS NEXT TEST IS UNNECESSARY BECAUSE NFORMAT CHANGES (...)^-1 TO 1/(...) AND (...)^(1/2) TO SQRT(...). REVISIT.
 	      (or (and (atom expon) (not (numberp expon))) ; f(x)^y is ok
 		  (and (atom expon) (numberp expon) (> expon 0))))))
                                         ; f(x)^3 is ok, but not f(x)^-1, which could
@@ -810,7 +818,7 @@
   (cond ((null (cddr x))
 	 (if (null (cdr x))
 	     (tex-function x l r t)
-	     (tex (cadr x) (cons "+" l) r 'mplus rop)))
+	     (tex (cadr x) (append l (list "+")) r 'mplus rop)))
 	(t (setq l (tex (cadr x) l nil lop 'mplus)
 		 x (cddr x))
 	   (do ((nl l)  (dissym))
@@ -875,7 +883,7 @@
 
 
 ;; I WONDER IF ALL BUILT-IN FUNCTIONS SHOULD BE SET IN ROMAN TYPE
-(defprop $atan2 "{\\rm atan2}" texword)
+(defprop %atan2 "{\\rm atan2}" texword)
 
 ;; JM 09/01 expand and re-order to follow table of "log-like" functions,
 ;; see table in Lamport, 2nd edition, 1994, p. 44, table 3.9.
@@ -1131,15 +1139,17 @@
 ;; F must take 1 argument (an expression which has operator OP)
 ;; and must return a string (the TeX output).
 
-(defun make-maxima-tex-glue (op f)
+(defun make-maxima-tex-glue (op f previous-f)
   (let
-    ((glue-f (gensym))
-     (f-body `(append l
-                      (list
-                        (let ((f-x (mfuncall ',f x)))
-                          (if (stringp f-x) f-x
-                            (merror (intl:gettext "tex: function ~s did not return a string.~%") ($sconcat ',f)))))
-                      r)))
+    ((glue-f (gensym "TEX-GLUE-"))
+     (f-body `(let ((f-x (mfuncall ',f x)))
+                (cond ((stringp f-x) (append l (list f-x) r))
+                  ((null f-x)
+                   (if ',previous-f
+                     (funcall ',previous-f x l r)
+                     (tex-function x l r nil)))
+                  (t (merror (intl:gettext "tex: function ~s returned something other than a string or 'false'.~%") ($sconcat ',f)))))
+              ))
     (setf (symbol-function glue-f) (coerce `(lambda (x l r) ,f-body) 'function))
     (setf (get op 'tex) glue-f))
   f)
@@ -1178,8 +1188,10 @@
      ;; the Maxima function named by foo.
      (let ((s0 (nth 0 s)))
        (if (stringp s0)
-         (putprop e s0 'texword)
-         (make-maxima-tex-glue e s0)))) ;; assigns TEX property
+         (progn
+           (when (get e 'texsym) (putprop e (list s0) 'texsym))
+           (putprop e s0 'texword))
+         (make-maxima-tex-glue e s0 (get e 'tex))))) ;; assigns TEX property
 	((eq tx '$matchfix)
 	 (putprop e 'tex-matchfix 'tex)
 	 (cond ((< (length s) 2)
@@ -1193,6 +1205,7 @@
 	((eq tx '$nofix)
 	 (putprop e 'tex-nofix 'tex)
 	 (putprop e s 'texsym)
+	 (when (get e 'texword) (putprop e (nth 0 s) 'texword))
 	 (car s))
 
 	((eq tx '$prefix)
@@ -1200,6 +1213,7 @@
 	 (when (null (get e 'grind))
 	   (putprop e 180 'tex-rbp))
 	 (putprop e s 'texsym)
+	 (when (get e 'texword) (putprop e (nth 0 s) 'texword))
 	 (car s))
 		
 	((eq tx '$infix)
@@ -1208,6 +1222,7 @@
 	   (putprop e 180 'tex-lbp)
 	   (putprop e 180 'tex-rbp))
 	 (putprop e  s 'texsym)
+	 (when (get e 'texword) (putprop e (nth 0 s) 'texword))
 	 (car s))
 
 	((eq tx '$nary)
@@ -1216,6 +1231,7 @@
 	   (putprop e 180 'tex-lbp)
 	   (putprop e 180 'tex-rbp))
 	 (putprop e s 'texsym)
+	 (when (get e 'texword) (putprop e (nth 0 s) 'texword))
 	 (car s))
 
 	((eq tx '$postfix)
@@ -1223,4 +1239,5 @@
 	 (when (null (get e 'grind))
 	   (putprop e 180 'tex-lbp))
 	 (putprop e  s 'texsym)
+	 (when (get e 'texword) (putprop e (nth 0 s) 'texword))
 	 (car s))))

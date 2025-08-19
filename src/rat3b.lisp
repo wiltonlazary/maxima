@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -14,11 +14,6 @@
 
 ;;	THIS IS THE NEW RATIONAL FUNCTION PACKAGE PART 2.
 ;;	IT INCLUDES RATIONAL FUNCTIONS ONLY.
-
-(declare-top (special $algebraic $ratfac $keepfloat $float))
-
-(defmvar $ratwtlvl nil) 
-(defmvar $ratalgdenom t)       ;If T then denominator is rationalized.
 
 (defun ralgp (r) (or (palgp (car r)) (palgp (cdr r))))
 

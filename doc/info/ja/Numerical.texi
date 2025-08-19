@@ -13,7 +13,10 @@
 @code{fft}パッケージは、高速Fourier変換の（数式計算ではなく）数値計算に関する関数を含みます。
 
 @opencatbox
-@category{Fourier transform} @category{Numerical methods} @category{Share packages} @category{Package fft}
+@category{Fourier transform}
+@category{Numerical methods}
+@category{Share packages}
+@category{Package fft}
 @closecatbox
 
 @c end concepts Numerical
@@ -42,11 +45,12 @@ b = r sin(t)
 
 @code{polartorect}は、@code{recttopolar}の逆関数です。
 
-@code{load(fft)}はこの関数をロードします。
+@code{load("fft")}はこの関数をロードします。
 @code{fft}も参照してください。
 
 @opencatbox
-@category{Package fft} @category{Complex variables}
+@category{Package fft}
+@category{Complex variables}
 @closecatbox
 @end deffn
 
@@ -71,11 +75,12 @@ t = atan2(b, a)
 
 @code{recttopolar}は@code{polartorect}の逆関数です。
 
-@code{load(fft)}はこの関数をロードします。
+@code{load("fft")}はこの関数をロードします。
 @code{fft}も参照してください。
 
 @opencatbox
-@category{Package fft} @category{Complex variables}
+@category{Package fft}
+@category{Complex variables}
 @closecatbox
 @end deffn
 
@@ -103,7 +108,7 @@ t = atan2(b, a)
 x[j] = sum(y[k] exp(+2 %i %pi j k / n), k, 0, n - 1)
 @end example
 
-@code{load(fft)}はこの関数をロードします。
+@code{load("fft")}はこの関数をロードします。
 
 @code{fft} (正変換), @code{recttopolar}, @code{polartorect}も参照してください。
 
@@ -112,7 +117,7 @@ x[j] = sum(y[k] exp(+2 %i %pi j k / n), k, 0, n - 1)
 実数データ。
 
 @c ===beg===
-@c load (fft) $
+@c load ("fft") $
 @c fpprintprec : 4 $
 @c L : [1, 2, 3, 4, -1, -2, -3, -4] $
 @c L1 : inverse_fft (L);
@@ -120,7 +125,7 @@ x[j] = sum(y[k] exp(+2 %i %pi j k / n), k, 0, n - 1)
 @c lmax (abs (L2 - L));
 @c ===end===
 @example
-(%i1) load (fft) $
+(%i1) load ("fft") $
 (%i2) fpprintprec : 4 $
 (%i3) L : [1, 2, 3, 4, -1, -2, -3, -4] $
 (%i4) L1 : inverse_fft (L);
@@ -137,7 +142,7 @@ x[j] = sum(y[k] exp(+2 %i %pi j k / n), k, 0, n - 1)
 複素数データ
 
 @c ===beg===
-@c load (fft) $
+@c load ("fft") $
 @c fpprintprec : 4 $
 @c L : [1, 1 + %i, 1 - %i, -1, -1, 1 - %i, 1 + %i, 1] $
 @c L1 : inverse_fft (L);
@@ -145,7 +150,7 @@ x[j] = sum(y[k] exp(+2 %i %pi j k / n), k, 0, n - 1)
 @c lmax (abs (L2 - L));
 @c ===end===
 @example
-(%i1) load (fft) $
+(%i1) load ("fft") $
 (%i2) fpprintprec : 4 $                 
 (%i3) L : [1, 1 + %i, 1 - %i, -1, -1, 1 - %i, 1 + %i, 1] $
 (%i4) L1 : inverse_fft (L);
@@ -216,7 +221,7 @@ a[n/2] = realpart (y[n/2])
 b[n/2] = 0
 @end example
 
-@code{load(fft)}はこの関数をロードします。
+@code{load("fft")}はこの関数をロードします。
 
 @code{inverse_fft} (逆変換), @code{recttopolar}, @code{polartorect}も参照してください。
 
@@ -225,7 +230,7 @@ b[n/2] = 0
 実数データ。
 
 @c ===beg===
-@c load (fft) $
+@c load ("fft") $
 @c fpprintprec : 4 $
 @c L : [1, 2, 3, 4, -1, -2, -3, -4] $
 @c L1 : fft (L);
@@ -233,7 +238,7 @@ b[n/2] = 0
 @c lmax (abs (L2 - L));
 @c ===end===
 @example
-(%i1) load (fft) $
+(%i1) load ("fft") $
 (%i2) fpprintprec : 4 $
 (%i3) L : [1, 2, 3, 4, -1, -2, -3, -4] $
 (%i4) L1 : fft (L);
@@ -250,7 +255,7 @@ b[n/2] = 0
 複素数データ
 
 @c ===beg===
-@c load (fft) $
+@c load ("fft") $
 @c fpprintprec : 4 $
 @c L : [1, 1 + %i, 1 - %i, -1, -1, 1 - %i, 1 + %i, 1] $
 @c L1 : fft (L);
@@ -258,7 +263,7 @@ b[n/2] = 0
 @c lmax (abs (L2 - L));
 @c ===end===
 @example
-(%i1) load (fft) $
+(%i1) load ("fft") $
 (%i2) fpprintprec : 4 $
 (%i3) L : [1, 1 + %i, 1 - %i, -1, -1, 1 - %i, 1 + %i, 1] $
 (%i4) L1 : fft (L);
@@ -276,7 +281,7 @@ b[n/2] = 0
 サインとコサイン係数の計算。
 
 @c ===beg===
-@c load (fft) $
+@c load ("fft") $
 @c fpprintprec : 4 $
 @c L : [1, 2, 3, 4, 5, 6, 7, 8] $
 @c n : length (L) $
@@ -298,7 +303,7 @@ b[n/2] = 0
 @c makelist (float (f (j)), j, 0, n - 1);
 @c ===end===
 @example
-(%i1) load (fft) $
+(%i1) load ("fft") $
 (%i2) fpprintprec : 4 $
 (%i3) L : [1, 2, 3, 4, 5, 6, 7, 8] $
 (%i4) n : length (L) $
@@ -569,7 +574,8 @@ Maximaは@var{expr}もしくは@var{f}を@math{[@var{a}, @var{b}]}上で評価�
 @end example
 
 @opencatbox
-@category{Algebraic equations} @category{Numerical methods}
+@category{Algebraic equations}
+@category{Numerical methods}
 @closecatbox
 
 @end deffn
@@ -589,14 +595,14 @@ Newton法による、@code{@var{expr} = 0}の近似解を返します。
 このように、
 @var{expr}は数に評価される必要はありません。
 
-@code{load(newton1)}はこの関数をロードします。
+@code{load("newton1")}はこの関数をロードします。
 
 @code{realroots}, @code{allroots}, @code{find_root}, @code{mnewton}も参照してください。
 
 例:
 
 @c ===beg===
-@c load (newton1);
+@c load ("newton1");
 @c newton (cos (u), u, 1, 1/100);
 @c ev (cos (u), u = %);
 @c assume (a > 0);
@@ -604,7 +610,7 @@ Newton法による、@code{@var{expr} = 0}の近似解を返します。
 @c ev (x^2 - a^2, x = %);
 @c ===end===
 @example
-(%i1) load (newton1);
+(%i1) load ("newton1");
 (%o1) /usr/share/maxima/5.10.0cvs/share/numeric/newton1.mac
 (%i2) newton (cos (u), u, 1, 1/100);
 (%o2)                   1.570675277161251
@@ -620,7 +626,8 @@ Newton法による、@code{@var{expr} = 0}の近似解を返します。
 @end example
 
 @opencatbox
-@category{Algebraic equations} @category{Numerical methods}
+@category{Algebraic equations}
+@category{Numerical methods}
 @closecatbox
 @end deffn
 
@@ -635,7 +642,9 @@ Newton法による、@code{@var{expr} = 0}の近似解を返します。
 Fourier積分係数を計算する関数や、式の操作のためのいくつかの関数があります。
 
 @opencatbox
-@category{Fourier transform} @category{Share packages} @category{Package fourie}
+@category{Fourier transform}
+@category{Share packages}
+@category{Package fourie}
 @closecatbox
 
 @c -----------------------------------------------------------------------------
@@ -724,7 +733,8 @@ Fourier積分係数を計算する関数や、式の操作のためのいくつ�
 
 @c NEEDS EXAMPLES
 @opencatbox
-@category{Package fourie} @category{Integral calculus}
+@category{Package fourie}
+@category{Integral calculus}
 @closecatbox
 @end deffn
 
@@ -753,7 +763,9 @@ Fourier積分係数を計算する関数や、式の操作のためのいくつ�
 
 @c NEEDS EXAMPLES
 @opencatbox
-@category{Package fourie} @category{Trigonometric functions} @category{Simplification functions}
+@category{Package fourie}
+@category{Trigonometric functions}
+@category{Simplification functions}
 @closecatbox
 @end deffn
 

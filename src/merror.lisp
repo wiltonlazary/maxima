@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -14,14 +14,6 @@
 
 ;;; Macsyma error signalling. 
 ;;; 2:08pm  Tuesday, 30 June 1981 George Carrette.
-
-(defmvar $error `((mlist simp) "No error.")
-  "During an MAXIMA-ERROR break this is bound to a list
-  of the arguments to the call to MAXIMA-ERROR, with the message
-  text in a compact format.")
-
-(defmvar $errormsg 't
-  "If `false' then no maxima-error message is printed!")
 
 (defmfun $error (&rest l)
   "Signals a Maxima user error."
@@ -39,12 +31,12 @@
   this variable may be determined by factors of terminal speed and type.")
 
 (defun error-size (exp)
-  ; RATDISREP the argument in case it's a CRE. Ugh.
-  ; But RATDISREP simplifies its argument, which is a no-no if we got here
+  ; Call SPECREPCHECK on the argument in case it's a specrep. Ugh.
+  ; But this simplifies its argument, which is a no-no if we got here
   ; because some simplification code is complaining, so inhibit simplification. Double ugh.
   (let (($simp nil))
     (declare (special $simp))
-    (setq exp (ratdisrep exp)))
+    (setq exp (specrepcheck exp)))
 
   (if (atom exp)
       0
@@ -75,37 +67,8 @@
 	     (let ((*standard-output* stream))
 	       ($errormsg)))))
 
-(defun merror (sstring &rest l)
-  (declare (special errcatch *mdebug*))
-  (setq $error `((mlist simp) ,sstring ,@ l))
-  (and $errormsg ($errormsg))
-  (cond (*mdebug*
-	 (let ((dispflag t) ret)
-	   (declare (special dispflag))
-	   (format t (intl:gettext " -- an error.  Entering the Maxima debugger.~%~
-                       Enter ':h' for help.~%"))
-	   (progn
-	     (setq ret (break-dbm-loop nil))
-	     (cond ((eql ret :resume)
-		    (break-quit))))))
-	(errcatch  (error 'maxima-$error))
-	(t
-	 (fresh-line *standard-output*)
-	 ($backtrace 3)
-	 (format t (intl:gettext "~& -- an error. To debug this try: debugmode(true);~%"))
-	 (finish-output)
-	 (throw 'macsyma-quit 'maxima-error))))
-
-(defun mwarning (&rest l)
-  (format t "Warning: ~{~a~^ ~}~%" (mapcar #'$sconcat l)))
-
-(defmacro with-$error (&body body)
-  "Let MERROR signal a MAXIMA-$ERROR condition."
-  `(let ((errcatch t)
-	 *mdebug*		       ;let merror signal a lisp error
-	 $errormsg)			;don't print $error
-     (declare (special errcatch *mdebug* $errormsg))
-     ,@body))
+(defvar *merror-signals-$error-p* nil
+  "When T, MERROR will signal a MAXIMA-$ERROR condition.")
 
 ;; Sample:
 ;; (defun h (he)
@@ -113,10 +76,55 @@
 ;; This will signal a MAXIMA-$ERROR condition:
 ;; (with-$error (h '$you))
 
-(defmvar $error_syms '((mlist) $errexp1 $errexp2 $errexp3)
-  "Symbols to bind the too-large `maxima-error' expresssions to")
+(defmacro with-$error (&body body)
+  "Let MERROR signal a MAXIMA-$ERROR condition."
+  `(let ((*merror-signals-$error-p* t))
+     (declare (special *merror-signals-$error-p*))
+     ,@body))
 
-(defun-prop ($error_syms assign) (var val)
+(defun merror (sstring &rest l)
+  (declare (special *quit-on-error*))
+  (setq $error `((mlist simp) ,sstring ,@ l))
+  (cond (*merror-signals-$error-p*
+	 (error 'maxima-$error))
+	((eq *mdebug* '$lisp)
+	 ; Go immediately into the lisp debugger
+	 (let ((*debugger-hook* nil))
+	   (invoke-debugger (make-condition 'maxima-$error))))
+	(*mdebug*
+	 (let ((dispflag t) ret)
+	   (declare (special dispflag))
+	   (when $errormsg
+	     ($errormsg))
+	   (format t (intl:gettext " -- an error.  Entering the Maxima debugger.~%~
+                       Enter ':h' for help.~%"))
+	   (progn
+	     (setq ret (break-dbm-loop nil))
+	     (cond ((eql ret :resume)
+		    (break-quit))))))
+	(errcatch
+	 (when $errormsg
+	   ($errormsg))
+	 (error 'maxima-$error))
+	(t
+	 (let ((*standard-output* *error-output*))
+	 (when $errormsg
+	   ($errormsg))
+	 (fresh-line *standard-output*)
+	 ($backtrace 3)
+	 (format *standard-output* (intl:gettext "~& -- an error. To debug this try: debugmode(true);~%"))
+	 (finish-output *standard-output*)
+         (if *quit-on-error* ($quit 1.))
+	 (throw 'macsyma-quit 'maxima-error)))))
+
+(defun mwarning (&rest l)
+  (format *error-output* "Warning: ~{~a~^ ~}~%" (mapcar #'$sconcat l)))
+
+(defmvar $error_syms '((mlist) $errexp1 $errexp2 $errexp3)
+  "Symbols to bind the too-large `maxima-error' expressions to"
+  :properties ((assign 'assign-symbols)))
+
+(defun assign-symbols (var val)
   (if (not (and ($listp val)
 		(do ((l (cdr val) (cdr l)))
 		    ((null l) (return t))
@@ -168,14 +176,6 @@
 		 )))
     (fresh-line))
   '$done)
-
-(defun read-only-assign (var val)
-  (if munbindp
-      'munbindp
-      (merror (intl:gettext "assignment: attempting to assign read-only variable ~:M the value ~M") var val)))
-
-
-(defprop $error read-only-assign  assign)
 
 ;; RAT-ERROR (function)
 ;;

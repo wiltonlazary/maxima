@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -21,9 +21,6 @@
 ;;; their own arrays.  The algorithm seems to benefit be taking are
 ;;; mre 0.01 times the published values.
 
-(declare-top (special $partswitch $keepfloat $demoivre $listconstvars
-		      $algebraic $ratfac $programmode))
-
 (declare-top (special *logbas* *infin* *are* *mre* *cr* *ci* *sr* *si*
 		      *tr* *ti* *zr* *zi* *n* *nn* *bool*
 		      *conv* *pvr* *pvi* *polysc* *polysc1*))
@@ -33,9 +30,6 @@
 
 (declare-top (special *u* *v* *a* *b* *c* *d* *a1* *a3* *a7* *e* *f* *g* *h*
 		      *szr* *szi* *lzr* *lzi* *nz* *ui* *vi* *s*))
-
-(defmvar $polyfactor nil
-  "When T factor the polynomial over the real or complex numbers.")
 
 (defmfun $allroots (expr)
   (prog (degree *nn* var res $partswitch $keepfloat $demoivre $listconstvars
@@ -170,8 +164,8 @@
 
 (defun cpoly-sl (degree)
   (let ((*logbas* (log 2.0))
-	(*infin* most-positive-flonum)
-	(*are* flonum-epsilon)
+	(*infin* +most-positive-flonum+)
+	(*are* +flonum-epsilon+)
 	(*mre* 0.0)
 	(xx (sqrt 0.5))
 	(yy 0.0)
@@ -474,8 +468,8 @@
 
 (defun rpoly-sl (degree)
   (let ((*logbas* (log 2.0))
-	(*infin* most-positive-flonum)
-	(*are* flonum-epsilon)
+	(*infin* +most-positive-flonum+)
+	(*are* +flonum-epsilon+)
 	(*mre* 0.0)
 	(xx (sqrt 0.5)) ;; sqrt(0.5)
 	(yy 0.0)
@@ -1233,7 +1227,7 @@
   (let ( ;; Log of our floating point base.  (Do we need this much accuracy?)
 	(*logbas* (fplog (intofp 2)))
 	;; "Largest" bfloat.  What should we use?
-	(*infin* (intofp most-positive-flonum))
+	(*infin* (intofp +most-positive-flonum+))
 	;; bfloat epsilon.  2^(-fpprec)
 	(*are* (bf-scale-float (intofp 2) (- fpprec)))
 	(*mre* (intofp 0))
@@ -1328,8 +1322,14 @@
      (cond ((not (= (length var) 1))
 	    (merror (intl:gettext "bfallroots: expected a polynomial in one variable; found variables ~M") `((mlist) ,@var)))
 	   ((setq var (car var))))
-     (setq expr ($rat expr '$%i var)
-	   res (reverse (car (cdddar expr))))
+     ;; It's VERY important to set $bftorat to T so that we preserve
+     ;; the precision of the bfloats when converting them to rationals
+     ;; for $rat.  Might as well turn off printing of the rat messages
+     ;; too.
+     (let (($ratprint nil)
+	   ($bftorat t))
+       (setq expr ($rat expr '$%i var)
+	     res (reverse (car (cdddar expr)))))
      (do ((i (- (length res)
 		(length (caddar expr)))
 	     (1- i)))
@@ -1466,7 +1466,7 @@
 
 (defun bf-rpoly-sl (degree)
   (let ((*logbas* (fplog (intofp 2)))
-	(*infin* (intofp most-positive-flonum))
+	(*infin* (intofp +most-positive-flonum+))
 	(*are* (bf-scale-float (intofp 2) (- fpprec)))
 	(*mre* (intofp 0))
 	(xx (fproot bfhalf 2))

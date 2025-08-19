@@ -141,7 +141,8 @@ Maximaは組み込み数学関数による浮動小数点演算を整理とみ�
 @end example
 
 @opencatbox
-@category{Evaluation} @category{Operators}
+@category{Evaluation}
+@category{Operators}
 @closecatbox
 @end deffn
 
@@ -328,13 +329,10 @@ Maximaは組み込み数学関数による浮動小数点演算を整理とみ�
 @end example
 
 @opencatbox
-@category{Evaluation} @category{Operators}
+@category{Evaluation}
+@category{Operators}
 @closecatbox
 @end deffn
-
-@c end concepts Command Line
-@node Functions and Variables for Command Line,  , Introduction to Command Line, Command Line
-@section Functions and Variables for Command Line
 
 @c NEEDS WORK, ESPECIALLY EXAMPLES
 @deffn {関数} alias (@var{new_name_1}, @var{old_name_1}, ..., @var{new_name_n}, @var{old_name_n})
@@ -648,7 +646,8 @@ Solution
 @end example
 
 @opencatbox
-@category{Evaluation flags} @category{Simplification flags and variables}
+@category{Evaluation flags}
+@category{Simplification flags and variables}
 @closecatbox
 @end defvr
 
@@ -795,7 +794,8 @@ Solution
 @mref{noun}, @mref{nounify}, @code{verb}, @mref{verbify}も参照してください。
 
 @opencatbox
-@category{Evaluation flags} @category{Nouns and verbs}
+@category{Evaluation flags}
+@category{Nouns and verbs}
 @closecatbox
 @end defvr
 

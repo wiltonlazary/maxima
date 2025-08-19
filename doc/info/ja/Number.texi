@@ -57,7 +57,8 @@
 @var{n}は戻り値の小数点以下の桁数です。
 
 @opencatbox
-@category{Number theory} @category{Numerical evaluation}
+@category{Number theory}
+@category{Numerical evaluation}
 @closecatbox
 @end deffn
 
@@ -89,7 +90,8 @@ $$\zeta \left(s,h\right) = \sum_{k=0}^\infty {1 \over \left(k+h\right)^{s}}$$
 @code{load ("bffac")}はこの関数をロードします。
 
 @opencatbox
-@category{Number theory} @category{Numerical evaluation}
+@category{Number theory}
+@category{Numerical evaluation}
 @closecatbox
 @end deffn
 
@@ -439,12 +441,12 @@ Pollardのロー法、楕円曲線法です。
 @code{igcdex}はユークリッドのアルゴリズムを実装します。
 @mrefdot{gcdex}も参照してください。
 
-コマンド @code{load(gcdex)}はこの関数をロードします。
+コマンド @code{load("gcdex")}はこの関数をロードします。
 
 例:
 
 @example
-(%i1) load(gcdex)$
+(%i1) load("gcdex")$
 
 (%i2) igcdex(30,18);
 (%o2)                      [- 1, 2, 6]
@@ -661,12 +663,12 @@ Graham, Knuth, Patashnik著の「コンピュータの数学」の3.4節を参�
 @var{n}は合成数であり、
 もし@code{true}を返すなら、@var{n}は非常に高い確立で素数です。
 
-341550071728321より小さな@var{n}に対して、
+3317044064679887385961981より小さな@var{n}に対して、
 Miller-Rabinのテストの決定的バージョンが使われます。
 もし@code{primep (@var{n})}が@code{true}を返すなら、
 @var{n}は素数です。
 
-341550071728321よりの大きな@var{n}に対して、
+3317044064679887385961981よりの大きな@var{n}に対して、
 @code{primep}は、
 @code{primep_number_of_tests}個のMiller-Rabinの疑似素数テストと
 1つのLucasの疑似素数テストを使います。
@@ -677,7 +679,8 @@ Miller-Rabinのテストの決定的バージョンが使われます。
 10^-15よりもはるかに小さいです。
 
 @opencatbox
-@category{Predicate functions} @category{Number theory}
+@category{Predicate functions}
+@category{Number theory}
 @closecatbox
 @end deffn
 
@@ -690,7 +693,8 @@ Miller-Rabinのテストの決定的バージョンが使われます。
 
 
 @opencatbox
-@category{Predicate functions} @category{Number theory}
+@category{Predicate functions}
+@category{Number theory}
 @closecatbox
 @end defvr
 

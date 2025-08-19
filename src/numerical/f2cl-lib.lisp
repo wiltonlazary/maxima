@@ -9,8 +9,7 @@
   "$Id: macros.l,v 3fe93de3be82 2012/05/06 02:17:14 toy $")
 
 (eval-when
-    #+gcl (compile load eval)
-    #-gcl (:compile-toplevel :load-toplevel :execute)
+    (:compile-toplevel :load-toplevel :execute)
     (proclaim '(special *verbose*)))
 ;;----------------------------------------------------------------------------
 (defvar *check-array-bounds* nil
@@ -340,8 +339,7 @@ is not included")
 
 ;; macro for a lisp equivalent of Fortran assigned GOTOs
 (eval-when
-    #+gcl (compile load eval)
-    #-gcl (:load-toplevel :compile-toplevel :execute)
+    (:load-toplevel :compile-toplevel :execute)
 (defun make-label (n) 
   (read-from-string (concatenate 'string (symbol-name :label) (princ-to-string n))))
 
@@ -693,19 +691,19 @@ is not included")
 ;; Should we make these macros that expand directly to the appropriate
 ;; max?
 (defun max0 (x y &rest z)
-  #-gcl(declare (integer x y))
+  (declare (integer x y))
   (apply #'max x y z))
 (defun amax1 (x y &rest z)
-  #-gcl(declare (single-float x y))
+  (declare (single-float x y))
   (apply #'max x y z))
 (defun dmax1 (x y &rest z)
-  #-gcl(declare (double-float x y))
+  (declare (double-float x y))
   (apply #'max x y z))
 (defun max1 (x y &rest z)
-  #-gcl(declare (single-float x y))
+  (declare (single-float x y))
   (int (apply #'max x y z)))
 (defun amax0 (x y &rest z)
-  #-gcl(declare (type integer4 x y))
+  (declare (type integer4 x y))
   (float (apply #'max x y z) 1f0))
 
 (defun min0 (x y &rest z)
@@ -906,12 +904,13 @@ is not included")
 (defun datan (x)
   (declare (type double-float x))
   (atan x))
-(defun atan2 (x y)
-  (declare (type single-float x))
-  (atan x y))
-(defun datan2 (x y)
+;; atan2 is the Fortran77 generic name, so it can take any float arg.
+(defun atan2 (y x)
+  (declare (type float y x))
+  (atan y x))
+(defun datan2 (y x)
   (declare (type double-float x y))
-  (atan x y))
+  (atan y x))
 
 (defun dsinh (x)
   (declare (type double-float x))
@@ -960,12 +959,7 @@ is not included")
    
 ;; Map Fortran logical unit numbers to Lisp streams
 
-#-gcl
 (defparameter *lun-hash*
-  (make-hash-table))
-
-#+gcl
-(defvar *lun-hash*
   (make-hash-table))
 
 (defun lun->stream (lun &optional readp)
@@ -1065,7 +1059,6 @@ causing all pending operations to be flushed"
 	,(if err `(unless ,result (go ,(f2cl-lib::make-label err))))
 	,(if iostat `(setf ,iostat (if ,result 0 1))))))
 
-#-gcl
 (declaim (ftype (function (t) stream) lun->stream))
 
 (defmacro fformat (dest-lun format-cilist &rest args)
@@ -1359,10 +1352,10 @@ causing all pending operations to be flushed"
   (ecase i
     (1 least-positive-normalized-double-float)
     (2 most-positive-double-float)
-    (3 #-(or gcl ecl) double-float-epsilon
-       #+(or gcl ecl) (scale-float (float #X10000000000001 1d0) -105))
-    (4 (scale-float #-(or gcl ecl) double-float-epsilon
-		    #+(or gcl ecl) (scale-float (float #X10000000000001 1d0) -105)
+    (3 #-ecl double-float-epsilon
+       #+ecl (scale-float (float #X10000000000001 1d0) -105))
+    (4 (scale-float #-ecl double-float-epsilon
+		    #+ecl (scale-float (float #X10000000000001 1d0) -105)
 		    1))
     (5 (log (float (float-radix 1d0) 1d0) 10d0))))
 
@@ -1581,7 +1574,7 @@ causing all pending operations to be flushed"
 ;;; Revision 1.113  2010/02/23 00:59:12  rtoy
 ;;; Support the Fortran capability of passing an array of one type
 ;;; to a routine expecting a different type.  Currently only supports REAL
-;;; and COMPLEX arrays (and their double precison versions).
+;;; and COMPLEX arrays (and their double precision versions).
 ;;;
 ;;; NOTES:
 ;;; o Update
@@ -1659,7 +1652,7 @@ causing all pending operations to be flushed"
 ;;; Oops.  Forgot one place to conditionalize on gcl.
 ;;;
 ;;; Revision 1.103  2008/08/21 20:16:49  rtoy
-;;; Gcl doesn' like ~/ format specifier, so rearrange things so we don't
+;;; Gcl does not like ~/ format specifier, so rearrange things so we don't
 ;;; use it.  (Should we just do the same for every one?)
 ;;;
 ;;; Revision 1.102  2008/03/26 13:19:52  rtoy
@@ -1814,7 +1807,7 @@ causing all pending operations to be flushed"
 ;;;   left.
 ;;;
 ;;; Revision 1.81  2007/09/23 20:51:43  rtoy
-;;; Previous checkin changed how character strings are initialized.
+;;; Previous checking changed how character strings are initialized.
 ;;; Modify code accordingly.  (This needs to be rethought and made less
 ;;; fragile.)
 ;;;
@@ -2125,7 +2118,7 @@ causing all pending operations to be flushed"
 ;;; Add a version of I1MACH.
 ;;;
 ;;; Revision 1.32  2001/04/26 17:49:19  rtoy
-;;; o SIGN and DIM are Fortran generic instrinsics.  Make it so.
+;;; o SIGN and DIM are Fortran generic intrinsics.  Make it so.
 ;;; o Added D1MACH and R1MACH because they're very common in Fortran
 ;;;   libraries.
 ;;;
@@ -2157,8 +2150,8 @@ causing all pending operations to be flushed"
 ;;; o Declaim most of the intrinsics as inline so we don't have an
 ;;;   additional function call for simple things.
 ;;; o Add some compiler macros for Fortran max/min functions to call the
-;;;   Lisp max/min functions withouth using #'apply.
-;;; o Try to declare the args to functions with branchs appropriately,
+;;;   Lisp max/min functions without using #'apply.
+;;; o Try to declare the args to functions with branches appropriately,
 ;;;   even in the face of signed zeroes.
 ;;;
 ;;; Revision 1.25  2000/07/28 22:10:05  rtoy

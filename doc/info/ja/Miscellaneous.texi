@@ -167,7 +167,8 @@ Lisp内部整数は、使われた後1だけ増分されます。
 @code{infolists}で陽に言及されたもの以外の任意のプロパティ、を持つアトムです。
 
 @opencatbox
-@category{Declarations and inferences} @category{Global variables}
+@category{Declarations and inferences}
+@category{Global variables}
 @closecatbox
 @end defvr
 
@@ -380,7 +381,7 @@ Lisp内部整数は、使われた後1だけ増分されます。
 クロス積の数値的分母因子のおまけのステップを実行します。
 これは、きれいな形式と、いくつかの相殺を認識する可能性を生みます。
 
-@code{load(rncomb)}はこの関数をロードします。
+@code{load("rncomb")}はこの関数をロードします。
 
 @opencatbox
 @category{Expressions}
@@ -400,7 +401,9 @@ Lisp内部整数は、使われた後1だけ増分されます。
 @code{true}を返します。
 
 @opencatbox
-@category{Predicate functions} @category{Vectors} @category{Matrices}
+@category{Predicate functions}
+@category{Vectors}
+@category{Matrices}
 @closecatbox
 @end deffn
 
@@ -449,6 +452,7 @@ Warning - you are redefining the Macsyma function legendre_p
 @end example
 
 @opencatbox
-@category{Function definition} @category{File input}
+@category{Function definition}
+@category{File input}
 @closecatbox
 @end deffn

@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -89,17 +89,17 @@
 ;;; we must send down an expression to PART1 which when evaluated has
 ;;; the proper environment for the compiled-away variable names in the
 ;;; environment of the calling function. 
-;;; It is possible to get unbelivebly strange results from the order of
+;;; It is possible to get unbelievably strange results from the order of
 ;;; evaluation of the arguments to $SUBSTPART, these crocks shall not
 ;;; be supported.
 ;;; The PIECE feature is not as often used as say,
 ;;; SUBSTPART("*",EXP,0) is.
 
 (def%tr $substpart (form)
-  (substpart-translation form t nil '$inflag))
+  (substpart-translation form t nil '$inflag '$substpart))
 
 (def%tr $substinpart (form)
-  (substpart-translation form t nil t))
+  (substpart-translation form t nil t '$substinpart))
 
 (defun for-eval-then-mquote-simp-argl (l)
   ;;       (MAPCAR #'(LAMBDA (U) ;;; consing not important here.
@@ -112,7 +112,7 @@
    (push `(list '(mquote simp) ,(pop l)) v)
    (go loop)))
 
-(defun  substpart-translation (form flag1 flag2 flag3)
+(defun substpart-translation (form flag1 flag2 flag3 fn)
   (let* ((subst-item (dtranslate (cadr form)))
 	 (freevars (free-lisp-vars subst-item))
 	 (argl (tr-args (cddr form))))
@@ -127,7 +127,7 @@
 		      (list  ,@(for-eval-then-mquote-simp-argl
 				(cons subst-item argl)))
 
-		      ,flag1 ,flag2 ,flag3))))
+		      ,flag1 ,flag2 ,flag3 ',fn))))
 	  (t
 	   (setq freevars (tbound-free-vars freevars))
 	   (side-effect-free-check (cadr freevars) (cadr form))
@@ -136,44 +136,21 @@
 				   ,(delete '$piece (car freevars) :test #'equal)
 				   ($piece) ,subst-item)
 				  ,@(for-eval-then-mquote-simp-argl argl))
-		      ,flag1 ,flag2 ,flag3)))))))
-
-;;; This is could be done better on the LISPM
+		      ,flag1 ,flag2 ,flag3 ',fn)))))))
 
 (def%tr $errcatch (form)
-  (setq form (translate `((mprogn) ,@(cdr form))))
-  `(,(car form) . ((lambda (errcatch ret)
-		     (declare (special errcatch))
-		     ;; Very important to declare errcatch special
-		     ;; here because merror uses it to figure out if
-		     ;; someone is catching an error so it can be
-		     ;; signaled in a way that we can catch.
-		     (cond ((null (setq ret
-					(errset ,(cdr form))))
-			    (errlfun1 errcatch)))
-		     (cons '(mlist) ret))
-		   (cons bindlist loclist) nil)))
-
-
-;;; The MODE of a CATCH could either be the MODE of the last of the PROGN
-;;; or the mode of the THROW. The THROW may be hard to find, so this goes
-;;; on the assumption that the mode of the PROGN is enough to tell.
+  (destructuring-bind (mode . body) (translate `((mprogn) ,@(cdr form)))
+    (declare (ignore mode))
+    (cons '$any `(cons '(mlist) (errcatch ,body)))))
 
 (def%tr $catch (form)
-  (destructuring-let (((mode . body) (translate `((mprogn) . ,(cdr form)))))
-    `(,mode . ((lambda (mcatch)
-                 (prog1
-                   (catch 'mcatch ,body)
-                   (errlfun1 mcatch)))
-               (cons bindlist loclist)))))
+  (destructuring-bind (mode . body) (translate `((mprogn) . ,(cdr form)))
+    (declare (ignore mode))
+    (cons '$any `(mcatch ,body))))
 
 (def%tr $throw (form)
-  (destructuring-let (((mode . exp) (translate (cadr form))))
-    `(,mode . ((lambda (x)
-		 (when (null mcatch)
-		   (merror (intl:gettext "throw: not within 'catch'; expression: ~M") x))
-		 (throw 'mcatch x))
-	       ,exp))))
+  (destructuring-bind (mode . body) (translate (cadr form))
+    (cons mode `($throw ,body))))
 
 ;;; Makelist is a very sorry FSUBR. All these FSUBRS are just to avoid
 ;;; writing LAMBDA. But lots of users use MAKELIST now. 
@@ -274,7 +251,7 @@
     (t
      (tr-format (intl:gettext "makelist: maximum 5 arguments allowed; found: ~M.~%makelist: to create a list with sublists, use nested makelist commands.~%")
                 (length form))
-     (setq tr-abort t)
+     (tr-abort)
      '($any . '$**error**))))
 
 (def%tr $kill (form)
@@ -335,7 +312,8 @@
 ;;; The following special forms do not call the evaluator.
 
 (def%tr $alias (form)
-  `($any . (meval ',form)))  
+  (punt-to-meval form))
+
 ;;most of these will lose in common since a local variable will not
 ;;have its value accessible to the mfexpr*.  They should
 ;;be redone as macros with any necessary info passed along.
@@ -344,6 +322,8 @@
 (def%tr $batchload $alias)
 (def%tr $closefile $alias)
 (def%tr $compfile $alias)
+(def%tr $declare $alias)
+(def%tr $defstruct $alias)
 (def%tr $demo $alias)
 (def%tr $dependencies $alias)
 (def%tr $describe $alias)
@@ -354,6 +334,7 @@
 (def%tr $labels $alias)
 (def%tr $loadarrays $alias)
 (def%tr $loadfile $alias)
+(def%tr $new $alias)
 (def%tr $numerval $alias)
 (def%tr $options $alias)
 (def%tr $ordergreat $alias)

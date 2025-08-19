@@ -14,7 +14,7 @@ Library General Public License for more details.
 
 You should have received a copy of the GNU Library General Public
 License along with this library; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 Dan Stanger dan.stanger@ieee.org
 
@@ -66,7 +66,7 @@ C	MT(I) HAS ALL ZERO ELEMENTS INITIALLY */
 /* pt_name is the symbolic name of the circuit element, and if a element
    is not given a value, then it's value is its name.  maybe there should
    be a flag, to assign symbolic names even if there are numeric values,
-   to be more compatable with spice.
+   to be more compatible with spice.
    pt_aJT is the element type in the order of the pt_A array */
     block([i:0],
 	for l in cl do (i:i+1,

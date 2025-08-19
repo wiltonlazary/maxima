@@ -57,7 +57,8 @@
 
 (defun $openw_binary (file)
    (open
-      file
+      #+sbcl (sb-ext:native-namestring file)
+      #-sbcl file
       :direction :output
       :if-exists :supersede
       :element-type '(unsigned-byte 8)
@@ -65,13 +66,17 @@
 
 (defun $opena_binary (file)
    (open
-      file
+      #+sbcl (sb-ext:native-namestring file)
+      #-sbcl file
       :direction :output
       :if-exists :append
       :element-type '(unsigned-byte 8)
       :if-does-not-exist :create))
 
-(defun $openr_binary (file) (open file :element-type '(unsigned-byte 8)))
+(defun $openr_binary (file) (open
+			     #+sbcl (sb-ext:native-namestring file)
+			     #-sbcl file
+			     :element-type '(unsigned-byte 8)))
 
 ;; -------------------- read functions --------------------
 
@@ -87,8 +92,11 @@
        (L ($read_list stream-or-filename sep-ch-flag (* nrow ncol))))
       ;; COPYING DATA HERE !!
       (fill-matrix-from-list L M nrow ncol))
-    (let ((sep-ch-flag (car args)))
-      `(($matrix) ,@(cdr ($read_nested_list stream-or-filename sep-ch-flag))))))
+    (let*
+      ((sep-ch-flag (car args))
+       (rows-list (cdr ($read_nested_list stream-or-filename sep-ch-flag)))
+       (rows-list-nonempty (remove-if #'(lambda (x) (= ($length x) 0)) rows-list)))
+      `(($matrix) ,@rows-list-nonempty))))
 
 (defun $read_binary_matrix (stream-or-filename M)
   (if ($matrixp M)
@@ -116,11 +124,11 @@
     (let
       ((A (car args))
        (sep-ch-flag (and (cdr args) (cadr args)))
-       (mode (or (and (cddr args) (caddr args)) 'text)))
+       (mode 'text))
       (read-into-existing-array stream-or-filename A sep-ch-flag mode))
     (let
       ((sep-ch-flag (and args (car args)))
-       (mode (or (and (cdr args) (cadr args)) 'text)))
+       (mode 'text))
       (read-and-return-new-array stream-or-filename sep-ch-flag mode))))
 
 (defun $read_binary_array (file-name &rest args)
@@ -142,7 +150,9 @@
     (read-into-existing-array-size-known-from-stream stream-or-filename A sep-ch-flag mode n)
     (let ((file-name (require-string stream-or-filename)))
       (with-open-file
-        (in file-name
+        (in 
+            #+sbcl (sb-ext:native-namestring file-name)
+            #-sbcl file-name
             :if-does-not-exist nil
             :element-type (if (eq mode 'text) 'character '(unsigned-byte 8)))
         (if (not (null in))
@@ -151,6 +161,7 @@
 
 (defun read-into-existing-array-size-known-from-stream (in A sep-ch-flag mode n)
   (let (x (sep-ch (get-input-sep-ch sep-ch-flag in)))
+    (if (eq mode 'text) (reset-for-parse-next-element))
     (dotimes (i n)
       (if (eq (setq x (if (eq mode 'text) (parse-next-element in sep-ch) (read-float-64 in))) 'eof)
         (return A))
@@ -158,6 +169,7 @@
 
 (defun read-into-existing-array-size-unknown-from-stream (in A sep-ch mode)
   (let (x)
+    (if (eq mode 'text) (reset-for-parse-next-element))
     (loop
       (if (eq (setq x (if (eq mode 'text) (parse-next-element in sep-ch) (read-float-64 in))) 'eof)
         (return A))
@@ -168,7 +180,9 @@
     (read-and-return-new-array-from-stream stream-or-filename sep-ch-flag mode)
     (let ((file-name (require-string stream-or-filename)))
       (with-open-file
-        (in file-name
+        (in
+            #+sbcl (sb-ext:native-namestring file-name)
+            #-sbcl file-name
             :if-does-not-exist nil
             :element-type (if (eq mode 'text) 'character '(unsigned-byte 8)))
         (if (not (null in))
@@ -186,7 +200,10 @@
   (if (streamp stream-or-filename)
     (read-hashed-array-from-stream stream-or-filename A sep-ch-flag)
     (let ((file-name (require-string stream-or-filename)))
-      (with-open-file (in file-name :if-does-not-exist nil)
+      (with-open-file (in
+		       #+sbcl (sb-ext:native-namestring file-name)
+		       #-sbcl file-name
+		       :if-does-not-exist nil)
         (if (not (null in))
           (read-hashed-array-from-stream in A sep-ch-flag)
           (merror "read_hashed_array no such file `~a'" file-name))))))
@@ -211,7 +228,10 @@
   (if (streamp stream-or-filename)
     (read-nested-list-from-stream stream-or-filename sep-ch-flag)
     (let ((file-name (require-string stream-or-filename)))
-      (with-open-file (in file-name :if-does-not-exist nil)
+      (with-open-file (in
+		       #+sbcl (sb-ext:native-namestring file-name)
+		       #-sbcl file-name
+		       :if-does-not-exist nil)
         (if (not (null in))
           (read-nested-list-from-stream in sep-ch-flag)
           (merror "read_nested_list: no such file `~a'" file-name))))))
@@ -242,7 +262,9 @@
     (read-into-existing-list-from-stream stream-or-filename L sep-ch-flag mode n)
     (let ((file-name (require-string stream-or-filename)))
       (with-open-file
-        (in file-name
+        (in 
+            #+sbcl (sb-ext:native-namestring file-name)
+            #-sbcl file-name
             :if-does-not-exist nil
             :element-type (if (eq mode 'text) 'character '(unsigned-byte 8)))
         (if (not (null in))
@@ -251,6 +273,7 @@
 
 (defun read-into-existing-list-from-stream (in L sep-ch-flag mode n)
   (let (x (sep-ch (if (eq mode 'text) (get-input-sep-ch sep-ch-flag in))))
+    (if (eq mode 'text) (reset-for-parse-next-element))
     (dotimes (i n)
       (if (eq (setq x (if (eq mode 'text) (parse-next-element in sep-ch) (read-float-64 in))) 'eof)
         (return))
@@ -262,7 +285,9 @@
     (read-list-from-stream stream-or-filename sep-ch-flag mode n)
     (let ((file-name (require-string stream-or-filename)))
       (with-open-file
-        (in file-name
+       (in
+            #+sbcl (sb-ext:native-namestring file-name)
+            #-sbcl file-name
             :if-does-not-exist nil
             :element-type (if (eq mode 'text) 'character '(unsigned-byte 8)))
         (if (not (null in))
@@ -271,6 +296,7 @@
 
 (defun read-list-from-stream (in sep-ch-flag mode n)
   (let (A x (sep-ch (if (eq mode 'text) (get-input-sep-ch sep-ch-flag in))))
+    (if (eq mode 'text) (reset-for-parse-next-element))
     (loop
       (if
         (or
@@ -295,7 +321,7 @@
   (setq s (concatenate 'string s " "))
 
   (with-input-from-string (*parse-stream* s)
-    (let ((token) (L) (LL) (sign))
+    (let ((token) (L) (LL) (sign) (found-token) (found-sep))
       (loop
         (setq token (scan-one-token-g t 'eof))
         (cond
@@ -307,7 +333,11 @@
              ((eql sep-ch #\space)
               (return (cons '(mlist) LL)))
              (t
-               (return (cons '(mlist) (appropriate-append L LL)))))))
+               (if (or found-token found-sep)
+                 (return (cons '(mlist) (appropriate-append L LL)))
+                 ;; We reached EOF without encountering a token or a separator;
+                 ;; this is an empty line.
+                 (return '((mlist))))))))
         (cond
           ((or (eq token '$-) (eq token '$+))
            (setq sign (cond ((eq token '$-) -1) (t 1))))
@@ -318,13 +348,16 @@
                (setq sign nil)))
             (cond
               ((eql sep-ch #\space)
+               (setq found-token token)
                (setq LL (append LL (list token))))
               (t
                 (cond
                   ((eql token sep-ch)
+                   (setq found-sep token)
                    (setq L (appropriate-append L LL))
                    (setq LL nil))
                   (t
+                    (setq found-token token)
                     (setq LL (append LL (list token)))))))))))))
 
 (defun appropriate-append (L LL)
@@ -343,39 +376,62 @@
 
 ;; ---- read one element
 
-(let (pushback-sep-ch)
+(defvar newline-symbol (intern (coerce '(#\$ #\newline) 'string)))
+(defvar whitespace-sans-newline (remove #\newline *whitespace-chars*))
+
+(let (prev-token-sep-ch sign start-of-line)
+
+  (defun reset-for-parse-next-element ()
+    (setq prev-token-sep-ch nil)
+    (setq sign 1)
+    (setq start-of-line t))
+
   (defun parse-next-element (in sep-ch)
     (let
       ((*parse-stream* in)
-       (sign 1)
-       (initial-pos (file-position in))
-       token
-       found-sep-ch)
+       ;; Treat newline as a token, so leading/trailing separators can be detected,
+       ;; when separator is anything other than a space.
+       (*whitespace-chars* (if (eql sep-ch #\space) *whitespace-chars* whitespace-sans-newline))
+       token)
       (loop
-        (if pushback-sep-ch
-          (setq token pushback-sep-ch pushback-sep-ch nil)
-          (setq token (scan-one-token-g t 'eof)))
+        (setq token (scan-one-token-g t 'eof))
         (cond
+          ((eq token newline-symbol)
+           (setq start-of-line t)
+           (when prev-token-sep-ch
+             (setq prev-token-sep-ch nil)
+             (return nil)))
           ((eq token 'eof)
-           (if found-sep-ch
-             (return nil)
-             (return 'eof)))
-          ((and (eql token sep-ch) (not (eql sep-ch #\space)))
-           (if (or found-sep-ch (eql initial-pos 0))
+           (if prev-token-sep-ch
              (progn
-               (setq pushback-sep-ch token)
+               (setq prev-token-sep-ch nil)
                (return nil))
-             (setq found-sep-ch token)))
+             (return 'eof)))
+          ((and (eql token sep-ch) (not (eql sep-ch #\space))) ;; TEST FOR #\SPACE IS REDUNDANT
+           ;; We have a separator token.
+           ;; If the preceding token was also a separator,
+           ;; or we're at the start of a line, return NIL.
+           (if (or prev-token-sep-ch start-of-line)
+             (progn
+               (setq start-of-line nil)
+               (return nil))
+             (setq prev-token-sep-ch token)))
+          ((prog nil (setq start-of-line nil)))
+          ((prog nil (setq prev-token-sep-ch nil)))
           ((member token '($- $+))
            (setq sign (* sign (if (eq token '$-) -1 1))))
           (t
-            (return (m* sign token))))))))
+            (let ((return-value (m* sign token)))
+              (setq sign 1)
+              (return return-value))))))))
 
 
 ;; -------------------- write functions -------------------
 
 (defun open-file-appropriately (file-name mode)
-  (open file-name
+  (open
+        #+sbcl (sb-ext:native-namestring file-name)
+        #-sbcl file-name
         :direction :output
         :element-type (if (eq mode 'text) 'character '(unsigned-byte 8))
         :if-exists (if (or (eq $file_output_append '$true) (eq $file_output_append t)) :append :supersede)
@@ -452,7 +508,9 @@
 
 (defun write-list-lowlevel (L out sep-ch mode)
   (setq sep-ch (cond ((symbolp sep-ch) (cadr (exploden sep-ch))) (t sep-ch)))
-  (cond ((not (null L))
+  (cond
+    ((null L) (terpri out))
+    (t
       (loop 
         (if (not L) (return))
         (let ((e (pop L)))
@@ -490,6 +548,20 @@
     ((eq sep-ch-flag '$pipe) '$\|)
     ((eq sep-ch-flag '$semicolon) '$\;)
 
+    ((stringp sep-ch-flag)
+     (if (/= (length sep-ch-flag) 1)
+       (progn (format t "numericalio: unrecognized separator; assume ``space''.~%")
+              #\space)
+       (let ((would-be-sep-ch (aref sep-ch-flag 0)))
+         (cond
+           ((eq would-be-sep-ch #\space) #\space)
+           ((eq would-be-sep-ch #\tab) #\tab)
+           ((eq would-be-sep-ch #\,) '$\,)
+           ((eq would-be-sep-ch #\|) '$\|)
+           ((eq would-be-sep-ch #\;) '$\;)
+           (t
+             (format t "numericalio: separator flag ~S not recognized; assume ``space''.~%" would-be-sep-ch)
+             #\space)))))
     ((null sep-ch-flag)
       (cond
         ((ignore-errors (equal (pathname-type (truename my-stream)) "csv"))

@@ -226,6 +226,45 @@ a newline."),
 
     tex ('("All together now" : <<fooprefix foo foonary foo foonary foonofix foopostfix>>)),
 
+    tex_text ("\\subsection*{{\\tt texput} with output function}"),
+
+    tex_text ("Derivatives before {\\tt texput}:"),
+
+    tex ('diff (y(x), x, 3) + 'diff (y(x), x, 2) + 'diff (y(x), x) +  y(x) + a = 0),
+    tex ('diff (y(t), t, 3) + 'diff (y(t), t, 2) + 'diff (y(t), t) +  y(t) + a = 0),
+    tex ('diff (f(x, t), x) + 'diff(f(x, t), t) = c),
+
+    texput (nounify (diff), lambda ([e], if not mapatom (first (e)) and length (args (first (e))) = 1 then if third (e) = 1 then sconcat (tex1 (op (first (e))), "'\\left(", tex1 (first (args (first (e)))), "\\right)"))),
+    texput (nounify (diff), lambda ([e], if second (e) = 't and third (e) =1 then sconcat ("\\dot ", tex1 (first (e))) elseif second (e) = 't and third (e) = 2 then sconcat ("\\ddot ", tex1 (first (e))))),
+
+    tex_text ("Derivatives after {\\tt texput}:"),
+
+    tex ('diff (y(x), x, 3) + 'diff (y(x), x, 2) + 'diff (y(x), x) +  y(x) + a = 0),
+    tex ('diff (y(t), t, 3) + 'diff (y(t), t, 2) + 'diff (y(t), t) +  y(t) + a = 0),
+    tex ('diff (f(x, t), x) + 'diff(f(x, t), t) = c),
+
+    tex (1/(1 + 'diff (u, t))),
+    tex (1/(1 + ('diff (u, t))^n)),
+    /* this next one should use only default typesetting for diff */
+    tex ('integrate ('diff (g(a, b), b) * 'diff (h(c - a, b), a), b, minf, inf)),
+
+    tex_text ("Additional {\\tt texput} examples --- no previous \\TeX\\ function:"),
+
+    texput (baz, lambda ([e], if mapatom (first (e)) then sconcat ("\\hat{", tex1 (first (e)), "}"))),
+
+    tex (%pi + %phi / baz (%gamma[2])),
+    tex (%pi + %phi / baz (3 + %gamma[2])),
+
+    tex_text ("Additional {\\tt texput} examples --- general and special cases:"),
+
+    /* general case is a catch-all -- no conditional */
+    texput (quux, lambda ([e], sconcat ("\\mathrm{", string (op (e)), "}", tex1 (subst (quux = ?mprogn, e))))),
+    /* special case applies only to mapatom argument */
+    texput (quux, lambda ([e], if mapatom (first (e)) then sconcat ("\\hat{", tex1 (first (e)), "}"))),
+
+    tex (%pi + %phi / quux (%gamma[2])),
+    tex (%pi + %phi / quux (3 + %gamma[2])),
+
     tex_text ("\\subsection*{Miscellany}"),
 
     tex_text ("Next few should all be the same."),
@@ -432,16 +471,20 @@ with_stdout (s,
     print ("Typesetting exponents."),
 
     tex(sin(x)^2),
+    tex(sec(x)^2),
     tex(f(x)^2),
 
     tex(sin(x)^n),
+    tex(sec(x)^n),
     tex(f(x)^n),
 
     tex(sin(x)^-2),
+    tex(sec(x)^-2),
     tex(f(x)^-2),
 
     simp:false,
     tex(sin(x)^-2),
+    tex(sec(x)^-2),
     tex(f(x)^-2),
     simp:true,
 
@@ -449,6 +492,34 @@ with_stdout (s,
     tex('sum(f(x),x,0,n)^4),
     tex('integrate(f(x)^n,x,0,inf)^4),
     tex('sum(f(x)^x,x,0,n)^4),
+
+    print ("Typesetting conjugates."),
+
+    simp: false,
+
+    declare ([x, y, z], complex),
+    declare ([a, b, c], real),
+
+    tex (conjugate (x)),
+    tex (conjugate (conjugate (x))),
+    tex (conjugate (x)^2),
+    tex (conjugate (x)^(k + 2)),
+    tex (conjugate (x^2)),
+    tex (conjugate (x + y)),
+    tex (conjugate (x + y)^m),
+    tex (conjugate (x*y)),
+    tex (conjugate (x*y)^n),
+    tex (conjugate (x/y)),
+    tex (conjugate (x/y)^k),
+    tex (conjugate ((-1)^%i)),
+    tex (conjugate (sin (x))),
+    tex (sin (conjugate (x))),
+    tex (conjugate (sin (x))^n),
+    tex (sin (conjugate (x))^n),
+    tex (conjugate (sin (x)^n)),
+    tex (sin (conjugate (x)^n)),
+
+    simp: true,
 
     print ("The end!"),
     print ("\\end{document}"));

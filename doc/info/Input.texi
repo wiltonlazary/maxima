@@ -46,7 +46,7 @@ Examples:
 (%o5)                        xyz + 1
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Syntax}
 @closecatbox
 
@@ -92,7 +92,7 @@ always appended.
 @mref{closefile} closes the transcript file opened by @code{appendfile} or
 @code{writefile}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File output}
 @category{Console interaction}
 @closecatbox
@@ -102,11 +102,20 @@ always appended.
 @anchor{batch}
 @deffn  {Function} batch @
 @fname{batch} (@var{filename}) @
-@fname{batch} (@var{filename}, @code{option})
+@fname{batch} (@var{filename}, @var{option}) @
+@fname{batch} (@var{S}) @
+@fname{batch} (@var{S}, @var{option})
 
 @code{batch(@var{filename})} reads Maxima expressions from @var{filename} and 
 evaluates them.  @code{batch} searches for @var{filename} in the list 
 @mrefdot{file_search_maxima}  See also @mrefdot{file_search}
+
+@code{batch(@var{S})} reads Maxima expressions from the input stream @var{S}
+as created by @mref{openr}.
+The behavior of @code{batch} in this case is the same as if the input
+were a file name, and in the remainder of this description,
+what is said about input files applies to input streams as well,
+except that the comments about searching for files do not apply to streams.
 
 @code{batch(@var{filename}, @code{demo})} is like @code{demo(@var{filename})}.
 In this case @code{batch} searches for @var{filename} in the list
@@ -128,13 +137,16 @@ useful, when writing a test file.
 A suitable input file may be created by a text editor or by the
 @mref{stringout} function.
 
-@code{batch} reads each input expression from @var{filename}, displays the input
-to the console, computes the corresponding output expression, and displays the
-output expression.  Input labels are assigned to the input expressions and
-output labels are assigned to the output expressions.  @code{batch} evaluates
-every input expression in the file unless there is an error.  If user input is
-requested (by @mref{asksign} or @mrefcomma{askinteger} for example) @code{batch}
-pauses to collect the requisite input and then continue.
+@code{batch} reads each input expression from @var{filename}, displays
+the input to the console, computes the corresponding output expression,
+and displays the output expression. Input labels are assigned to the
+input expressions and output labels are assigned to the output
+expressions. @code{batch} evaluates every input expression in the file
+unless there is an error. If user input is requested (by @mref{asksign}
+or @mrefcomma{askinteger} for example) @code{batch} pauses to collect
+the requisite input and then continue; if @code{batch_answers_from_file}
+is @code{true}, the input is read from the file itself
+@mrefdot{batch_answers_from_file}
 
 @c CTRL-C BREAKS batch IN CMUCL, BUT CLISP (ALTHOUGH IT SHOWS "User break") 
 @c KEEPS GOING !!! DON'T KNOW ABOUT GCL !!!
@@ -146,15 +158,24 @@ implementation.
 command lines, to give error-free demonstrations, or to help organize one's
 thinking in solving complex problems.
 
-@code{batch} evaluates its argument.  @code{batch} returns the path of
-@var{filename} as a string, when called with no second argument or with the 
-option @code{demo}.  When called with the option @code{test}, the return value
+@code{batch} evaluates its arguments.
+
+When called with no second argument or with the option @code{demo},
+@code{batch} returns the path of @var{filename},
+if the argument is a file name,
+or the path of the file for which the input stream was opened,
+if the argument is a file input stream.
+If the argument is a string input stream,
+a representation of the input stream is returned.
+
+When called with the option @code{test}, the return value
 is a an empty list @code{[]} or a list with @var{filename} and the numbers of
 the tests which have failed.
 
-See also @mrefcomma{load} @mrefcomma{batchload} and @mrefdot{demo}
+See also @mrefcomma{load} @mrefcomma{batchload}
+@mrefcomma{batch_answers_from_file} and @mrefdot{demo}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Session management}
 @category{File input}
 @closecatbox
@@ -164,10 +185,13 @@ See also @mrefcomma{load} @mrefcomma{batchload} and @mrefdot{demo}
 
 @c -----------------------------------------------------------------------------
 @anchor{batchload}
-@deffn {Function} batchload (@var{filename})
+@deffn {Function} batchload @
+@fname{batchload} (@var{filename}) @
+@fname{batchload} (@var{S}) @
 
-Reads Maxima expressions from @var{filename} and evaluates them, without
-displaying the input or output expressions and without assigning labels to
+Reads Maxima expressions from input file @var{filename} or input stream @var{S}
+and evaluates them,
+without displaying the input or output expressions and without assigning labels to
 output expressions.  Printed output (such as produced by @mref{print} or
 @mrefparen{describe}) is displayed, however.
 
@@ -175,14 +199,20 @@ The special variable @mref{%} and the function @mref{%th} refer to previous
 results from the interactive interpreter, not results within the file.
 The file cannot include @code{:lisp} constructs.
 
-@code{batchload} returns the path of @var{filename}, as a string.
 @code{batchload} evaluates its argument.
+
+@code{batchload} returns the path of @var{filename},
+if the argument is a file name,
+or the path of the file for which the input stream was opened,
+if the argument is a file input stream.
+If the argument is a string input stream,
+a representation of the input stream is returned.
 
 See also @mrefcomma{batch} and @mrefdot{load}
 @c batchload APPEARS TO HAVE THE SAME EFFECT AS load.
 @c WHY NOT GET RID OF batchload ???
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Session management}
 @category{File input}
 @closecatbox
@@ -194,11 +224,44 @@ See also @mrefcomma{batch} and @mrefdot{load}
 
 Closes the transcript file opened by @mref{writefile} or @mrefdot{appendfile}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File output}
 @category{Console interaction}
 @closecatbox
 @end deffn
+
+@c -----------------------------------------------------------------------------
+@anchor{batch_answers_from_file}
+@defvr {Option variable} batch_answers_from_file
+Default value: @code{false}
+
+If @code{true}, then @code{batch} reads answers to interactive questions
+from its input file or stream.
+
+Example: Maxima's interactive testsuite includes something like
+following.
+
+@example
+[asksign (foo), sign (foo), sign (foo)];
+p;
+[pos, pos, pos];
+@end example
+
+The first line makes Maxima ask a question; when
+@code{batch_answers_from_file} is @code{true}, the second line is read
+as the answer to the question; and the third line provides the expected
+result.
+
+The command-line option @code{--batch-string} binds
+@code{batch_answers_from_file} to @code{true}. The @code{run_testsuite}
+function, as a default, also binds @code{batch_answers_from_file} to
+@code{true}. @mref{command_line_options} and @mrefdot{run_testsuite}
+
+@opencatbox{Categories:}
+@category{File input}
+@category{Global flags}
+@closecatbox
+@end defvr
 
 @c -----------------------------------------------------------------------------
 @anchor{file_output_append}
@@ -216,7 +279,7 @@ functions always truncate their output file, and @mref{tex} and
 @mref{appendfile} always append.
 @c WHAT ABOUT WRITEFILE ??
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File output}
 @category{Global flags}
 @closecatbox
@@ -235,7 +298,7 @@ component is simply replaced by @var{filename}.
 
 The result is a Lisp pathname object.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File input}
 @category{File output}
 @closecatbox
@@ -284,7 +347,7 @@ See @mrefdot{file_search_maxima}
 @code{file_search} is invoked by @mref{load} with @code{file_search_maxima} and
 @mref{file_search_lisp} as the search directories.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File input}
 @closecatbox
 @end deffn
@@ -309,15 +372,15 @@ The user can modify these variables, either to replace the default values or to
 append additional directories.  For example,
 
 @example
-file_search_maxima: ["/usr/local/foo/###.mac",
-    "/usr/local/bar/###.mac"]$
+file_search_maxima: ["/usr/local/foo/*.mac",
+    "/usr/local/bar/*.mac"]$
 @end example
 
 replaces the default value of @code{file_search_maxima}, while
 
 @example
 file_search_maxima: append (file_search_maxima,
-    ["/usr/local/foo/###.mac", "/usr/local/bar/###.mac"])$
+    ["/usr/local/foo/*.mac", "/usr/local/bar/*.mac"])$
 @end example
 
 appends two additional directories.  It may be convenient to put such an
@@ -325,22 +388,30 @@ expression in the file @code{maxima-init.mac} so that the file search path is
 assigned automatically when Maxima starts.
 See also @ref{Introduction for Runtime Environment}.
 
-Multiple filename extensions and multiple paths can be specified by special 
-``wildcard'' constructions.  The string @code{###} expands into the sought-after
-name, while a comma-separated list enclosed in curly braces
-@code{@{foo,bar,baz@}} expands into multiple strings.  For example, supposing
-the sought-after name is @code{neumann},
+Each element of the search list is a Common Lisp wildcard pathname.
+Briefly, a wildcard filename looks like @code{"*.lisp"}, which matches
+any filename with an extension of @code{"lisp"}.  A directory
+component of @code{*} matches any directory in the current directory,
+and @code{**} matches any directory and subdirectories in the current
+directory.
 
-@example
-"/home/@{wfs,gcj@}/###.@{lisp,mac@}"
-@end example
+So, @code{file_search_maxima} includes
+@code{"/home/username/.maxima/**/*.mac"}.  This means look in all
+subdirectories of @code{"/home/username/.maxima/"} for files with
+extension @code{"mac"}.  This includes subdirectories of
+subdirectories.  Thus, @code{load("file")} will find
+@code{"/home/username/.maxima/dir1/subdir1/file.mac"}.
 
-@flushleft
-expands into @code{/home/wfs/neumann.lisp}, @code{/home/gcj/neumann.lisp},
-@code{/home/wfs/neumann.mac}, and @code{/home/gcj/neumann.mac}.
-@end flushleft
+To only search for a single level of subdirectories, use
+@code{"/home/username/.maxima/*/*.mac"}.  This means Maxima will not
+find the file @code{"/home/username/.maxima/dir1/subdir1/file.mac"}
+when Maxima tries to, say, @code{load("file")}.
 
-@opencatbox
+Further information about Common Lisp pathnames maybe be found in
+@url{http://www.lispworks.com/documentation/HyperSpec/Body/19_b.htm,
+CLHS Section 19.2: Pathnames}.
+
+@opencatbox{Categories:}
 @category{File input}
 @category{Global variables}
 @closecatbox
@@ -377,7 +448,7 @@ Examples:
 (%o2)            [lisp, maxima, maxima, object]
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File input}
 @closecatbox
 @end deffn
@@ -410,7 +481,11 @@ See also @mrefdot{file_type}
 
 Evaluates expressions in @var{filename}, thus bringing variables, functions, and
 other objects into Maxima.  The binding of any existing object is clobbered by
-the binding recovered from @var{filename}.  To find the file, @code{load} calls
+the binding recovered from @var{filename}.
+
+@var{filename} must be a string, symbol,
+or Lisp pathname (as created by @mref{filename_merge}).
+To find the file, @code{load} calls
 @mref{file_search} with @mref{file_search_maxima} and
 @mref{file_search_lisp} as the search directories.  If @code{load} succeeds, it
 returns the name of the file.  Otherwise @code{load} prints an error message.
@@ -430,17 +505,19 @@ Note also that structures will only be read back as structures if
 they have been defined by @code{defstruct} before the @code{load} command
 is called.
 
-See also @mrefcomma{loadfile} @mrefcomma{batch} @mrefcomma{batchload} and
-@mrefdot{demo}  @code{loadfile} processes Lisp files; @code{batch},
-@code{batchload}, and @code{demo} process Maxima files.
+See also @mrefcomma{loadfile} for Lisp files; and @mrefcomma{batch} @mrefcomma{batchload} and
+@mrefdot{demo} for Maxima files.
 
 See @mref{file_search} for more detail about the file search mechanism.
-Additionally the chapter on @mref{numericalio} describes many functions
-that allow to load files that contain csv or similar data.
+The @mref{numericalio} chapter describes many functions
+for loading csv and other data files.
+
+During Maxima file loading, the variable @mref{load_pathname} is bound to the pathname of the file
+being loaded.
 
 @code{load} evaluates its argument.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Session management}
 @category{File input}
 @closecatbox
@@ -479,7 +556,7 @@ The value of load_pathname is:
 End of batchfile
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File input}
 @closecatbox
 @end defvr
@@ -498,7 +575,7 @@ as much of the path as needed to find the file.
 @mrefcomma{translate_file} and @mrefdot{compile_file}  The user may find it
 more convenient to use @mref{load} instead of @code{loadfile}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Session management}
 @category{File input}
 @closecatbox
@@ -528,7 +605,7 @@ See @mrefdot{setup_autoload}
 When @code{loadprint} is @code{false}, never print a message.
 @end itemize
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File input}
 @category{Global flags}
 @closecatbox
@@ -549,7 +626,7 @@ and possibly other characters, depending on the system.
 @code{directory} relies on the Lisp function DIRECTORY,
 which may have implementation-specific behavior.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File input}
 @closecatbox
 @end deffn
@@ -580,7 +657,7 @@ Examples:
 (%o3)                          txt
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File input}
 @closecatbox
 @end deffn
@@ -600,7 +677,7 @@ attempts to locate the file by appending @var{path} to each of the elements of
 @code{printfile} returns @var{path} if it names an existing file,
 or otherwise the result of a successful filename merge.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File input}
 @category{Console interaction}
 @closecatbox
@@ -666,7 +743,7 @@ have been assigned new values by the user; see @mrefdot{myoptions}
 
 @code{save} evaluates @var{filename} and quotes all other arguments.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Session management}
 @category{File output}
 @closecatbox
@@ -695,7 +772,7 @@ creates the file if it does not yet exist.
 The general form of @code{stringout} writes the values of one or more 
 expressions to the output file.  Note that if an expression is a
 variable, only the value of the variable is written and not the name
-of the variable.  As an useful special case, the expressions may be
+of the variable.  As a useful special case, the expressions may be
 input labels (@code{%i1}, @code{%i2}, @code{%i3}, @dots{}) or output labels
 (@code{%o1}, @code{%o2}, @code{%o3}, @dots{}).
 
@@ -719,7 +796,7 @@ Each variable is printed as an assignment statement, with the name of the
 variable, a colon, and its value.  Note that the general form of
 @code{stringout} does not print variables as assignment statements.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Session management}
 @category{File output}
 @closecatbox
@@ -773,7 +850,7 @@ See also @mref{writefile} and @mrefdot{display2d}
 10 ! yields 3628800
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File output}
 @closecatbox
 @end deffn
@@ -806,7 +883,7 @@ displayed by @code{playback}.
 @mref{closefile} closes the transcript file opened by @code{writefile} or
 @code{appendfile}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{File output}
 @category{Console interaction}
 @closecatbox
@@ -889,7 +966,7 @@ $$-\cos x$$
 (%o2) $$x\,y\,z$$
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{TeX output}
 @category{File output}
 @closecatbox
@@ -933,8 +1010,11 @@ the string @var{s} into the TeX output in place of @var{a}.
 
 @code{texput (@var{a}, @var{f})} causes the @code{tex} function to call the
 function @var{f} to generate TeX output.  @var{f} must accept one argument,
-which is an expression which has operator @var{a}, and must return a string
-(the TeX output).  @var{f} may call @code{tex1} to generate TeX output for the
+which is an expression which has operator @var{a},
+and must return either a string (the TeX output) or @code{false},
+indicating that the TeX function in effect when @code{texput} is called
+should handle the expression.
+@var{f} may call @code{tex1} to generate TeX output for the
 arguments of the input expression.
 
 @code{texput (@var{a}, @var{s}, @var{operator_type})}, where @var{operator_type}
@@ -1122,7 +1202,7 @@ $$ \langle a \, | \,b \rangle $$
 (%o7)                         false
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{TeX output}
 @closecatbox
 @end deffn
@@ -1175,7 +1255,7 @@ $$f(x):=1-x$$
 (%o4)                         false
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{TeX output}
 @closecatbox
 @end deffn
@@ -1224,7 +1304,7 @@ g\left(x\right)+f\left(x\right)
 (%o4)                         false
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{TeX output}
 @closecatbox
 @end deffn
@@ -1244,7 +1324,7 @@ expressions printed out by the @mref{fortran} command.  @code{0} gives normal
 printout (i.e., 6 spaces), and positive values will causes the
 expressions to be printed farther to the right.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Translation and compilation}
 @closecatbox
 @end defvr
@@ -1309,7 +1389,7 @@ Examples:
 (%o8)                         done
 @end verbatim
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Translation and compilation}
 @closecatbox
 @end deffn
@@ -1322,7 +1402,7 @@ Default value: @code{false}
 When @code{fortspaces} is @code{true}, @code{fortran} fills out
 each printed line with spaces to 80 columns.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Translation and compilation}
 @closecatbox
 @end defvr

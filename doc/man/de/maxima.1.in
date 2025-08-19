@@ -1,4 +1,4 @@
-.TH "MAXIMA" "1" "2020-03-30"
+.TH "MAXIMA" "1" "2022-07-18"
 .SH "NAME" 
 Maxima \- Eine Common Lisp Version von MACSYMA, einem Programm f\(:ur symbolische Mathematik, ver\(:offentlicht unter der GNU Public License.
 .LP
@@ -25,7 +25,7 @@ polynomiellen Gleichungen, Faktorisierung von Polynomen, Taylorreihen- oder Laur
 von Funktionen, Berechnung von Poissionreihen, Matrizen- und Tensorberechnungen und
 2D und 3D Graphiken.
 Prozeduren k\(:onnen in einer ALGOL-\(:ahnlichen Syntax geschrieben werden und sowohl Lisp-\(:ahnliche Funktionen
-als auch Pattern-Matching kann verwendet werden
+als auch Pattern-Matching kann verwendet werden.
 Maxima-Code kann in Dateien geschrieben und aus Dateien gelesen werden.
 Maxima-Befehle in Dateien k\(:onnen gelesen und ausgef\(:uhrt werden, was Batch-Prozessing erm\(:oglicht.
 
@@ -100,6 +100,9 @@ Unterdr\(:uckt Ausdrucksmarken und Startmeldungen.
 .TP
 \fB\-X\fR \fILisp-Optionen\fR, \fB\-\-lisp-options=\fR\fILisp-Optionen\fR
 Optionen, die an das verwendete Lisp weitergereicht werden.
+.TP
+\fB\-\-no\-init\fR, \fB\-\-norc\fR
+Initialisierungsdateien beim Start nicht laden.
 
 .SH EINF\(:UHRENDE ANMERKUNGEN
 Nach dem Start von
@@ -184,7 +187,7 @@ Es gibt einige Demo-Dateien, die vollst\(:andige Probleme, die mit Maxima gel\(:
 \fBdemo(command);\fR
 .LP
 Zus\(:atzliche - von Benutzern beigesteuerte Programmdateien - f\(:ur verschiedene Probleme sind vorhanden, die 
-.IR "Share Bilbliothek"
+.IR "Share Bibliothek"
 
 .SH WEITERE DOKUMENTATION
 Das Handbuch von Maxima existiert in vielen Formaten, z.B. als HTML oder PDF Dokument.
@@ -234,7 +237,7 @@ Schreibt eine Sitzung der folgenden Kommandos in die Datei
 (nur eine Datei kann gleichzeitig ge\(:offnet sein) und das
 .I closefile
 Kommando mu\(ss ausgef\(:uhrt werden, bevor Maxima beendet wird, um die Datei
-ordnungsgem\(:ass zu schlie\(ssen.
+ordnungsgem\(:a\(ss zu schlie\(ssen.
 
 .SH PLOTTING BEFEHLE
 Maxima kann 2D und 3-dimensionale Plots erzeugen. Hier ein einfaches Beispiel f\(:ur einen 2D-Plot:
@@ -291,7 +294,7 @@ Maxima Hilfs-Skripte.
 .SH UMGEBUNGSVARIABLEN
 .TP
 \fBMAXIMA_USERDIR\fR
-Directory f\(:ur benutzerspezifische Einstellgungsdateien.
+Directory f\(:ur benutzerspezifische Einstellungsdateien.
 Der standardm\(:assige Suchpfad von Maxima beinhaltet \fBMAXIMA_USERDIR\fR.
 Standardwert: \fB$HOME/.maxima\fR.
 .TP
@@ -321,8 +324,8 @@ Skript und dem Lisp-Abbild. Alle diese Variablen starten mit
 .I maxima
 Skript beim Start eingelesen. Es sollte im Verzeichnis, auf das die Variable
 \fB$MAXIMA_USERDIR\fR zeigt (siehe oben) vorhanden sein. \fBmaximarc\fR kann verwendet werden,
- um beispielsweise die standardm\(:assige Lisp-Implementation zu \(:andern, z.B. durch die Zeile "MAXIMA_LISP=cmucl"
- (um CMUCL Lisp auszuw\(:ahlen).
+um beispielsweise die standardm\(:assige Lisp-Implementation zu \(:andern, z.B. durch die Zeile "MAXIMA_LISP=cmucl"
+(um CMUCL Lisp auszuw\(:ahlen).
 .TP
 \fBmaxima-init.lisp\fR
 Beim Programmstart wird die Lisp-Datei \fBmaxima-init.lisp\fR eingelesen, falls sie
@@ -345,6 +348,13 @@ Maxima hat \(:ublicherweise eine systemweite
 Alternativ kann man eine Maxima-Initialisierungs-Datei mit den Kommandozeilenoptionen
 \fB\-\-init-mac\fR oder \fB\-\-init\fR
 laden.
+.TP
+\fB~/.xmaximarc\fR
+Xmaxima speichert hier userspezifische Einstellungen.
+.TP
+\fB~/.xmaxima_history\fR
+Xmaxima speichert hier die Kommando-Historie.
+
 
 .SH REFERENZEN
 Alte Refererenz:  
@@ -356,7 +366,7 @@ Version 10.
 January 1983.
 .LP
 Neuere Referenzen: 
-.UR http://maxima.sourceforge.net/de/
+.UR https://maxima.sourceforge.io/de/
 .UE
 
 .SH FEHLER
@@ -389,7 +399,7 @@ Die urspr\(:ungliche Version dieser Manualseite wurde von R. P. C. Rodgers (UCSF
 James Amundson in 2002. Die deutsche \(:Ubersetzung stammt von Wolfgang Dautermann.
 
 Maxima wird nun entwickelt und betreut vom 
-.UR http://maxima.sourceforge.net/de/
+.UR https://maxima.sourceforge.io/de/
 Maxima Projekt auf Sourceforge.
 .UE
 

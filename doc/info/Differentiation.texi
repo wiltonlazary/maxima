@@ -77,7 +77,7 @@ Examples:
                   /
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Integral calculus}
 @closecatbox
 @end deffn
@@ -151,7 +151,7 @@ Examples:
                   /
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Integral calculus}
 @closecatbox
 @end deffn
@@ -264,7 +264,7 @@ seen in the following example:
 @end example
 
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Evaluation}
 @category{Differential equations}
 @closecatbox
@@ -282,7 +282,7 @@ seen in the following example:
 This property is assigned by @code{gradef}.
 
 @c NEED EXAMPLE HERE
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @closecatbox
 @end defvr
@@ -369,36 +369,12 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential equations}
 @category{Declarations and inferences}
 @closecatbox
 @end deffn
 
-@c LOOKS LIKE cartan IS THE NAME OF A PACKAGE AND NOT A FUNCTION OR VARIABLE
-@c PROBABLY SHOULD SPLIT OUT cartan AND ITS CONTENTS INTO ITS OWN TEXINFO FILE
-@c ext_diff AND lie_diff NOT DOCUMENTED (OTHER THAN HERE)
-
-@c -----------------------------------------------------------------------------
-@anchor{cartan}
-@deffn {Function} cartan
-
-The exterior calculus of differential forms is a basic tool
-of differential geometry developed by Elie Cartan and has important
-applications in the theory of partial differential equations.
-The @code{cartan} package
-implements the functions @code{ext_diff} and @code{lie_diff},
-along with the operators @code{~} (wedge product) and @code{|} (contraction
-of a form with a vector.)
-Type @code{demo ("tensor")} to see a brief
-description of these commands along with examples.
-
-@code{cartan} was implemented by F.B. Estabrook and H.D. Wahlquist.
-
-@opencatbox
-@category{Differential geometry}
-@closecatbox
-@end deffn
 
 @c -----------------------------------------------------------------------------
 @anchor{del}
@@ -409,6 +385,8 @@ description of these commands along with examples.
 @code{diff} returns an expression containing @code{del}
 if an independent variable is not specified.
 In this case, the return value is the so-called "total differential".
+
+See also @mrefcomma{diff} @mref{del} and @mrefdot{derivdegree}
 
 Examples:
 
@@ -429,7 +407,7 @@ Examples:
 (%o3)         x y del(z) + x z del(y) + y z del(x)
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @closecatbox
 @end deffn
@@ -457,7 +435,7 @@ p;
 (%o1)                   sin(a b) %e
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Mathematical functions}
 @category{Laplace transform}
 @closecatbox
@@ -529,7 +507,7 @@ See also @mref{depends} and @mrefdot{gradef}
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Declarations and inferences}
 @category{Global variables}
 @closecatbox
@@ -569,6 +547,9 @@ For example, @mref{integrate} does not recognize the dependence of @code{f} on
 @code{x} unless explicitly represented as @code{integrate (f(x), x)}.
 
 @code{depends(@var{f}, [@var{x_1}, @dots{}, @var{x_n}])} is equivalent to @code{dependencies(@var{f}(@var{x_1}, @dots{}, @var{x_n}))}.
+
+See also @mrefcomma{diff} @mrefcomma{del} @mref{derivdegree} and
+@mrefdot{derivabbrev}
 
 @c ===beg===
 @c depends ([f, g], x);
@@ -615,14 +596,14 @@ For example, @mref{integrate} does not recognize the dependence of @code{f} on
                                 du dt
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @category{Declarations and inferences}
 @closecatbox
 @end deffn
 
 @c -----------------------------------------------------------------------------
-@anchor{derivabrev}
+@anchor{derivabbrev}
 @defvr {Option variable} derivabbrev
 Default value: @code{false}
 
@@ -631,7 +612,7 @@ symbolic derivatives (that is, @code{diff} nouns) are displayed as subscripts.
 Otherwise, derivatives are displayed in the Leibniz notation @code{dy/dx}.
 
 @c NEED EXAMPLES HERE
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @category{Global flags}
 @closecatbox
@@ -664,7 +645,7 @@ Example:
 (%o2)                           2
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @category{Expressions}
 @closecatbox
@@ -679,7 +660,7 @@ Example:
 Causes only differentiations with respect to
 the indicated variables, within the @mref{ev} command.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @category{Evaluation}
 @closecatbox
@@ -693,7 +674,7 @@ Default value: @code{false}
 When @code{derivsubst} is @code{true}, a non-syntactic substitution such as
 @code{subst (x, 'diff (y, t), 'diff (y, t, 2))} yields @code{'diff (x, t)}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @category{Expressions}
 @closecatbox
@@ -735,6 +716,8 @@ form instead of carrying out the differentiation.
 
 When @code{derivabbrev} is @code{true}, derivatives are displayed as subscripts.
 Otherwise, derivatives are displayed in the Leibniz notation, @code{dy/dx}.
+
+See also @mrefcomma{depends} @mrefcomma{del} @mrefcomma{derivdegree} @mrefcomma{derivabbrev} and @mrefdot{gradef}
 
 Examples:
 
@@ -789,7 +772,7 @@ subscripted names like @code{X[1]}, @code{X[2]}, @dots{} to be used.  If
 treated as in (1) above.
 
 @c NEED EXAMPLES FOR TENSOR STUFF
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @closecatbox
 @end deffn
@@ -898,7 +881,7 @@ Examples:
 (%o15)          [b z - c y, c x - a z, a y - b x]
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @category{Vectors}
 @category{Operators}
@@ -977,7 +960,7 @@ explicitly but its first derivatives are and it is desired to obtain
 higher order derivatives.
 
 @c NEED EXAMPLES HERE
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @category{Declarations and inferences}
 @closecatbox
@@ -993,125 +976,9 @@ for which partial derivatives have been defined by @code{gradef}.
 @code{gradefs} does not include any variables
 for which partial derivatives have been defined by @code{gradef}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Differential calculus}
 @category{Declarations and inferences}
 @closecatbox
 @end defvr
-
-@c -----------------------------------------------------------------------------
-@anchor{laplace}
-@deffn {Function} laplace (@var{expr}, @var{t}, @var{s})
-
-Attempts to compute the Laplace transform of @var{expr} with respect to the 
-variable @var{t} and transform parameter @var{s}.
-
-@code{laplace} recognizes in @var{expr} the functions @mrefcomma{delta} @mrefcomma{exp}
-@mrefcomma{log} @mrefcomma{sin} @mrefcomma{cos} @mrefcomma{sinh} @mrefcomma{cosh} and @mrefcomma{erf}
-as well as @code{derivative}, @mrefcomma{integrate} @mrefcomma{sum} and @mrefdot{ilt} If
-laplace fails to find a transform the function @mref{specint} is called.
-@code{specint} can find the laplace transform for expressions with special
-functions like the bessel functions @mrefcomma{bessel_j} @mrefcomma{bessel_i} @dots{}
-and can handle the @mref{unit_step} function.  See also @mrefdot{specint}
-
-If @code{specint} cannot find a solution too, a noun @code{laplace} is returned.
-
-@c REPHRASE THIS
-@var{expr} may also be a linear, constant coefficient differential equation in
-which case @mref{atvalue} of the dependent variable is used.
-@c "used" -- USED HOW ??
-The required atvalue may be supplied either before or after the transform is
-computed.  Since the initial conditions must be specified at zero, if one has
-boundary conditions imposed elsewhere he can impose these on the general
-solution and eliminate the constants by solving the general solution
-for them and substituting their values back.
-
-@code{laplace} recognizes convolution integrals of the form
-@code{integrate (f(x) * g(t - x), x, 0, t)};
-other kinds of convolutions are not recognized.
-
-Functional relations must be explicitly represented in @var{expr};
-implicit relations, established by @mrefcomma{depends} are not recognized.
-That is, if @var{f} depends on @var{x} and @var{y},
-@code{f (x, y)} must appear in @var{expr}.
-
-See also @mrefcomma{ilt} the inverse Laplace transform.
-
-Examples:
-
-@c ===beg===
-@c laplace (exp (2*t + a) * sin(t) * t, t, s);
-@c laplace ('diff (f (x), x), x, s);
-@c diff (diff (delta (t), t), t);
-@c laplace (%, t, s);
-@c assume(a>0)$
-@c declare(a, integer)$
-@c laplace(gamma_incomplete(a,t),t,s),gamma_expand:true;
-@c factor(laplace(gamma_incomplete(1/2,t),t,s));
-@c assume(exp(%pi*s)>1)$
-@c laplace(sum((-1)^n*unit_step(t-n*%pi)*sin(t),n,0,inf),t,s),
-@c    simpsum;
-@c ===end===
-@example
-(%i1) laplace (exp (2*t + a) * sin(t) * t, t, s);
-                            a
-                          %e  (2 s - 4)
-(%o1)                    ---------------
-                           2           2
-                         (s  - 4 s + 5)
-(%i2) laplace ('diff (f (x), x), x, s);
-(%o2)             s laplace(f(x), x, s) - f(0)
-(%i3) diff (diff (delta (t), t), t);
-                          2
-                         d
-(%o3)                    --- (delta(t))
-                           2
-                         dt
-(%i4) laplace (%, t, s);
-                            !
-               d            !         2
-(%o4)        - -- (delta(t))!      + s  - delta(0) s
-               dt           !
-                            !t = 0
-(%i5) assume(a>0)$
-(%i6) laplace(gamma_incomplete(a,t),t,s),gamma_expand:true;
-                                              - a - 1
-                         gamma(a)   gamma(a) s
-(%o6)                    -------- - -----------------
-                            s            1     a
-                                        (- + 1)
-                                         s
-(%i7) factor(laplace(gamma_incomplete(1/2,t),t,s));
-                                              s + 1
-                      sqrt(%pi) (sqrt(s) sqrt(-----) - 1)
-                                                s
-(%o7)                 -----------------------------------
-                                3/2      s + 1
-                               s    sqrt(-----)
-                                           s
-(%i8) assume(exp(%pi*s)>1)$
-(%i9) laplace(sum((-1)^n*unit_step(t-n*%pi)*sin(t),n,0,inf),t,s),
-         simpsum;
-@group
-                         %i                         %i
-              ------------------------ - ------------------------
-                              - %pi s                    - %pi s
-              (s + %i) (1 - %e       )   (s - %i) (1 - %e       )
-(%o9)         ---------------------------------------------------
-                                       2
-@end group
-(%i9) factor(%);
-                                      %pi s
-                                    %e
-(%o9)                   -------------------------------
-                                             %pi s
-                        (s - %i) (s + %i) (%e      - 1)
-
-@end example
-
-@opencatbox
-@category{Laplace transform}
-@category{Differential equations}
-@closecatbox
-@end deffn
 

@@ -26,7 +26,9 @@
 @end example
 
 @opencatbox
-@category{Linear recurrences} @category{Share packages} @category{Package solve_rec}
+@category{Linear recurrences}
+@category{Share packages}
+@category{Package solve_rec}
 @closecatbox
 
 @node Functions and Variables for solve_rec,  , Introduction to solve_rec, solve_rec
@@ -114,7 +116,7 @@ WARNING: found some hypergeometrical solutions!
 @var{expr}に現れるすべての和を閉形式に整理しようとします。
 
 この関数を初めて使うには、
-@code{load(simplify_sum)}で
+@code{load("simplify_sum")}で
 @code{simplify_sum}パッケージをロードしてください。
 
 例:
@@ -145,7 +147,9 @@ WARNING: found some hypergeometrical solutions!
 @end example
 
 @opencatbox
-@category{Package solve_rec} @category{Sums and products} @category{Simplification functions}
+@category{Package solve_rec}
+@category{Sums and products}
+@category{Simplification functions}
 @closecatbox
 
 @end deffn
@@ -164,7 +168,7 @@ Ricatti型漸化式を解くことができます。
 
 この関数を使うには、
 最初に
-@code{load(solve_rec);}で@code{solve_rec}パッケージをロードしてください。
+@code{load("solve_rec");}で@code{solve_rec}パッケージをロードしてください。
 
 
 定係数の線形漸化式の例:
@@ -242,7 +246,7 @@ Ricatti型漸化式の例:
 
 この関数を使うには、
 最初に
-@code{load(solve_rec);}で@code{solve_rec}パッケージをロードしてください。
+@code{load("solve_rec");}で@code{solve_rec}パッケージをロードしてください。
 
 例:
 
@@ -311,7 +315,7 @@ Ricatti型漸化式の例:
 それらは@code{lo = -inf}、@code{hi = inf}と仮定されます。
 
 この関数を初めて使うには、
-@code{load(simplify_sum)}で
+@code{load("simplify_sum")}で
 @code{simplify_sum}パッケージをロードしてください。
 
 例:

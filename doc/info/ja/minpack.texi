@@ -3,7 +3,7 @@
 * Functions and Variables for minpack::
 @end menu
 
-@node Introduction to minpack, , , 
+@node Introduction to minpack, Functions and Variables for minpack, , 
 @section Introduction to minpack
 
 @code{Minpack}は
@@ -11,13 +11,19 @@ Netlibから得られるFortranライブラリ MINPACKの
 (@code{f2cl}を介した)Common Lisp翻訳です。
 
 @opencatbox
-@category{Numerical methods} @category{Share packages} @category{Package minpack} @category{Package minpack}
+@category{Numerical methods}
+@category{Share packages}
+@category{Package minpack}
+@category{Package minpack}
 @closecatbox
 
-@node Functions and Variables for minpack, , ,
+@node Functions and Variables for minpack, , Introduction to minpack,
 @section Functions and Variables for minpack
 
-@deffn {関数} minpack_lsquares (@var{flist}, @var{varlist}, @var{guess} [, @var{tolerance}, @var{jacobian}])
+@deffn {関数} minpack_lsquares @
+@fname{minpack_lsquares} (@var{flist}, @var{varlist}, @var{guess}) @
+@fname{minpack_lsquares} (..., 'tolerance = @var{tolerance}) @
+@fname{minpack_lsquares} (..., 'jacobian = @var{jacobian})
 
 リスト @var{flist}の関数の平方の和を最小化する
 点を計算します。
@@ -81,7 +87,11 @@ tolが小さすぎます。近似解xの更なる改善は不可能です。
 
 @end deffn
 
-@deffn {関数} minpack_solve (@var{flist}, @var{varlist}, @var{guess} [, @var{tolerance}, @var{jacobian}])
+@deffn {関数} minpack_solve @
+@fname{minpack_solve} (@var{flist}, @var{varlist}, @var{guess}) @
+@fname{minpack_solve} (..., 'tolerance = @var{tolerance}) @
+@fname{minpack_solve} (..., 'jacobian = @var{jacobian})
+
 @code{n}個の未知数に関する
 @code{n}個の方程式系を解きます。
 @code{n}個の方程式形がリスト @var{flist}で

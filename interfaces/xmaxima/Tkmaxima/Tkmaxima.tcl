@@ -1,7 +1,10 @@
-# -*-mode: tcl; fill-column: 75; tab-width: 8; coding: iso-latin-1-unix -*-
-#
-#       $Id: Tkmaxima.tcl,v 1.7 2011-03-21 09:17:17 villate Exp $
-#
+############################################################
+# Tkmaxima.tcl                                                  #
+# Copyright (C) 1998 William F. Schelter                   #
+# For distribution under GNU public License.  See COPYING. #
+#                                                          #
+#     Time-stamp: "2024-04-01 14:07:21 villate"            #
+############################################################
 
 # The Header.tcl is created by autoconf to make the xmaxima script
 # auto executable. After the header the various tcl pieces are put together:
@@ -13,11 +16,6 @@
 
 # Source Tkmaxima/COPYING.tcl           ;# license info
 # Source Tkmaxima/Cygwin.tcl 		;# required - must not be autoloaded
-# Source Utils/FileDlg.tcl
-# Source Utils/Messages.tcl
-# Source Utils/Misc.tcl
-# Source ObjTcl/Object.tcl
-# Source ObjTcl/Feedback.tcl
 # Source Tkmaxima/Constants.tcl 	;# required - must not be autoloaded
 # Source Tkmaxima/Preamble.tcl 		;# required - must not be autoloaded
 # Source Tkmaxima/Readdata.tcl 		;# can be autoloaded
@@ -37,7 +35,6 @@
 # Source Tkmaxima/Plotconf.tcl 		;# can be autoloaded
 # Source Tkmaxima/Adams.tcl 		;# can be autoloaded
 # Source Tkmaxima/Rk.tcl 		;# can be autoloaded
-# Source Tkmaxima/rk4.tcl
 # Source Tkmaxima/Plotdf.tcl 		;# can be autoloaded
 # Source Tkmaxima/Plot2d.tcl 		;# defined globals
 # Source Tkmaxima/Matrix.tcl 		;# can be autoloaded
@@ -51,7 +48,6 @@
 # Source Tkmaxima/Browser.tcl 		;# defines globals
 # Source Tkmaxima/Bindings.tcl 		;# defines bindings
 # Source Tkmaxima/Wmenu.tcl 		;# can be autoloaded
-# Source Tkmaxima/Tryftp2.tcl 		;# can be autoloaded
 # Source Tkmaxima/Myhtml.tcl 		;# defines globals and tags
 # Source Tkmaxima/Myhtml1.tcl 		;# can be autoloaded
 # Source Tkmaxima/Base64.tcl 		;# can be autoloaded
@@ -133,69 +129,16 @@ proc lMaxInitSetOpts {} {
     }
 }
 
-object_class MAXTkmaxima {
 
-    method create {} {
-	global tcl_platform maxima_priv
-
-	if {$tcl_platform(platform) == "windows" } {
-
-	    set dir [file dir [info name]]
-	    # These should be in the same directory as the xmaxima.exe
-	    set maxima_priv(kill) [file join $dir winkill.exe]
-
-	    set file [file join $dir tclwinkill.dll]
-	    if {[file isfile $file]} {
-		catch {load  $file}
-	    }
-	    unset file
-	} else {
-	    # unix
-	    set maxima_priv(kill) kill
-	}
-
-    }
-
-    method install {} {
-	global maxima_priv argv argv0 env fontSize maxima_default
-
-	wm withdraw .
-	wm title . [mc {Xmaxima: console}]
-
-	set fr .maxima
-	MAXGui gui
-	set w [gui install $fr]
-
-	#mike Defer looking for maxima until the interface has been built
-	vMAXSetMaximaCommand
-
-	#mike Defer the starting of maxima until the interface has been built
-	if {[catch {runOneMaxima $w} err]} {
-	    tide_failure [concat [mc "Error starting Maxima:"] "\n$err"]
-	    return
-	}
-	after idle focus $maxima_priv(cConsoleText)
-    }
-
-    method exit {{text ""} {val "0"}} {
-	global maxima_priv
-	# save user settings for future sessions
-	catch {savePreferences}
-	update
-	if {$text == ""} {
-	    if {[info exists maxima_priv(cConsoleText)]} {
-		set text $maxima_priv(cConsoleText)
-	    }
-	}
-	
-	if {$text != ""} {
-	    if {[catch {closeMaxima $text} err]} {
-		tide_failure $err
-	    }
-	}
-	tkexit $val
-    }
-
-
-}
-
+# Exists Maxima after saving the current settings
+proc maxExit {{text ""} {val "0"}} {
+    global maxima_priv
+    # save user settings for future sessions
+    catch {savePreferences}
+    update
+    if {$text eq ""} {
+        if {[info exists maxima_priv(cConsoleText)]} {
+            set text $maxima_priv(cConsoleText)}
+    } elseif {[catch {closeMaxima $text} err]} {
+        tk_messageBox -title Error -icon error -message $err}
+    tkexit $val}

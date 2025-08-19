@@ -75,6 +75,11 @@
 			     ;; Convert dir/foo.fas to dir/foo.o
 			     (make-pathname :type "o" :defaults p))
 			 files)))
+	(c::build-fasl "binary-ecl/maxima" :lisp-files obj
+			  :ld-flags
+			  (let ((x (symbol-value (find-symbol "*AUTOCONF-LD-FLAGS*"
+							      (find-package "MAXIMA")))))
+			    (if (and x (not (string= x ""))) (list x))))
 	(c::build-program "binary-ecl/maxima" :lisp-files obj
 			  :ld-flags
 			  (let ((x (symbol-value (find-symbol "*AUTOCONF-LD-FLAGS*"
@@ -126,7 +131,7 @@
 	     (:file "numerical/f2cl-package")
 	     (:file "numerical/slatec")
 	     (:file "command-line")
-	     (:file "nregex")
+	     (:file "pregexp")
 	     #+gcl-working-proclaims
 	     (:private-file "tools/sys-proclaim")))
    (:module package :source-pathname ""
@@ -143,11 +148,11 @@
 	     ;; build possible), but not compiled (which means
 	     ;; with ECL or ABCL it won't end up in the final image)
 	     ;; => no out-of-tree build for ECL.
-	     #-(or ecl abcl) (:private-file "autoconf-variables")
-	     #+(or ecl abcl) (:file "autoconf-variables")
+	     #-(or ecl abcl lispworks) (:private-file "autoconf-variables")
+	     #+(or ecl abcl lispworks) (:file "autoconf-variables")
 	     ))
    (:module intl :source-pathname ""
-	    :components
+	    :components 
 	    (
 	     ;; Some versions of CMUCL already
 	     ;; have a compatible version of
@@ -155,14 +160,19 @@
 	     ;; it.
 	     #+#.(cl:if (cl:and (cl:member :cmu cl:*features*) (cl:find-package '#:intl))  '(or) '(and))
 	     (:file "intl")))
+   (:module globals :source-pathname ""
+	    :depends-on ("intl")
+	    :components
+	    ((:file "globals")))
    (:module info :source-pathname ""
 	    :components
-	    ((:file "nregex")
+	    ((:file "pregexp")
 	     (:file "cl-info")))
    (:module sloop :source-pathname ""
 	    :components
 	    ((:file "sloop")))
    (:module declarations :source-pathname ""
+	    :depends-on ("globals")
 	    :components
 	    ((:file "lmdcls")))
    (:module destructuring-let :source-pathname ""
@@ -175,35 +185,50 @@
    (:module defmfun :source-pathname ""
 	    :components
 	    ((:file "defmfun-check")))
-   (:module compatibility-macros :source-pathname ""
+   (:module float-properties :source-pathname ""
 	    :depends-on ("defmfun")
+	    :components
+	    ((:file "float-properties")))
+   (:module compatibility-macros :source-pathname ""
+	    :depends-on ("defmfun" "compatibility-macros1")
 	    :components
 	    (#+gcl (:file "gcl-compat")
 		   (:file "commac")))
    (:module prerequisites :source-pathname ""
+	    :depends-on ("defmfun")
 	    :components
 	    ((:file "mormac")
 	     (:file "compat")))
    (:module maxima-language-compiler-macros :source-pathname ""
+	    ;; Should depend on transl to get special var tr-abort,
+	    ;; but making this depend on maxima-language-compiler to
+	    ;; get transl.lisp doesn't work.  It results in a compiler
+	    ;; error about maxima::$local being an unknown block.  I
+	    ;; (rtoy) didn't investigate further.
+	    :depends-on ("defmfun")
 	    :components
 	    ((:file "transm")))
    (:module command-line :source-pathname ""
+	    :depends-on ("defmfun")
 	    :depends-on ("getopt")
 	    :components
 	    ((:file "command-line")))
    (:module getopt :source-pathname ""
+	    :depends-on ("defmfun")
 	    :components
 	    ((:file "getopt")))
    (:module fundamental-macros :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "defcal")
 	     (:file "maxmac")))
    (:module utility-macros :source-pathname ""
+	    :depends-on ("defmfun")
 	    :components
 	    ((:file "mopers")
 	     (:file "mforma")))
    (:module other-macros :source-pathname ""
+	    :depends-on ("defmfun" "compatibility-macros1")
 	    :components
 	    ((:file "mrgmac")
 	     (:file "rzmac")
@@ -217,7 +242,7 @@
 	     (:file "mhayat")))
    #+gcl (:file "optimize")		; jfa check this
    (:module utilities :source-pathname ""
-	    :depends-on ("defmfun" "utility-macros")
+	    :depends-on ("globals" "defmfun" "utility-macros")
 	    :components
 	    ((:file "opers")
 	     (:file "utils")
@@ -229,20 +254,21 @@
 	     (:file "outmis")
 	     (:file "ar")))
    (:module commands :source-pathname ""
-	    :depends-on ("defmfun" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "compatibility-macros1")
 	    :components
 	    ((:file "comm")
 	     (:file "comm2")))
    (:module evaluator :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun" "utility-macros")
 	    :components
 	    ((:file "mlisp")
 	     (:file "mmacro")
 	     (:file "buildq")))
-   ;; The free version of Allegro has a heap limit.  Let's
-   ;; not compile these routines so that we can at least
+   ;; The free versions of Allegro and Lispworks have a heap limit.
+   ;; Let's not compile these routines so that we can at least
    ;; get the rest of maxima built.
    (:module numerical
+	    :depends-on ("defmfun")
 	    :components
 	    ((:module packages :source-pathname ""
 		      :components
@@ -253,8 +279,8 @@
 		      ((:file "f2cl-lib")))
 	     (:module slatec :source-pathname "slatec"
 		      :depends-on ("f2cl-lib" "packages")
-		      #+allegro-cl-trial :load-only
-		      #+allegro-cl-trial t
+		      #+(or allegro-cl-trial lispworks-personal-edition) :load-only
+		      #+(or allegro-cl-trial lispworks-personal-edition)  t
 		      :components
 		      ((:file "fdump")
 		       (:file "j4save")
@@ -429,8 +455,8 @@
 		       (:file "d9upak")))
 	     (:module quadpack
 		      :source-pathname "slatec"
-		      #+allegro-cl-trial :load-only
-		      #+allegro-cl-trial t
+		      #+(or allegro-cl-trial lispworks-personal-edition) :load-only
+		      #+(or allegro-cl-trial lispworks-personal-edition) t
 		      :components
 		      (
 		       ;; Support
@@ -521,7 +547,7 @@
 		       )
 		      )))
    (:module simplification :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "simp")
 	     (:file "float")
@@ -531,22 +557,24 @@
 	     (:file "logarc")
 	     (:file "rpart")))
    (:module numeric-bigfloat :source-pathname ""
-	    :depends-on (#-gcl "package"
+	    :depends-on ("defmfun" #-gcl "package"
 			       #+gcl "proclaim")
 	    :components
 	    ((:file "numeric")))
    (:module server :source-pathname ""
+	    :depends-on ("defmfun")
 	    :components ((:file "server")))
    (:module i-o :source-pathname ""
-	    :depends-on ("defmfun" "compatibility-macros" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "compatibility-macros" "compatibility-macros1")
 	    :components
 	    ((:file "macsys")
 	     (:file "testsuite")
 	     (:file "mload")
 	     (:file "suprv1")
+	     (:file "mactex")
 	     (:file "dskfn")))
    (:module factoring :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "lesfac")
 	     (:file "factor")
@@ -559,7 +587,8 @@
 	    :components
 	    ((:file "ifactor")))
    (:module rational-functions :source-pathname ""
-	    :depends-on ("defmfun" "rat-macros" "other-macros" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "rat-macros" "other-macros" 
+			 "compatibility-macros1" "ifactor" "factoring")
 	    :components
 	    ((:file "rat3a")
 	     (:file "rat3b")
@@ -569,19 +598,27 @@
 	     (:file "nrat4")
 	     (:file "ratout")))
    (:module maxima-language-compiler :source-pathname ""
-	    :depends-on ("defmfun" "maxima-language-compiler-macros")
+	    :depends-on ("globals" "defmfun" "maxima-language-compiler-macros" "evaluator")
 	    :components
 	    ((:file "transl")
-	     (:file "transs")
+	     (:file "transs"
+		    :depends-on ("transl"))
 	     (:file "trans1")
-	     (:file "trans2")
-	     (:file "trans3")
-	     (:file "trans4")
-	     (:file "trans5")
+	     (:file "trans2"
+		    :depends-on ("transl"))
+	     (:file "trans3"
+		    :depends-on ("transl"))
+	     (:file "trans4"
+		    :depends-on ("trprop"))
+	     (:file "trans5"
+		    :depends-on ("transl"))
 	     (:file "transf")
-	     (:file "troper")
-	     (:file "trutil")
-	     (:file "trmode")
+	     (:file "troper"
+		    :depends-on ("transl"))
+	     (:file "trutil"
+		    :depends-on ("transl"))
+	     (:file "trmode"
+		    :depends-on ("transl"))
 	     (:file "trdata")
 	     (:file "trpred")
 	     (:file "transq")
@@ -591,7 +628,7 @@
 	     (:file "trprop")
 	     (:file "mdefun")))
    (:module numerical-functions :source-pathname ""
-	    :depends-on ("defmfun" "trigonometry")
+	    :depends-on ("globals" "defmfun" "trigonometry" "algebraic-database" "utility-macros")
 	    :components
 	    ((:file "bessel")
 	     (:file "ellipt")
@@ -600,26 +637,27 @@
 	     (:file "plasma")
 	     (:file "intpol")))
    (:module reader :source-pathname ""
-	    :depends-on ("defmfun" "compatibility-macros" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "compatibility-macros" "compatibility-macros1")
 	    :components
 	    ((:file "nparse")))
    (:module display :source-pathname ""
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "displa")
 	     (:file "nforma")
 	     (:file "grind")))
    (:module gcd :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "spgcd")
 	     (:file "ezgcd")))
    (:module documentation :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
-	    ((:file "option")
-	     (:file "macdes")))
+	    ((:file "macdes")
+	     (:file "verify-html-index")))
    (:module algebraic-database :source-pathname ""
-	    :depends-on ("defmfun" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "compatibility-macros1")
 	    :components
 	    ((:file "inmis")
 	     (:file "db")
@@ -627,53 +665,56 @@
 	     (:file "askp"))		;does this belong here?
 	    )
    (:module integration :source-pathname ""
-	    :depends-on ("defmfun" "pattern-matching")
+	    :depends-on ("globals" "defmfun" "pattern-matching")
 	    :components
 	    ((:file "sinint")
 	     (:file "sin")
-	     (:file "risch")))
+	     (:file "risch")
+	     (:file "irinte")
+	     (:file "laplac")))
    (:module taylor-series :source-pathname ""
+	    :depends-on ("globals" "defmfun")
 	    :components ((:file "hayat")))
    (:module definite-integration :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "defint")
 	     (:file "residu")))
    (:module trigonometry :source-pathname ""
-	    :depends-on ("pattern-matching" "defmfun")
+	    :depends-on ("globals" "pattern-matching" "defmfun")
 	    :components
 	    ((:file "trigi")
 	     (:file "trigo")
 	     (:file "trgred")))
    (:module special-functions :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "specfn")))
    (:module matrix-algebra :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "mat")
 	     (:file "linnew")
 	     (:file "matrix")))
    (:module determinants :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components
 	    ((:file "sprdet")
 	     (:file "newinv")
 	     (:file "newdet")))
    (:module pattern-matching :source-pathname ""
-	    :depends-on ("defmfun" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "compatibility-macros1")
 	    :components
 	    ((:file "schatc")
 	     (:file "matcom")
 	     (:file "matrun")
 	     (:file "nisimp")))
    (:module limits :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    :components ((:file "tlimit")
 			 (:file "limit")))
    (:module solve :source-pathname ""
-	    :depends-on ("defmfun" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "compatibility-macros1")
 	    :components
 	    ((:file "solve")
 	     (:file "psolve")
@@ -682,12 +723,12 @@
 	     (:file "polyrz")
 	     (:file "cpoly")))
    (:module debugging :source-pathname ""
-	    :depends-on ("defmfun" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "compatibility-macros1")
 	    :components
 	    ((:file "mtrace")
 	     (:file "mdebug")))
    (:module miscellaneous :source-pathname ""
-	    :depends-on ("defmfun" "pattern-matching" "compatibility-macros1")
+	    :depends-on ("globals" "defmfun" "pattern-matching" "compatibility-macros1")
 	    :components
 	    ((:file "scs")
 	     (:file "asum")
@@ -695,10 +736,8 @@
 	     (:file "optim")
 	     (:file "marray")
 	     (:file "mdot")
-	     (:file "irinte")
 	     (:file "series")
 	     (:file "numth")
-	     (:file "laplac")
 	     (:file "pade")
 	     (:file "homog")
 	     (:file "combin")
@@ -710,13 +749,17 @@
 	     (:file "expintegral")
 	     (:file "gamma")
 	     (:file "mstuff")))
+   (:module polynomial :source-pathname ""
+	    :depends-on ("defmfun")
+            :components
+	    ((:file "polynomialp")))
    (:module poisson-series :source-pathname ""
 	    :depends-on ("defmfun")
 	    :components
 	    ((:file "pois2")
 	     (:file "pois3")))
    (:module translated-packages :source-pathname ""
-	    :depends-on ("maxima-language-compiler-macros"
+	    :depends-on ("globals" "maxima-language-compiler-macros"
 			 "compatibility-macros1"
 			 "defmfun")
 	    :components
@@ -725,15 +768,21 @@
 	     (:file "invert")
 	     (:file "hypgeo")
 	     (:file "hyp")
+	     (:file "hypergeometric")
+	     (:file "nfloat"
+		    ;; Comment in nfloat says hypergeometric needs to
+		    ;; be loaded first.
+		    :depends-on ("hypergeometric"))
 	     (:file "todd-coxeter")
-	     (:file "mactex")
 	     (:file "plot")))
    (:module graphics-drivers :source-pathname ""
+	    :depends-on ("defmfun")
 	    :components
 	    ((:file "gnuplot_def")
-	     (:file "xmaxima_def")))
+	     (:file "xmaxima_def")
+             (:file "geomview_def")))
    (:module final :source-pathname ""
-	    :depends-on ("defmfun")
+	    :depends-on ("globals" "defmfun")
 	    ;; These are not compiled, for whatever reason, except on ecl:
 	    ;; On ECL all runtime alterations to the system (i.e from repl)
 	    ;; at runtime are not part of the final executable if they aren't.
@@ -747,5 +796,4 @@
 	     ;; build possible), but not compiled (which means
 	     ;; that with ECL or ABCL it won't end up in the final image)
 	     ;; => no out-of-tree build for ECL.
-	     (:file "share-subdirs")
 	     (:file "init-cl")))))

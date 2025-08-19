@@ -4,7 +4,7 @@
 @end menu
 
 @c -----------------------------------------------------------------------------
-@node Documentation, Functions and Variables for Help, Help, Help
+@node Documentation, Functions and Variables for Help, , Help
 @section Documentation
 @c -----------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ yields
 
 and additional output.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Console interaction}
 @closecatbox
 
@@ -49,15 +49,17 @@ and additional output.
 
 @c -----------------------------------------------------------------------------
 @anchor{apropos}
-@deffn {Function} apropos (@var{string})
+@deffn {Function} apropos (@var{name})
 
-Searches for Maxima names which have @var{string} appearing anywhere within
-them.  Thus, @code{apropos (exp)} returns a list of all the flags and functions
-which have @code{exp} as part of their names, such as @code{expand}, @code{exp},
-and @code{exponentialize}.  Thus if you can only remember part of the name of
-something you can use this command to find the rest of the name.  Similarly, you
-could say @code{apropos (tr_)} to find a list of many of the switches relating
-to the translator, most of which begin with @code{tr_}.
+Searches for Maxima names which have @var{name} appearing anywhere
+within them; @var{name} must be a string or symbol. Thus, @code{apropos
+(exp)} returns a list of all the flags and functions which have
+@code{exp} as part of their names, such as @code{expand}, @code{exp},
+and @code{exponentialize}. So, if you can only remember part of the name
+of a Maxima command or variable, you can use this command to find the
+rest of the name. Similarly, you can type @code{apropos (tr_)} to find
+a list of many of the switches relating to the translator, most of which
+begin with @code{tr_}.
 
 @code{apropos("")} returns a list with all Maxima names.
 
@@ -65,23 +67,39 @@ to the translator, most of which begin with @code{tr_}.
 
 Example:
 
-Show all Maxima symbols which have @code{"gamma"} in the name:
+Show all Maxima symbols which have @code{gamma} in the name:
 
 @c ===beg===
 @c apropos("gamma");
+@c apropos(gamma);
+@c length(apropos(""));
 @c ===end===
 @example
 @group
 (%i1) apropos("gamma");
-(%o1) [%gamma, gamma, gammalim, gamma_expand, gamma_incomplete_lower, 
-gamma_incomplete, gamma_incomplete_generalized, 
-gamma_incomplete_regularized, Gamma, log_gamma, makegamma, 
-prefer_gamma_incomplete, gamma-incomplete, 
-gamma_incomplete_generalized_regularized]
+(%o1) [%gamma, Gamma, gamma_expand, gammalim, makegamma, 
+prefer_gamma_incomplete, gamma, gamma-incomplete, gamma_incomplete, 
+gamma_incomplete_generalized, gamma_incomplete_generalized_regularized, 
+gamma_incomplete_lower, gamma_incomplete_regularized, log_gamma]
+@end group
+
+The same example, using the symbol @code{gamma}, rather than the string:
+@group
+(%i2) apropos(gamma);
+(%o2) [%gamma, Gamma, gamma_expand, gammalim, makegamma, 
+prefer_gamma_incomplete, gamma, gamma-incomplete, gamma_incomplete, 
+gamma_incomplete_generalized, gamma_incomplete_generalized_regularized, 
+gamma_incomplete_lower, gamma_incomplete_regularized, log_gamma]
+@end group
+
+The number of symbols in the current Maxima session. This will vary.
+@group
+(%i3) length(apropos(""));
+(%o3)                                2338
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Help}
 @closecatbox
 @end deffn
@@ -126,7 +144,7 @@ _
 _
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Help}
 @category{Console interaction}
 @category{File input}
@@ -160,6 +178,10 @@ on-line manual.
 
 @code{describe} quotes its argument.  @code{describe} returns @code{true} if
 some documentation is found, otherwise @code{false}.
+
+To display the topics using a browser see @ref{output_format_for_help}.
+Also see @ref{browser} and @ref{url_base} to configure how to display
+the HTML files.
 
 See also @ref{Documentation}.
 
@@ -204,11 +226,90 @@ by @code{[...]}).  All or none of the items could have been selected by entering
 @code{all} or @code{none}, which can be abbreviated @code{a} or @code{n},
 respectively.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Help}
 @category{Console interaction}
 @closecatbox
 @end deffn
+
+@anchor{output_format_for_help}
+@defvr {Option variable} output_format_for_help
+Default value: @code{text}
+
+@code{output_format_for_help} controls how @code{describe} displays
+help.
+
+@code{output_format_for_help} can be set to one of the following
+values:
+@table @code
+@item text
+Help is displayed as plain text sent to a terminal.  This is the default.
+@item html
+Help is displayed using a browser to display the HTML version of the
+manual.
+@item frontend
+Help is displayed using the frontend's help system.  If no frontend is
+running then an error is signaled.  For example, wxMaxima and xmaxima
+are some frontends for maxima.
+@end table
+
+Any other value is a error.
+
+
+See also @mrefcomma{browser} and @mrefdot{url_base}
+
+@opencatbox{Categories:}
+@category{Help}
+@category{Global variables}
+@closecatbox
+@end defvr
+
+@anchor{browser}
+@defvr {Option variable} browser
+
+This specifies the command to use to open an HTML file.  This is a
+format string of the form @code{<cmd> ~A} where @code{~A} is replaced
+by the URL of the HTML file and @code{<cmd>} is some program that
+takes an arg and opens up a browser to the given URL.
+
+On windows, the default setting is @code{"start ~A"},
+which uses the default browser to display the html file.  You may replace
+it with e.g. @code{start firefox ~A}, @code{start chrome ~A} or @code{start iexplore ~A}
+if you want to use Firefox, Chrome, or Internet Explorer
+instead of the default browser.
+
+On other OSes, the user's default browser should be used
+automatically (using @code{xdg-open} on Linux/Unix and @code{open} on MacOS).
+You can also set the @code{browser} variable to use
+a non default browser, e.g.
+@code{browser:"firefox '~A'";} or @code{browser:"chromium '~A'";}
+
+See also @mrefcomma{output_format_for_help} and @mrefdot{url_base}
+
+@opencatbox{Categories:}
+@category{Help}
+@category{Global variables}
+@closecatbox
+@end defvr
+
+@anchor{url_base}
+@defvr {Option variable} url_base
+
+When displaying help using a browser, @code{url_base} defines the URL
+to use.  It defaults to a @code{file://} path pointing to the
+directory containing the html files for documentation.  However, you
+could use @code{http://localhost:8080/} or some other URL that has the HTML
+help files.  But this requires those URLs to have exactly the same
+HTML files in the info directory because a table is needed to
+translate a topic to the appropriate location in an html file.
+
+See also @ref{output_format_for_help} and @mrefdot{browser}
+
+@opencatbox{Categories:}
+@category{Help}
+@category{Global variables}
+@closecatbox
+@end defvr
 
 @c -----------------------------------------------------------------------------
 @anchor{example}
@@ -255,7 +356,7 @@ Examples:
 (%o6)                         done
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Help}
 @category{Console interaction}
 @closecatbox
@@ -269,7 +370,7 @@ Default value: @code{"manual.demo"}
 @code{manual_demo} specifies the name of the file containing the examples for 
 the function @code{example}.  See @mrefdot{example}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Help}
 @category{Global variables}
 @closecatbox

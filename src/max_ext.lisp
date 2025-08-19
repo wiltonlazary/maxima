@@ -1,6 +1,12 @@
 ;;Autoloads for maxima
 (in-package :maxima)
 
+($auto_mexpr '$guess_exact_value "pslq")
+(setf (get '$pslq_integer_relation 'autoload) "pslq")
+
+($auto_mexpr '$lratsubst "lrats")
+($auto_mexpr '$fullratsubst "lrats")
+
 ($auto_mexpr '$nusum "nusum")
 ($auto_mexpr '$unsum "nusum")
 ($auto_mexpr '$funcsolve "nusum")
@@ -43,6 +49,10 @@
 ($auto_mexpr '$bc2 "ode2.mac")
 ($auto_mexpr '$desimp "ode2.mac")
 ($auto_mexpr '$linear2 "ode2")
+
+;villate
+($auto_mexpr '$similaritytransform "eigen.mac")
+($auto_mexpr '$simtran "eigen.mac")
 
 (dolist (v       
 	  '($arite
@@ -281,9 +291,7 @@
        
        $addmatrices            ; mring.lisp
        $require_ring
-       
-       $nonnegintegerp         ; polynomialp.lisp
-       $polynomialp ))
+       ))
   (setf (get f 'autoload) "linearalgebra"))
 
 (dolist (mexpr       
@@ -350,14 +358,22 @@
 (autof 'simp-pochhammer "orthopoly")
 
 (dolist (f
-  '($draw
+  '($activate_window
+    $add_zeroes
+    $draw
     $draw2d
     $draw3d
-    $set_draw_defaults
-    $multiplot_mode
+    $draw_file
+    $get_pixel
     $make_level_picture
     $make_rgb_picture
-    $get_pixel
+    $multiplot_mode
+    $negative_picture
+    $picture_equalp
+    $picturep
+    $read_xpm
+    $rgb2level
+    $set_draw_defaults
     $take_channel))
   (setf (get f 'autoload) "draw"))
 
@@ -380,11 +396,16 @@
 
 (setf (get '$scene 'autoload) "visualization")
 
-(defprop $hypergeometric simp-hypergeometric operators)
-(autof 'simp-hypergeometric "hypergeometric")
+($auto_mexpr '$abramowitz_id "abramowitz_id")
+($auto_mexpr '$hypergeometric_simp "hypergeometric_mac")
 
 (dolist (f
   '($cl_eval
     $common_lisp    
     $to_cl))
   (setf (get f 'autoload) "tocl"))
+
+(dolist (f
+  '($hstep
+    $pwilt))
+  (setf (get f 'autoload) "pwilt"))

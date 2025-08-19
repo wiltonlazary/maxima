@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -12,16 +12,7 @@
 
 (macsyma-module comm)
 
-(declare-top (special $exptsubst $linechar $nolabels $inflag $piece $dispflag
-		      $gradefs $props $dependencies derivflag derivlist
-		      $linenum $partswitch *linelabel* nn* dn*
-		      $powerdisp atvars $errexp $derivsubst $dotdistrib
-		      $opsubst $subnumsimp $transrun in-p substp $sqrtdispflag
-		      $pfeformat dummy-variable-operators))
-
-(defvar *islinp* nil) ; When T, sdiff is called from the function islinear.
-(defvar *atp* nil)    ; When T, prevents substitution from applying to vars 
-                      ; bound by %sum, %product, %integrate, %limit
+(declare-top (special *linelabel*))
 
 ;; op and opr properties
 
@@ -45,11 +36,16 @@
     (and (symbolp x) (remprop x 'opr))
     (and (stringp x) (remhash x *opr-table*))))
 
-;; Store built-in operators, which get additional properties.
-;; These operators aren't killed by the function kill-operator.
-(defvar *mopl* nil)
+;; This business about operator properties is terrible --
+;; this stuff should be in src/nparse.lisp, and it should be split up
+;; for each operator. Extra points for making it declarative.
 
-(mapc #'(lambda (x) (putprop (car x) (cadr x) 'op) (putopr (cadr x) (car x)) (push (cadr x) *mopl*))
+(mapc #'(lambda (x)
+          (putprop (car x) (cadr x) 'op)
+          (putprop (intern (concatenate 'string "%" (symbol-name (car x)))) (cadr x) 'op) ;; nounify not yet available
+          (putopr (cadr x) (car x))
+          (push (cadr x) *mopl*))
+
       '((mplus "+") (mminus "-") (mtimes "*") (mexpt "**") (mexpt "^")
 	(mnctimes ".") (rat "/") (mquotient "/") (mncexpt "^^")
 	(mequal "=") (mgreaterp ">") (mlessp "<") (mleqp "<=") (mgeqp ">=")
@@ -60,17 +56,6 @@
 
 (mapc #'(lambda (x) (putprop (car x) (cadr x) 'op))
       '((mqapply $subvar) (bigfloat $bfloat)))
-
-(defmvar $exptsubst nil)
-(defmvar $partswitch nil)
-(defmvar $inflag nil)
-(defmvar $derivsubst nil)
-(defmvar $opsubst t)
-(defvar $gradefs '((mlist simp)))
-(defvar $dependencies '((mlist simp)))
-(defvar atvars '($@1 $@2 $@3 $@4))
-(defvar in-p nil)
-(defvar substp nil)
 
 (defmvar $vect_cross nil
   "If TRUE allows DIFF(X~Y,T) to work where ~ is defined in
@@ -136,36 +121,38 @@
                         (setq z (maxima-substitute (cdar l) (caar l) z))))))))))
 
 (defun maxima-substitute (x y z) ; The args to SUBSTITUTE are assumed to be simplified.
-;; Prevent replacing dependent variable with constant in derivative
-(cond ((and (not (atom z)) (eq (caar z) '%derivative) (eq (cadr z) y) (typep x 'number)) z)
-(t
-  (let ((in-p t) (substp t))
-    (if (and (mnump y) (= (signum1 y) 1))
-	(let ($sqrtdispflag ($pfeformat t)) (setq z (nformat-all z))))
-    (simplifya
-     (if (atom y)
-	 (cond ((equal y -1)
-		(setq y '((mminus) 1)) (subst2 x y (nformat-all z) nil nil)) ;; negxpty and timesp don't matter in this call since (caar y) != 'mexpt
-	       (t
-		(cond ((and (not (symbolp x))
-			    (functionp x))
-		       (let ((tem (gensym)))
-			 (setf (get  tem  'operators) 'application-operator)
-			 (setf (symbol-function tem) x)
-			 (setq x tem))))
-		(subst1 x y z)))
-	 (let ((negxpty (if (and (eq (caar y) 'mexpt)
-				 (= (signum1 (caddr y)) 1))
-			    (mul2 -1 (caddr y))))
-	       (timesp (if (eq (caar y) 'mtimes) (setq y (nformat y)))))
-	   (subst2 x y z negxpty timesp)))
-     nil)))
-))
+  ;; Prevent replacing dependent variable with constant in derivative
+  (cond ((and (not (atom z))
+              (eq (caar z) '%derivative)
+              (eq (cadr z) y)
+              (typep x 'number))
+         z)
+        (t
+         (let ((in-p t) (substp t))
+           (if (and (mnump y) (= (signum1 y) 1))
+	       (let ($sqrtdispflag ($pfeformat t)) (setq z (nformat-all z))))
+           (simplifya
+            (if (atom y)
+	        (cond ((equal y -1)
+		       (setq y '((mminus) 1))
+                       (subst2 x y (nformat-all z) nil nil)) ;; negxpty and timesp don't matter in this call since (caar y) != 'mexpt
+	              (t
+		       (cond ((and (not (symbolp x))
+			           (functionp x))
+		              (let ((tem (gensym)))
+			        (setf (get  tem  'operators) 'application-operator)
+			        (setf (symbol-function tem) x)
+			        (setq x tem))))
+		       (subst1 x y z)))
+	        (let ((negxpty (if (and (eq (caar y) 'mexpt)
+				        (= (signum1 (caddr y)) 1))
+			           (mul2 -1 (caddr y))))
+	              (timesp (if (eq (caar y) 'mtimes)
+                                  (setq y (nformat y)))))
+	          (subst2 x y z negxpty timesp)))
+            nil)))))
 
 ;;Remainder of page is update from F302 --gsb
-
-;;Used in COMM2 (AT), limit, and below.
-(defvar dummy-variable-operators '(%product %sum %laplace %integrate %limit %at))
 
 (defun subst1 (x y z)			; Y is an atom
   (cond ((atom z) (if (equal y z) x z))
@@ -398,7 +385,6 @@
 	     (add2lnc (cons (cons (caar z) nil) (cdr z)) $gradefs) z))))
 
 (defmfun $diff (&rest args)
-  #-gcl
   (declare (dynamic-extent args))
   (let (derivlist)
     (deriv args)))
@@ -510,7 +496,7 @@
 	 (cond ((or (atom (cadr e)) (member 'array (cdaadr e) :test #'eq)) (chainrule e x))
 	       ((freel (cddr e) x) (diff%deriv (cons (sdiff (cadr e) x) (cddr e))))
 	       (t (diff%deriv (list e x 1)))))
-	((member (caar e) '(%binomial $beta) :test #'eq)
+	((member (caar e) '(%binomial %beta) :test #'eq)
 	 (let ((efact ($makefact e)))
 	   (mul2 (factor (sdiff efact x)) (div e efact))))
 	((eq (caar e) '%integrate) (diffint e x))
@@ -557,7 +543,7 @@
 	  ((and (get '$pderivop 'operators) (funcall 'sdiffgrad-pdiff e x)))
 
 	  ;; two line extension for hypergeometric.
-	  ((and (equal fun '$hypergeometric) (get '$hypergeometric 'operators))
+	  ((and (equal fun '%hypergeometric) (get '%hypergeometric 'operators))
 	   (funcall 'diff-hypergeometric (second e) (third e) (fourth e) x))
 
 	  ((or (eq fun 'mqapply) (null (setq grad (zl-get fun 'grad))))
@@ -669,7 +655,7 @@
 		 ((mexpt) $%e ((mtimes) -1 ((mexpt) x 2)))))
 	  )))
 
-(defprop $atan2 ((x y) ((mtimes) y ((mexpt) ((mplus) ((mexpt) x 2) ((mexpt) y 2)) -1))
+(defprop %atan2 ((x y) ((mtimes) y ((mexpt) ((mplus) ((mexpt) x 2) ((mexpt) y 2)) -1))
 		 ((mtimes) -1 x ((mexpt) ((mplus) ((mexpt) x 2) ((mexpt) y 2)) -1)))
   grad)
 
@@ -727,8 +713,7 @@
 (defun nthelem (n e)
   (car (nthcdr (1- n) e)))
 
-(defun delsimp (e)
-  (delete 'simp (copy-list e) :count 1 :test #'eq))
+(defun delsimp (e) (remove 'simp e))
 
 (defun remsimp (e)
   (if (atom e) e (cons (delsimp (car e)) (mapcar #'remsimp (cdr e)))))
@@ -751,7 +736,6 @@
   (disp1 (cdr form) t t))
 
 (defmfun $ldisp (&rest args)
-  #-gcl
   (declare (dynamic-extent args))
   (disp1 args t nil))
 
@@ -759,7 +743,6 @@
   (disp1 (cdr form) nil t))
 
 (defmfun $disp (&rest args)
-  #-gcl
   (declare (dynamic-extent args))
   (disp1 args nil nil))
 
@@ -777,7 +760,6 @@
     (if lablist (nconc lablist (cons (elabel ans) nil)))
     (setq tim (get-internal-run-time))
     (let ((*display-labels-p* (not (null lablist))))
-      (declare (special *display-labels-p*))
       (displa (list '(mlabel) (if lablist *linelabel*) ans)))
     (mterpri)
     (timeorg tim)))
@@ -834,7 +816,8 @@
 ;;; These functions implement the Macsyma functions $op and $operatorp.
 ;;; Dan Stanger
 (defmfun $op (expr)
-  ($part expr 0))
+  (let (($partswitch nil))
+    ($part expr 0)))
 
 (defmfun $operatorp (expr oplist)
   (if ($listp oplist)
@@ -842,12 +825,10 @@
       (alike1 ($op expr) oplist)))
 
 (defmfun $part (&rest args)
-  #-gcl
   (declare (dynamic-extent args))
   (mpart args nil nil $inflag '$part))
 
 (defmfun $inpart (&rest args)
-  #-gcl
   (declare (dynamic-extent args))
   (mpart args nil nil t '$inpart))
 
@@ -859,16 +840,16 @@
   (let ((substp t))
     (mpart (cdr l) t nil t '$substinpart)))
 
-(defun part1 (arglist substflag dispflag inflag) ; called only by TRANSLATE
+(defun part1 (arglist substflag dispflag inflag fn) ; called only by TRANSLATE
   (let ((substp t))
-    (mpart arglist substflag dispflag inflag '$substpart)))
+    (mpart arglist substflag dispflag inflag fn)))
 
 (defun mpart (arglist substflag dispflag inflag fn)
   (prog (substitem arg arg1 exp exp1 exp* sevlist count prevcount n specp
 	 lastelem lastcount)
      (setq specp (or substflag dispflag))
      (if substflag (setq substitem (car arglist) arglist (cdr arglist)))
-     (if (null arglist) (wna-err '$part))
+     (if (null arglist) (wna-err fn))
      (setq exp (if substflag (meval (car arglist)) (car arglist)))
      (when (null (setq arglist (cdr arglist)))
        (setq $piece exp)
@@ -1213,7 +1194,6 @@
   (let ((errset nil)
 	(errcatch (cons bindlist loclist))
 	(*mdebug* nil))
-    (declare (special errcatch))
     (let ((result (errset (funcall thunk))))
       (labels ((bad-number-p (num)
 		 (if (complexp num)
@@ -1228,6 +1208,9 @@
 (defmfun $float (e)
   (cond ((numberp e)
 	 (let ((e1 (float e))) (if (float-inf-p e1) (signal 'floating-point-overflow) e1)))
+	((eq e '$%i)
+	 ;; Handle %i specially.
+	 (mul 1.0 '$%i))
 	((and (symbolp e) (mget e '$numer)))
 	((or (atom e) (member 'array (cdar e) :test #'eq)) e)
 	((eq (caar e) 'rat) (fpcofrat e))

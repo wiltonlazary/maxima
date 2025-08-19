@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -16,9 +16,6 @@
 ;;                        MMACROEXPANDED, MMACROEXPAND and MMACROEXPAND1
 
 
-(declare-top (special $macros $functions $transrun $translate))
-
- 
 ;; $MACROS declared in jpg;mlisp >
 
 
@@ -32,7 +29,7 @@ means to completely replace the form with the expansion.  This is more space
 efficient than EXPAND but grinds and displays the expansion instead of the
 call."
   modified-commands '($macroexpand)
-  setting-list      '( () $expand $displace ) )
+  :setting-list      (() $expand $displace))
 
 
 ;;; LOCAL MACRO ;;;

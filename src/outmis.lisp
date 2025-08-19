@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -19,10 +19,14 @@
 (macsyma-module outmis)
 
 
-(declare-top (special $exptisolate $labels $dispflag errorsw))
+(declare-top (special $exptisolate))
 
-(defmvar $exptisolate nil)
-(defmvar $isolate_wrt_times nil)
+(defmvar $exptisolate nil
+  nil
+  :properties ((evflag t)))
+(defmvar $isolate_wrt_times nil
+  nil
+  :properties ((evflag t)))
 
 (defmfun $isolate (e *xvar)
   (iso1 e (getopr *xvar)))
@@ -118,9 +122,6 @@
 	     (cond ((eq (caar e) 'mqapply) (cons u (cons (cadr e) v)))
 		   ((eq (caar e) 'mplus) (cons u (nreverse v)))
 		   (t (cons u v)))))))
-
-(declare-top (special atvars munbound $props $gradefs $features opers
-		      $contexts $activecontexts $aliases))
 
 (defmspec $properties (x)
   (setq x (getopr (fexprcheck x)))
@@ -319,7 +320,7 @@
 			    (ncons (car i)))
 		    ret))))
 
-(declare-top (special $programmode *roots *failures varlist genvar $ratfac))
+(declare-top (special *roots *failures))
 
 (defmfun $changevar (expr trans nvar ovar)
   (let ($ratfac)
@@ -391,8 +392,8 @@
 					     trans ovar)))))
 	     (cond
 	       (nfun
-		;; nfun is basically the result of subtituting ovar
-		;; with tfun in the integratand (summand).
+		;; nfun is basically the result of substituting ovar
+		;; with tfun in the integrand (summand).
 		(cond	
 		  ((cdddr expr)
 		   ;; Handle definite integral, summation, or product.
@@ -432,7 +433,7 @@
 		     varlist nvarlist)
 	    (rdis (cdr expr))))))
 
-(declare-top (special $listconstvars facfun))
+(declare-top (special facfun))
 
 (defmfun $factorsum (e)
   (factorsum0 e '$factor))

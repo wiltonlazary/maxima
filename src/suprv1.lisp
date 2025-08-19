@@ -15,70 +15,54 @@
 ;;apply, and tried to eliminate any / quoting.  Most of the relevant
 ;;stuff is in system.lisp for the lispm and nil friends.--wfs
 
+;; It would probably be better to bind *print-base* and *read-base* as
+;; needed in various functions instead of doing it this way with
+;; *old-ibase* and *old-base*.  There are already some cases where
+;; *print-base* is bound in various functions.
+(defvar *old-ibase*)
+(defvar *old-base*)
+
 (eval-when
-    #+gcl (compile eval)
-    #-gcl (:compile-toplevel :execute)
-  (setq old-ibase *read-base* old-base *print-base*)
+    (:compile-toplevel :execute)
+  (setq *old-ibase* *read-base* *old-base* *print-base*)
   (setq *read-base* 10. *print-base* 10.))
 
-(declare-top  (special bindlist loclist errset *mopl*
-		       $values $functions $arrays $gradefs $dependencies
-		       $rules $props $ratvars
-		       varlist genvar
-		       $gensumnum checkfactors $features featurel
-		       tellratlist $dontfactor
-		       dispflag savefile $%% $error
-		       opers *ratweights $ratweights
-		       $stringdisp $lispdisp
-		       transp $contexts $setcheck $macros autoload))
+(declare-top  (special errset
+		       $features featurel
+		       dispflag savefile
+		       opers *ratweights
+		       transp autoload))
 
 (defvar thistime 0)
-(defvar *refchkl* nil)
-(defvar *mdebug* nil)
-(defvar errcatch nil)
 (defvar mcatch nil)
 (defvar brklvl -1)
 (defvar allbutl nil)
-(defvar lessorder nil)
-(defvar greatorder nil)
-(defvar *in-translate-file* nil)
-(defvar *linelabel* nil)
 
-(defmvar $disptime nil)
 (defmvar $strdisp t)
-(defmvar $grind nil)
+
+(defmvar $grind nil
+  "When the variable 'grind' is 'true', the output of 'string' and
+  'stringout' has the same format as that of 'grind'; otherwise no
+  attempt is made to specially format the output of those functions.")
+
 (defmvar $backtrace '$backtrace)
-(defmvar $debugmode nil)
-(defmvar $poislim 5)
-(defmvar $loadprint nil)
-(defmvar $nolabels nil)
-(defmvar $aliases '((mlist simp)))
 
-(defmvar $infolists
-  '((mlist simp) $labels $values $functions $macros $arrays
-                 $myoptions $props $aliases $rules $gradefs
-                 $dependencies $let_rule_packages $structures))
+(defmvar $debugmode nil
+  "When 'debugmode' is 'true', Maxima will start the Maxima debugger
+  when a Maxima error occurs.
 
-(defmvar $labels (list '(mlist simp)))
-(defmvar $dispflag t)
+  When 'debugmode' is 'lisp', Maxima will start the Lisp debugger when
+  a Maxima error occurs.
 
-(defmvar $% '$% "The last out-line computed, corresponds to lisp *"
-	 no-reset)
+  In either case, enabling 'debugmode' will not catch Lisp errors."
+ :properties ((assign 'debugmode1)))
 
-(defmvar $inchar '$%i
-  "The alphabetic prefix of the names of expressions typed by the user.")
-
-(defmvar $outchar '$%o
-  "The alphabetic prefix of the names of expressions returned by the system.")
-
-(defmvar $linechar '$%t
-  "The alphabetic prefix of the names of intermediate displayed expressions.")
-
-(defmvar $linenum 1 "the line number of the last expression."
-	 fixnum no-reset)
-
-(defmvar $file_output_append nil
-  "Flag to tell file-writing functions whether to append or clobber the output file.")
+(defmvar $poislim 5
+  "Determines the domain of the coefficients in the arguments of the
+  trig functions.  The initial value of 5 corresponds to the interval
+  [-2^(5-1)+1,2^(5-1)], or [-15,16], but it can be set to [-2^(n-1)+1,
+  2^(n-1)]."
+  :properties ((assign 'poislim1)))
 
 ;; This version of meval* makes sure, that the facts from the global variable
 ;; *local-signs* are cleared with a call to clearsign. The facts are added by
@@ -87,17 +71,25 @@
 
 (defmvar $ratvarswitch t) ; If T, start an evaluation with a fresh list VARLIST.
 
-(defun meval* (expr)
+(defmacro with-top-level-environment (&rest body)
   ;; Make sure that clearsign is called after the evaluation.
-  (unwind-protect
-    (let (*refchkl* checkfactors)
+  `(unwind-protect
+    (let (*refchkl* *checkfactors*)
       (if $ratvarswitch (setq varlist (cdr $ratvars)))
-      (meval expr))
+      ,@ body)
     ;; Clear the facts from asksign and friends.
     (clearsign)))
 
+(defun meval* (expr)
+  (with-top-level-environment
+    (meval expr)))
+
+(defun makelabel10 (x)
+  (let (*print-radix*
+	(*print-base* 10.))
+    ($concat '|| x $linenum)))
 (defun makelabel (x)
-  (setq *linelabel* ($concat '|| x $linenum))
+  (setq *linelabel* (makelabel10 x))
   (unless $nolabels
     (when (or (null (cdr $labels))
 	      (when (member *linelabel* (cddr $labels) :test #'equal)
@@ -138,7 +130,7 @@
 (defun checklabel (x)	; CHECKLABEL returns T iff label is not in use
   (not (or $nolabels
 	   (= $linenum 0)
-	   (boundp ($concat '|| x $linenum)))))
+	   (boundp (makelabel10 x)))))
 
 (defun gctimep (timep tim)
   (cond ((and (eq timep '$all) (not (zerop tim))) (princ (intl:gettext "Total time = ")) t)
@@ -229,7 +221,6 @@
 (defvar *builtin-$rules* nil)
 (defvar *builtin-symbols-with-values* nil)
 (defvar *builtin-symbol-values* (make-hash-table))
-(defvar *builtin-numeric-constants* '($%e $%pi $%phi $%gamma))
 
 (defun kill1-atom (x)
   (let ((z (or (and (member x (cdr $aliases) :test #'equal) (get x 'noun)) (get x 'verb))))
@@ -293,6 +284,7 @@
           (remprop x 'defstruct-template)
           (remprop x 'defstruct-default)
           (remprop x 'translate)
+          (remprop x 'operators)
           (setf $structures (delete y $structures :count 1 :test #'equal))))
       (when (and (member x *builtin-symbols* :test #'equal)
 		 (gethash x *builtin-symbol-props*))
@@ -321,6 +313,7 @@
 	      (mapc #'(lambda (y) (kill1 (caar y))) (cdr (symbol-value x))))
 	     ((eq x '$myoptions))
 	     ((eq x '$tellrats) (setq tellratlist nil))
+	     ((eq x '$ratvars) (setq $ratvars '((mlist simp)) varlist nil))
 	     ((eq x '$ratweights) (setq *ratweights nil
 					$ratweights '((mlist simp))))
 	     ((eq x '$features)
@@ -329,7 +322,7 @@
 	     ((or (eq x t) (eq x '$all))
 	      (mapc #'kill1 (cdr $infolists))
 	      (setq $ratvars '((mlist simp)) varlist nil genvar nil
-		    checkfactors nil greatorder nil lessorder nil $gensumnum 0
+		    *checkfactors* nil greatorder nil lessorder nil $gensumnum 0
 		    *ratweights nil $ratweights
 		    '((mlist simp))
 		    tellratlist nil $dontfactor '((mlist)) $setcheck nil)
@@ -354,7 +347,7 @@
 		(if (gethash 'dim1 z)
 		  (remhash (car indices) z)
 		  (remhash indices z))))
-         ((eq (caar x) '$@) (mrecord-kill x))
+             ((eq (caar x) '$@) (mrecord-kill x))
 	     ((and (eq (caar x) '$allbut)
 		   (not (dolist (u (cdr x))
 			  (if (not (symbolp u)) (return t)))))
@@ -415,11 +408,14 @@
 	     (member rule l :test #'equal) op))))
 
 (defmfun $debugmode (x)
-  (setq $debugmode x)
-  (debugmode1 nil x))
+  (debugmode1 nil x)
+  (setq $debugmode x))
 
 (defun debugmode1 (assign-var y)
-  (declare (ignore assign-var))
+  ;; The user manual says $debugmode has one of three values: false
+  ;; (NIL), true (T), or lisp ($lisp).  Enforce that.
+  (unless (member y '(nil t $lisp))
+    (mseterr assign-var y "Must be one of false, true, or lisp"))
   (setq *mdebug* y))
 
 (defun errlfun1 (mpdls)
@@ -463,7 +459,6 @@
 	(cadr (reverse l)))))
 
 (defmspec $playback (x)
-  (declare (special $showtime))
   (setq x (cdr x))
   (prog (l l1 l2 numbp slowp nostringp inputp timep grindp inchar largp)
      (setq inchar (getlabcharn $inchar)) ; Only the 1st alphabetic char. of $INCHAR is tested
@@ -636,8 +631,19 @@
 	($go mgo) ($signum %signum)
 	($return mreturn) ($factorial mfactorial)
 	($ibase *read-base*) ($obase *print-base*)
-	($modulus modulus)
 	($mode_declare $modedeclare)))
+
+;; Validate values assigned to $ibase and $obase, which are aliased to
+;; *read-base* and *print-base*, respectively, above.
+(putprop '*read-base* #'(lambda (name val)
+			  (unless (typep val '(integer 2 36))
+			    (mseterr name val "must be an integer between 2 and 36, inclusive")))
+	 'assign)
+
+(putprop '*print-base* #'(lambda (name val)
+			  (unless (typep val '(integer 2 36))
+			    (mseterr name val "must be an integer between 2 and 36, inclusive")))
+	 'assign)
 
 (mapc #'(lambda (x) (putprop (car x) (cadr x) 'alias))
       '(($ratcoeff $ratcoef) ($ratnum $ratnumer) ($true t)
@@ -751,29 +757,66 @@
 	(char (symbol-name label) 2)
 	c)))
 
+; Evaluate form while catching throws to some specific tags (called
+; "errcatch tags").  If no throw to an errcatch tag is caught, then
+; the values from form are returned.  If a throw to an errcatch tag
+; is caught, then a Maxima error is signaled.
+;
+; The errcatch tags are ERRORSW, MACSYMA-QUIT and RAT-ERR.
+(defmacro with-errcatch-tag-$errors (form)
+  (let ((block-name (gensym)))
+    `(block ,block-name
+       ; RAT-ERROR-TO-MERROR will catch any throws to RAT-ERR and
+       ; call merror with a specific error message.
+       (catch 'macsyma-quit
+         (catch 'errorsw
+           (rat-error-to-merror
+             (return-from ,block-name ,form))))
+       ; If we're here, then we don't know any information about the
+       ; error, so just call MERROR with a vague error message.  This
+       ; message will not be printed by MERROR, but it will be stored
+       ; in Maxima's error variable.
+       (with-$error
+         (merror (intl:gettext "An error was caught by errcatch."))))))
+
+; This is similar to the classic errset, but errcatch handles lisp and
+; Maxima errors.
+(defmacro errcatch (form)
+  `(let ((errcatch (cons bindlist loclist))
+         (*mdebug* nil))
+     (declare (special errcatch))
+     (handler-case (list (with-errcatch-tag-$errors ,form))
+       (maxima-$error ()
+         ; If this was signaled by MERROR, then it has already handled
+         ; the setting of the error variable and the printing of any error
+         ; messages (as applicable).
+         ;
+         ; If for some reason this wasn't signaled by MERROR, then it's the
+         ; signaler's responsibility to handle error messages.
+         ;
+         ; Either way, we just need to clean up here.
+         (errlfun1 errcatch)
+         nil)
+       (error (e)
+         ; We store the error report message in the error variable and
+         ; print the message if errormsg is true.  Then we clean up.
+         (setq $error (list '(mlist simp) (princ-to-string e)))
+         (when $errormsg
+           ($errormsg))
+         (errlfun1 errcatch)
+         nil))))
+
 (defmspec $errcatch (form)
-  (let ((errcatch (cons bindlist loclist))
-        (*mdebug* nil))
-    (handler-case (list '(mlist) (rat-error-to-merror (mevaln (cdr form))))
-      (maxima-$error ()
-        ; merror already set the error variable and printed the error
-        ; message if errormsg is true, so we just need to clean up.
-        (errlfun1 errcatch)
-        (list '(mlist simp)))
-      (error (e)
-        ; We store the error report message in the error variable and
-        ; print the message if errormsg is true.  Then we clean up.
-        (setq $error (list '(mlist simp) (princ-to-string e)))
-        (when $errormsg
-          ($errormsg))
-        (errlfun1 errcatch)
-        (list '(mlist simp))))))
+  (cons '(mlist) (errcatch (mevaln (cdr form)))))
+
+(defmacro mcatch (form)
+  `(let ((mcatch (cons bindlist loclist)))
+     (unwind-protect
+         (catch 'mcatch (rat-error-to-merror ,form))
+       (errlfun1 mcatch))))
 
 (defmspec $catch (form)
-  (let ((mcatch (cons bindlist loclist)))
-    (prog1
-	(catch 'mcatch (rat-error-to-merror (mevaln (cdr form))))
-      (errlfun1 mcatch))))
+  (mcatch (mevaln (cdr form))))
 
 (defmfun $throw (exp)
   (if (null mcatch) (merror (intl:gettext "throw: not within 'catch'; expression: ~M") exp))
@@ -797,16 +840,18 @@
       (incf thistime (- (get-internal-run-time) tim))))
 
 
-(defmfun $quit ()
+(defmfun $quit (&optional (exit-code 0))
+  "Quit Maxima with an optional exit code for Lisps and systems that
+  support exit codes."
   (princ *maxima-epilog*)
-  (bye)
+  (bye exit-code)
   (mtell (intl:gettext "quit: No known quit function for this Lisp.~%")))
 
 ;; File-processing stuff.
 
-(defun mterpri ()
-   (terpri)
-   (finish-output))
+(defun mterpri (&optional (ostream *standard-output*))
+   (terpri ostream)
+   (finish-output ostream))
 
 (defmspec $status (form)
   (setq form (cdr form))
@@ -834,9 +879,9 @@
         (t
          (merror (intl:gettext "sstatus: unknown argument: ~M") keyword))))
 
-(dolist (l '($sin $cos $tan $log $plog $sec $csc $cot $sinh $cosh
+(dolist (l '($sin $cos $tan  $sec $csc $cot $sinh $cosh
 	     $tanh $sech $csch $coth $asin $acos $atan $acot $acsc $asec $asinh
-	     $acosh $atanh $acsch $asech $acoth $binomial $gamma $genfact $del))
+	     $acosh $atanh $acsch $asech $acoth $del))
   (let ((x ($nounify l)))
     (putprop l x 'alias)
     (putprop x l 'reversealias)))
@@ -850,18 +895,6 @@
 (defprop $diff %derivative verb)
 (defprop %derivative $diff noun)
 
-(mapc #'(lambda (x) (putprop (car x) (cadr x) 'assign))
-      '(($debugmode debugmode1)
-	($fpprec fpprec1) ($poislim poislim1)
-	($default_let_rule_package let-rule-setter)
-	($current_let_rule_package let-rule-setter)
-	($let_rule_packages let-rule-setter)))
-
-(mapc #'(lambda (x) (putprop x 'neverset 'assign)) (cdr $infolists))
-
-(defprop $contexts neverset assign)
-
 (eval-when
-    #+gcl (compile eval)
-    #-gcl (:compile-toplevel :execute)
-    (setq *print-base* old-base *read-base* old-ibase))
+    (:compile-toplevel :execute)
+    (setq *print-base* *old-base* *read-base* *old-ibase*))

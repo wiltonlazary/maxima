@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -15,26 +15,11 @@
 ;;	THIS IS THE NEW RATIONAL FUNCTION PACKAGE PART 4.
 ;;	IT INCLUDES THE POLYNOMIAL FACTORING ROUTINES.
 
-(declare-top (special *min* *mx* *odr* nn* scanmapp *checkagain adn*))
-
-(declare-top (special $factorflag $dontfactor $algebraic $ratfac))
-
-;;There really do seem to be two such variables...
-(declare-top (special alpha *alpha gauss genvar minpoly*))
+(declare-top (special *odr* *checkagain))
 
 (defmvar *irreds nil)
-(defmvar algfac* nil)
-(defmvar low* nil)
 
-(defmvar $intfaclim t)
 (defmvar $berlefact t)
-
-(defmvar $factor_max_degree 1000
-  "If set to an integer n, some potentially large (many factors) polynomials
-   of degree > n won't be factored, preventing huge memory allocations and
-   stack overflows. Set to zero to deactivate."
-  fixnum)
-(putprop '$factor_max_degree 'posintegerset 'assign)
 
 (defmvar $factor_max_degree_print_warning t
   "Print a warning message when a polynomial is not factored because its
@@ -189,10 +174,6 @@
 		 (cons (pmodroot (cadr x))
 		       (pmodroot1 (cddr x)))))))
 
-(defmvar $savefactors nil "If t factors of ratreped forms will be saved")
-
-(defvar checkfactors () "List of saved factors")
-
 (defun savefactors (l)
   (when $savefactors
     (savefactor1 (car l))
@@ -202,8 +183,8 @@
 (defun savefactor1 (p)
   (unless (or (pcoefp p)
 	      (ptzerop (p-red p))
-	      (member p checkfactors :test #'equal))
-    (push p checkfactors)))
+	      (member p *checkfactors* :test #'equal))
+    (push p *checkfactors*)))
 
 (defun heurtrial1 (poly facs)
   (prog (h j)
@@ -316,7 +297,7 @@
 			       (t (pfactor1 a)))))))))
 
 
-(defun ffactor (l fn &aux (alpha alpha))
+(defun ffactor (l fn &aux (*alpha* *alpha*))
   ;;  (declare (special varlist))		;i suppose...
   (prog (q)
      (cond ((and (null $factorflag) (mnump l)) (return l))
@@ -326,10 +307,10 @@
 	   ((and (not gauss)(member 'factored (cdar l) :test #'eq))(return l))
 	   ((and gauss (member 'gfactored (cdar l) :test #'eq)) (return l)))
      (newvar l)
-     (if algfac* (setq varlist (cons alpha (remove alpha varlist :test #'equal))))
+     (if algfac* (setq varlist (cons *alpha* (remove *alpha* varlist :test #'equal))))
      (setq q (ratrep* l))
      (when algfac*
-       (setq alpha (cadr (ratrep* alpha)))
+       (setq *alpha* (cadr (ratrep* *alpha*)))
        (setq minpoly* (subst (car (last genvar))
 			     (car minpoly*)
 			     minpoly*)))
@@ -391,7 +372,7 @@
      (cond ((dontfactor (car p)) (return (list p)))
 	   ((and (not (zerop $factor_max_degree)) (> (apply 'max (pdegreevector p)) $factor_max_degree))
 		 (when $factor_max_degree_print_warning
-		   (mformat t "Refusing to factor polynomial ~M because its degree exceeds factor_max_degree (~M)~%" (pdis p) $factor_max_degree))
+		   (mtell (intl:gettext "Refusing to factor polynomial ~M because its degree exceeds factor_max_degree (~M)~%") (pdis p) $factor_max_degree))
 		 (return (list p)))
 	   ((onevarp p)
 	    (cond ((setq factors (factxn+-1 p))
@@ -408,8 +389,8 @@
      (setq factors(if (or algfac* modulus) (list p) ;SQRT(NUM. CONT OF DISC)
 		      (pfactorquad p)))
      (cond ((null factors)(go out)))
-     (when checkfactors
-       (setq factors (heurtrial factors checkfactors))
+     (when *checkfactors*
+       (setq factors (heurtrial factors *checkfactors*))
        (setq *checkagain (cdr factors)))
      out (return (nconc *irreds (mapcan (function pfactorany) factors)))))
 
@@ -418,7 +399,7 @@
 (declare-top (special *hvar *hmat))
 
 (defun pfactorany (p)
-  (cond (*checkagain (let (checkfactors) (pfactor1 p)))
+  (cond (*checkagain (let (*checkfactors*) (pfactor1 p)))
 	((and $homog_hack (not algfac*) (not (onevarp p)))
 	 (let ($homog_hack *hvar *hmat)
 	   (mapcar #'hexpand (pfactor (hreduce p)))))

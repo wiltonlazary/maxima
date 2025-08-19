@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -23,10 +23,6 @@
 ;;slow it down on lispm. We also eliminated the special
 ;;from ptimes2--wfs
 
-;; Global variables referenced throughout the rational function package.
-
-(defmvar modulus nil "Global switch for doing modular arithmetic")
-
 ;; CQUOTIENT
 ;;
 ;; Calculate the quotient of two coefficients, which should be numbers. If
@@ -41,15 +37,19 @@
 ;; integers, and raise a RAT-ERROR if A is not divisible by B. If either A or B
 ;; is a float then the division is done in floating point. Floats can get as far
 ;; as the rational function code if $KEEPFLOAT is true.
-(defun cquotient (a b)
-  (cond ((equal a 0) 0)
-	((null modulus)
-         (if (or (floatp a) (floatp b)
-                 (zerop (rem a b)))
-             (/ a b)
-             (rat-error "CQUOTIENT: quotient is not exact")))
-	(t (ctimes a (crecip b)))))
 
+;; Before May 2023, this code used (rem a b) along with (/ a b) instead of
+;; just (floor a b). For Clozure CL the floor method is faster.
+(defun cquotient (a b)
+  (cond ((eql a 0) 0) ;not sure this is OK--what if b=0 too?
+        ((null modulus)
+           (cond ((or (floatp a) (floatp b)) (/ a b)) ;not sure about floats here!
+                 (t
+                  (multiple-value-bind (q r) (floor a b)
+                   ;; when the remainder vanishes, return the quotient; else rat-error.
+                   (if (eql 0 r) q (rat-error "CQUOTIENT: quotient is not exact"))))))
+        (t
+           (ctimes a (crecip b)))))
 ;; ALG
 ;;
 ;; Get any value stored on the tellrat property of (car l). Returns NIL if L
@@ -998,7 +998,7 @@
 	     (declare (special var))	;who uses this? --gsb
 	     (cond ((null p) (cons 1 q))
 		   (t (setq p (car (let ($ratalgdenom)
-				     (bprog q (cons var p)))))
+				     (bprog q (cons var p) var))))
 		      (rattimes (cons (car p) 1) (rainv (cdr p)) t)))))))
 
 (defun pexptsq (p n)

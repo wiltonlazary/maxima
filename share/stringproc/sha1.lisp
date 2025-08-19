@@ -41,7 +41,7 @@
    (%o6)     c7:56:7e:8b:39:e2:42:8e:38:bf:9c:92:26:ac:68:de:4c:67:dc:39
 
    Note that in case the string contains German umlauts or other non-ASCII 
-   characters the fingerprint is platform dependend.
+   characters the fingerprint is platform dependent.
    
    The following code streams the base64 contents of a X509 certificate into a 
    string, decodes base64 to DER format and returns the SHA1 fingerprint. 
@@ -99,10 +99,9 @@
 (in-package :maxima)
 
 (eval-when
-  #+gcl (compile eval)
-  #-gcl (:compile-toplevel :execute)
-    (defvar old-ibase-sha1 *read-base*)
-    (setq *read-base* 10.) )
+    (:compile-toplevel :execute)
+  (defvar old-ibase-sha1 *read-base*)
+  (setq *read-base* 10.) )
 
 
 (declaim (inline sha-not sha+ sha-left-rotation sha-right-rotation))
@@ -352,6 +351,5 @@
 
 
 (eval-when
-  #+gcl (compile eval)
-  #-gcl (:compile-toplevel :execute)
-    (setq *read-base* old-ibase-sha1) )
+    (:compile-toplevel :execute)
+  (setq *read-base* old-ibase-sha1) )

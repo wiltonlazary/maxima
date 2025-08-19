@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -11,8 +11,6 @@
 
 (in-package :maxima)
 (macsyma-module mload)
-
-(declare-top (special $file_search_lisp $file_search_maxima $file_search_demo $loadprint))
 
 (defun load-and-tell (filename)
   (loadfile filename t ;; means this is a lisp-level call, not user-level.
@@ -54,9 +52,6 @@
     (probe-file stream)
     (error () nil)))
 
-(defmvar $load_pathname nil
-  "The full pathname of the file being loaded")
-
 (defmfun $batchload (filename-or-stream &aux (*mread-prompt* ""))
   (declare (special *mread-prompt*))
   (if (streamp filename-or-stream)
@@ -66,7 +61,7 @@
       (with-open-file (in-stream filename)
         (batchload-stream in-stream)))))
 
-(defun batchload-stream (in-stream)
+(defun batchload-stream (in-stream &key autoloading-p)
   (let ($load_pathname)
     (let*
       ((noevalargs nil)
@@ -76,6 +71,10 @@
         (if stream-truename
           (setq $load_pathname (cl:namestring stream-truename))
           (format nil "~A" in-stream)))
+       ;; If we arrived here from autoloading, call MEVAL instead of MEVAL*
+       ;; since MEVAL* is intended to be called from the interpreter top level;
+       ;; MEVAL* modifies global state, resetting VARLIST and calling CLEARSIGN.
+       (meval-fcn (symbol-function (if autoloading-p 'meval 'meval*)))
        (expr nil))
       (declare (special *prompt-on-read-hang*))
       (when $loadprint
@@ -85,7 +84,7 @@
       (loop while (and
                     (setq  expr (let (*prompt-on-read-hang*) (mread in-stream nil)))
                     (consp expr))
-            do (meval* (third expr)))
+            do (funcall meval-fcn (third expr)))
       in-stream-string-rep)))
 
 ;;returns appropriate error or existing pathname.
@@ -105,30 +104,31 @@
 (defmfun $load (filename)
   "This is the generic file loading function.
   LOAD(filename) will either BATCHLOAD or LOADFILE the file,
-  depending on wether the file contains Macsyma, Lisp, or Compiled
+  depending on whether the file contains Macsyma, Lisp, or Compiled
   code. The file specifications default such that a compiled file
   is searched for first, then a lisp file, and finally a macsyma batch
   file. This command is designed to provide maximum utility and
   convenience for writers of packages and users of the macsyma->lisp
   translator."
 
-  (let ((searched-for
-	 ($file_search1 filename
-			'((mlist) $file_search_maxima $file_search_lisp  )))
-	type)
-    (setq type ($file_type searched-for))
-    (case type
-      (($maxima)
-       ($batchload searched-for))
-      (($lisp $object)
-       ;; do something about handling errors
-       ;; during loading. Foobar fail act errors.
-       (load-and-tell searched-for))
-      (t
-       ;; UNREACHABLE MESSAGE: DEFAULT TYPE IS '$OBJECT (SEE $FILE_TYPE BELOW)
-       (merror "Maxima bug: Unknown file type ~M" type)))
-    searched-for))
-
+  (if (or (stringp filename) (symbolp filename) (pathnamep filename))
+    (let ((searched-for
+  	 ($file_search1 filename
+  			'((mlist) $file_search_maxima $file_search_lisp  )))
+  	type)
+      (setq type ($file_type searched-for))
+      (case type
+        (($maxima)
+         ($batchload searched-for))
+        (($lisp $object)
+         ;; do something about handling errors
+         ;; during loading. Foobar fail act errors.
+         (load-and-tell searched-for))
+        (t
+         ;; UNREACHABLE MESSAGE: DEFAULT TYPE IS '$OBJECT (SEE $FILE_TYPE BELOW)
+         (merror "Maxima bug: Unknown file type ~M" type)))
+      searched-for)
+    (merror "load: argument must be a string, symbol, or pathname; found: ~M" filename)))
 
 (defmvar $file_type_lisp
     (list '(mlist) "l" "lsp" "lisp"))
@@ -169,6 +169,7 @@
                &aux tem   (possible '(:demo :batch :test)))
   "giving a second argument makes it use demo mode, ie pause after evaluation
    of each command line"
+  (declare (special $batch_answers_from_file))
 
   ;; Try to get rid of testsuite failures on machines that are low on RAM.
   ($garbage_collect)
@@ -185,12 +186,13 @@
                                   '((mlist) $file_search_maxima)))))
       (cond
         ((eq demo :test)
-         (test-batch filename nil :show-all t)) ;; NEED TO ACCEPT INPUT STREAM HERE TOO
+         (test-batch filename nil :show-all t))
         (t
           (with-open-file (in-stream filename)
             (batch-stream in-stream demo)))))))
 
 (defun batch-stream (in-stream demo)
+  (declare (special $batch_answers_from_file))
   (let ($load_pathname)
     (let*
       ((*read-base* 10.)
@@ -198,7 +200,9 @@
        (in-stream-string-rep
         (if stream-truename
           (setq $load_pathname (cl:namestring stream-truename))
-          (format nil "~A" in-stream))))
+          (format nil "~A" in-stream)))
+       (*query-io* (if $batch_answers_from_file
+		       (make-two-way-stream in-stream (make-string-output-stream)) *query-io*)))
       (format t (intl:gettext "~%read and interpret ~A~%") in-stream-string-rep)
       (catch 'macsyma-quit (continue :stream in-stream :batch-or-demo-flag demo))
       (incf $linenum)
@@ -231,7 +235,7 @@
 ;;
 ;; Otherwise, either a or b is not a float, so return false.
 
-(defmvar $float_approx_equal_tolerance (* 8 flonum-epsilon))
+(defmvar $float_approx_equal_tolerance (* 8 +flonum-epsilon+))
 
 (defmfun $float_approx_equal (a b)
   (setq a (if (floatp a) a ($float a)))
@@ -252,18 +256,23 @@
      ;; look for A = B
      ((= a b))
      (t
-       ;; Implement test without involving floating-point arithmetic,
-       ;; to avoid errors which could occur with extreme values.
-       (let (a-significand a-expt a-sign b-significand b-expt b-sign)
-         (multiple-value-setq (a-significand a-expt a-sign) (decode-float a))
-         (multiple-value-setq (b-significand b-expt b-sign) (decode-float b))
-         (if (or (= a-sign b-sign) (>= $float_approx_equal_tolerance 1d0))
-           (let (a-b-significand a-b-expt a-b-sign tol-significand tol-expt tol-sign)
-             (multiple-value-setq (a-b-significand a-b-expt a-b-sign) (integer-decode-float (abs (- a b))))
-             (multiple-value-setq (tol-significand tol-expt tol-sign) (integer-decode-float $float_approx_equal_tolerance))
-             (or (< a-b-expt (+ tol-expt (min a-expt b-expt)))
-                 (and (= a-b-expt (+ tol-expt (min a-expt b-expt)))
-                      (<= a-b-significand tol-significand))))))))))
+      ;; Implement test without involving floating-point arithmetic,
+      ;; to avoid errors which could occur with extreme values.
+      (multiple-value-bind (a-significand a-expt a-sign)
+          (decode-float a)
+        (declare (ignore a-significand))
+        (multiple-value-bind (b-significand b-expt b-sign)
+            (decode-float b)
+          (declare (ignore b-significand))
+          (when (or (= a-sign b-sign)
+                    (>= $float_approx_equal_tolerance 1d0))
+            (multiple-value-bind (a-b-significand a-b-expt)
+                (integer-decode-float (abs (- a b)))
+              (multiple-value-bind (tol-significand tol-expt)
+                  (integer-decode-float $float_approx_equal_tolerance)
+                (or (< a-b-expt (+ tol-expt (min a-expt b-expt)))
+                    (and (= a-b-expt (+ tol-expt (min a-expt b-expt)))
+                         (<= a-b-significand tol-significand))))))))))))
 
 ;; Big float version of float_approx_equal. But for bfloat_approx_equal, the tolerance isn't
 ;; user settable; instead, it is 32 / 2^fpprec. The factor of 32 is too large, I suppose. But
@@ -278,7 +287,7 @@
      ($bfloatp a)
      ($bfloatp b)
      (setq bits (min (third (first a)) (third (first b))))
-     (setq m (mul 32 (expt 2 (- bits)) (min (expt 2 (- (car (last a)) 1)) (expt 2 (- (car (last b)) 1)))))
+     (setq m (* 32 (expt 2 (- bits)) (min (expt 2 (- (car (last a)) 1)) (expt 2 (- (car (last b)) 1)))))
      (setq m (if (rationalp m) (div (numerator m) (denominator m)) m))
      (eq t (mgqp m (take '(mabs) (sub a b)))))))
 
@@ -304,7 +313,9 @@
 	 (and (stringp g) (string= f g)))
 
 	((arrayp f)
-	 (and (arrayp g) (approx-alike ($listarray f) ($listarray g))))
+	 (and (arrayp g)
+          (equal (array-dimensions f) (array-dimensions g))
+          (approx-alike ($listarray f) ($listarray g))))
 
 	((hash-table-p f)
 	 (and (hash-table-p g) (approx-alike ($listarray f) ($listarray g))))
@@ -368,7 +379,7 @@
 (defun test-batch (filename expected-errors
 			    &key (out *standard-output*) (show-expected nil)
 			    (show-all nil) (showtime nil))
-
+  (declare (special $batch_answers_from_file))
   (let (result
 	next-result
 	next
@@ -393,15 +404,16 @@
 	(test-start-run-time 0)
 	(test-end-run-time 0)
 	(test-start-real-time 0)
-	(test-end-real-time 0))
+	(test-end-real-time 0)
+	(*query-io* *query-io*)
+	(*standard-input* *standard-input*))
     
     (cond (*collect-errors*
 	   (setq error-log
 		 (if (streamp *collect-errors*) *collect-errors*
 		   (handler-case
 		       (open (alter-pathname filename :type "ERR") :direction :output :if-exists :supersede)
-		     #-gcl (file-error () nil)
-		     #+gcl (cl::error () nil))))
+		     (file-error () nil))))
 	   (when error-log
 	     (format t (intl:gettext "~%batch: write error log to ~a") error-log)
 	     (format error-log (intl:gettext "~%/* Maxima error log from tests in ~A") filename)
@@ -410,6 +422,8 @@
     (unwind-protect 
 	(progn
 	  (setq strm (open filename :direction :input))
+	  (when $batch_answers_from_file
+	    (setq *query-io* (make-two-way-stream strm out)))
 	  (setq start-real-time (get-internal-real-time))
 	  (setq start-run-time (get-internal-run-time))
 	  (while (not (eq 'eof (setq expr (mread strm 'eof))))
@@ -515,7 +529,7 @@
 		     (values "" "was"))
 	       (format t (intl:gettext "~%The following ~A problem~A passed but ~A expected to fail: ~A~%")
 		       (length unexpected-pass) plural was-were (reverse unexpected-pass))))
-	     (values (when unexpected-pass filename)
+	     (values filename
 		     nil
 		     `((mlist) ,@(reverse unexpected-pass))
 		     num-problems))
@@ -573,6 +587,16 @@
 (defun apparently-a-directory-p (path)
   (eq (pathname-name path) nil))
 
+;; We keep these here in case we want to optimize the search.  To
+;; speed things up, we might want to support search lists like
+;; "share/**/*.{mac,wxm,mc}" so that we only descend the directory
+;; once.  Then we would take the list of paths and try to match the
+;; one with the given extensions.
+;;
+;; Currently, the search list is ["share/**/*.mac", "share/**/*.wxm",
+;; "share/**/*.mc"].  Thus to find "foo.mc", we end up doing a
+;; directory 3 times.
+#+nil
 (defun new-file-search (name template)
   (cond ((file-exists-p name))
 	((atom template)
@@ -586,8 +610,9 @@
 	 (let ((temp nil))
 	   (loop for v in template
 		 when (setq temp (new-file-search name v))
-		 do (return temp))))))
+		   do (return temp))))))
 
+#+nil
 (defun new-file-search1 (name begin lis)
   (cond ((null lis)
 	 (let ((file (namestring ($filename_merge begin name))))
@@ -601,9 +626,41 @@
 		  when (setq tem  (new-file-search1 name begin (cons v (cdr lis))))
 		  do (return tem)))))
 
+(defvar *debug-new-file-search* nil)
+
+;; Search for a file named NAME.  If the file exists, return it.
+;; Otherwise, TEMPLATE is a list of wildcard paths to be searched for
+;; the NAME.  Each entry in TEMPLATE should be a Lisp wildcard
+;; pathname.
+(defun new-file-search (name template)
+  (cond ((file-exists-p name))
+	(t
+	 (let ((filename (pathname name)))
+	   (dolist (path template)
+	     (let ((pathnames (directory (merge-pathnames filename path))))
+	       (when *debug-new-file-search*
+		 (format *debug-io* "wildpath ~S~%" (merge-pathnames filename path)))
+	       (when pathnames
+		 ;; We MUST sort the results in alphabetical order
+		 ;; because that's how the old search paths were
+		 ;; sorted.
+		 (setf pathnames (sort pathnames #'string< :key #'namestring))
+		 (when *debug-new-file-search*
+		   (format *debug-io* "pathname = ~S~%" pathnames))
+		 ;; If more than one path is returned, print a warning
+		 ;; that we're selecting the first file.  Print all
+		 ;; the matches too so the user knows.
+		 (unless (= 1 (length pathnames))
+		   (mwarning
+		    (format nil
+			    "More than one file matches.  Selecting the first file from:~
+~%~{  ~A~^~%~}~%"
+			    (mapcar #'namestring pathnames))))
+		 (return-from new-file-search (namestring (first pathnames))))))))))
+
 (defun save-linenumbers (&key (c-lines t) d-lines (from 1) (below $linenum) a-list
 			 (file  "/tmp/lines")
-			 &aux input-symbol (linel 79))
+			 &aux input-symbol ($linel 79))
   (cond ((null a-list) (setq a-list (loop for i from from below below collecting i))))
   (with-open-file (st file :direction :output)
     (format st "/* -*- Mode: MACSYMA; Package: MACSYMA -*- */")
@@ -636,40 +693,70 @@
        (princ tem))
     (namestring file)))
 
-(defvar *maxima-testsdir*)
+(defun disable-some-lisp-warnings ()
+  ;; Suppress warnings about redefining functions;
+  ;; it appears that only Clisp and SBCL emit these warnings
+  ;; (ECL, GCL, CMUCL, and Clozure CL apparently do not).
+  ;; Such warnings are generated by the autoload mechanism.
+  ;; I guess it is plausible that we could also avoid the warnings by
+  ;; reworking autoload to not trigger them. I don't have enough
+  ;; motivation to attempt that right now.
+  #+sbcl
+  (setq sb-ext:*muffled-warnings* '(or sb-kernel:redefinition-with-defun sb-kernel:uninteresting-redefinition))
+  #+sbcl
+  (declaim (sb-ext:muffle-conditions sb-ext:compiler-note))
+  #+clisp
+  (setq custom:*suppress-check-redefinition* t)
+
+  ;; Suppress compiler output messages.
+  ;; These include the "0 errors, 0 warnings" message output from Clisp,
+  ;; and maybe other messages from other Lisps.
+  (setq *compile-verbose* nil))
+
+(defun enable-some-lisp-warnings ()
+  ;; SB-KERNEL:UNINTERESTING-REDEFINITION appears to be the default value.
+  #+sbcl
+  (setq sb-ext:*muffled-warnings* 'sb-kernel:uninteresting-redefinition)
+  #+sbcl
+  (declaim (sb-ext:unmuffle-conditions sb-ext:compiler-note))
+  #+clisp
+  (setq custom:*suppress-check-redefinition* nil)
+  (setq *compile-verbose* t))
+
+(defun simple-remove-dollarsign (x)
+  "Like stripdollar, but less heavy.  Intended for use with the
+  testsuite implementation."
+  (if (symbolp x)
+      (subseq (maxima-string x) 1)
+      x))
 
 (defun intersect-tests (tests)
   ;; If TESTS is non-NIL, we assume it's a Maxima list of (maxima)
   ;; strings naming the tests we want to run.  They must match the
   ;; file names in $testsuite_files.  We ignore any items that aren't
   ;; in $testsuite_files.
-  (flet ((remove-dollarsign (x)
-	   ;; Like stripdollar, but less heavy
-	   (if (symbolp x)
-	       (subseq (maxima-string x) 1)
-	       x)))
-    (mapcar #'remove-dollarsign
-	    (cond (tests
-		   (let ((results nil))
-		     ;; Using INTERSECTION would be convenient, but
-		     ;; INTERSECTION can return the result in any
-		     ;; order, and we'd prefer that the order of the
-		     ;; tests be preserved.  CMUCL and CCL returns the
-		     ;; intersection in reverse order.  Clisp produces
-		     ;; the original order.  Fortunately, this doesn't
-		     ;; have to be very fast, so we do it very naively.
-		     (dolist (test (mapcar #'remove-dollarsign (cdr tests)))
-		       (let ((matching-test (find test (cdr $testsuite_files)
-						  :key #'(lambda (x)
-							   (maxima-string (if (listp x)
-									      (second x)
-									      x)))
-						  :test #'string=)))
-			 (when matching-test
-			   (push matching-test results))))
-		     (nreverse results)))
-		  (t
-		   (cdr $testsuite_files))))))
+  (mapcar #'simple-remove-dollarsign
+	  (cond (tests
+		 (let ((results nil))
+		   ;; Using INTERSECTION would be convenient, but
+		   ;; INTERSECTION can return the result in any
+		   ;; order, and we'd prefer that the order of the
+		   ;; tests be preserved.  CMUCL and CCL returns the
+		   ;; intersection in reverse order.  Clisp produces
+		   ;; the original order.  Fortunately, this doesn't
+		   ;; have to be very fast, so we do it very naively.
+		   (dolist (test (mapcar #'simple-remove-dollarsign (cdr tests)))
+		     (let ((matching-test (find test (cdr $testsuite_files)
+						:key #'(lambda (x)
+							 (maxima-string (if (listp x)
+									    (second x)
+									    x)))
+						:test #'string=)))
+		       (when matching-test
+			 (push matching-test results))))
+		   (nreverse results)))
+		(t
+		 (cdr $testsuite_files)))))
 
 (defun print-testsuite-summary (errs unexpected-pass error-count total-count)
   (flet
@@ -703,16 +790,40 @@
 	      error-count
 	      total-count))))
 
-(defmfun $run_testsuite (&key tests display_all display_known_bugs share_tests time debug)
+(defun validate-given-tests (tests share-tests-p)
+  ;; Check the test names and print out some warnings if it
+  ;; doesn't exist, or if it does and is part of the share test
+  ;; suite, but share_tests was not set.
+  (dolist (test (mapcar #'simple-remove-dollarsign
+			(if (listp tests)
+			    (cdr tests)
+			    (list tests))))
+    (cond ((and (not share-tests-p)
+		(find test (cdr $share_testsuite_files)
+		      :key #'(lambda (x)
+			       (maxima-string (if (listp x)
+						  (second x)
+						  x)))
+		      :test #'string=))
+	   (mwarning test "is a share test, but share_tests was not set"))
+	  ((not (find test (cdr $testsuite_files)
+		      :key #'(lambda (x)
+			       (maxima-string (if (listp x)
+						  (second x)
+						  x)))
+		      :test #'string=))
+	   (mwarning "Unknown test: " test)))))
+  
+(defmfun $run_testsuite (&key tests display_all display_known_bugs share_tests time debug (answers_from_file t))
   "Run the testsuite.  Options are
   tests                List of tests to run
   display_all          Display output from each test entry
-  display_known_bugs   Include tests that are known to fail.
+  display_known_bugs   Include tests that are known to fail
   time                 Display time to run each test entry
   share_tests          Whether to include the share testsuite or not
-  debug                Set to enable some debugging prints.
+  debug                Set to enable some debugging prints
+  answers_from_file    Read interactive answers from source file.
 "
-  (declare (special $file_search_tests))
   (enable-some-lisp-warnings)
   (let ((test-file)
 	(expected-failures)
@@ -726,9 +837,10 @@
       (merror (intl:gettext "run_testsuite: display_all must be true or false; found: ~M") display_all))
     (unless (member time '(t nil $all))
       (merror (intl:gettext "run_testsuite: time must be true, false, or all; found: ~M") time))
-
     (unless (member share_tests '(t nil $only))
       (merror (intl:gettext "run_testsuite: share_tests must be true, false or only: found ~M") share_tests))
+    (unless (member answers_from_file '(t nil))
+      (merror (intl:gettext "run_testsuite: answers_from_file must be true or false only; found ~M") answers_from_file))
     
     (setq *collect-errors* nil)
 
@@ -757,9 +869,13 @@
 	     (test-count 0)
 	     (total-count 0)
 	     (error-count 0)
+	     ($batch_answers_from_file answers_from_file)
 	     filename
 	     diff
 	     upass)
+	(declare (special $batch_answers_from_file))
+	(validate-given-tests tests share_tests)
+
 	(when debug
 	  (let (($stringdisp t))
 	    (mformat t "$testsuite_files = ~M~%" $testsuite_files)
@@ -767,6 +883,11 @@
 	(when debug
 	  (let (($stringdisp t))
 	    (mformat t "tests-to-run = ~M~%" tests-to-run)))
+
+	(unless tests-to-run
+	  (mwarning "No tests to run")
+	  (return-from $run_testsuite '$done))
+
 	(flet
 	    ((testsuite ()
 	       (loop with errs = 'nil
@@ -808,7 +929,7 @@
 					    expected-failures :show-expected display_known_bugs
 					    :show-all display_all :showtime time))
 			      (incf total-count test-count)
-			      (when filename
+			      (when (or (rest diff) (rest upass))
 				(incf error-count (length (rest diff)))
 				(when (rest diff)
 				  (push (list* filename (rest diff))

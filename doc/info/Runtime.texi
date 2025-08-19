@@ -11,11 +11,18 @@
 
 @c THIS DISCUSSION OF maxima-init.mac REPLACES AN EARLIER WRITE-UP. !!!
 @c HOWEVER IT SEEMS THAT THIS TEXT REALLY WANTS TO BE UNDER A DIFFERENT HEADING. !!!
-@code{maxima-init.mac} is a file which is loaded automatically when Maxima
-starts.  You can use @code{maxima-init.mac} to customize your Maxima
-environment.  @code{maxima-init.mac}, if it exists, is typically placed in the
-directory named by @code{maxima_userdir},
-although it can be in any directory searched by the function @code{file_search}.
+
+@cindex maxima-init.mac
+@cindex maxima-init.lisp
+
+@code{maxima-init.mac} and @code{maxima-init.lisp} are loaded automatically when Maxima
+starts. @code{maxima-init.mac} contains Maxima code and is loaded using @mref{batchload},
+@code{maxima-init.lisp} contains Lisp code and is loaded using @mref{load}.
+
+You can use @code{maxima-init.mac} (and @code{maxima-init.lisp}) to customize your Maxima
+environment. These files typically placed in the directory named by
+@code{maxima_userdir}, although it can be in any directory searched by the function
+@code{file_search}.
 
 Here is an example @code{maxima-init.mac} file:
 
@@ -34,7 +41,29 @@ The statement @code{showtime: all} tells Maxima to set the @code{showtime}
 variable.  The @code{maxima-init.mac} file can contain any other assignments or
 other Maxima statements.
 
-@opencatbox
+@code{maxima-init.mac} and @code{maxima-init.lisp} are loaded automatically when Maxima
+starts. @code{maxima-init.mac} contains Maxima code and is loaded using @mref{batchload},
+@code{maxima-init.lisp} contains Lisp code and is loaded using @mref{load}.
+
+
+@cindex maximarc
+
+@code{maximarc} is sourced by the maxima script at startup. It should be located in @code{$MAXIMA_USERDIR}.
+If Maxima was compiled with several Lisp compilers, @code{maximarc} can be used, e.g., to change the
+user's default lisp implementation. E.g. to select CMUCL create a @code{maximarc} file containing the line:
+@code{MAXIMA_LISP=cmucl}
+
+You can also use the command option @code{-l <lisp>} or @code{--lisp=<lisp>} to select the Lisp when starting Maxima.
+
+@cindex .xmaximarc
+
+In the file @code{.xmaximarc} (in the users home directory) Xmaxima stores personal settings.
+
+@cindex .xmaxima_history
+
+In the file @code{.xmaxima_history} (in the users home directory) Xmaxima stores the command history.
+
+@opencatbox{Categories:}
 @category{Session management}
 @closecatbox
 
@@ -69,7 +98,7 @@ to stop altogether, and control is returned to the shell prompt.
 The @code{fg} command causes Maxima
 to resume from the point at which it was stopped.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Console interaction}
 @closecatbox
 
@@ -93,7 +122,7 @@ Maxima can locate it; otherwise Maxima makes a guess about a suitable directory.
 
 @code{maxima_tempdir} may be assigned a string which names a directory.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Global variables}
 @closecatbox
 @end defvr
@@ -115,7 +144,7 @@ However, assigning to @code{maxima_userdir} does not automatically change
 @code{file_search_maxima} and @code{file_search_lisp};
 those variables must be changed separately.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Global variables}
 @closecatbox
 @end defvr
@@ -140,7 +169,7 @@ the same name.
 @code{room (false)} prints out a terse description.
 @end itemize
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Debugging}
 @closecatbox
 @end deffn
@@ -158,7 +187,7 @@ loaded in.
 
 See also @mrefdot{status}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Programming}
 @closecatbox
 @end deffn
@@ -193,7 +222,7 @@ The variable @code{features} contains a list of features which apply to
 mathematical expressions. See @code{features} and @code{featurep} for more 
 information.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Programming}
 @closecatbox
 @end deffn
@@ -239,7 +268,7 @@ can only be applied to output line variables; for any other variables,
 Set @code{showtime: true} to make Maxima print out the computation time 
 and elapsed time with each output line.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Debugging}
 @closecatbox
 @end deffn
@@ -311,7 +340,7 @@ timedate reports current time 2010-06-08 04:08:09+01:00
 (%o1)               1931-09-09 16:16:40-09:30
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Time and date functions}
 @closecatbox
 @end deffn
@@ -436,7 +465,7 @@ Midnight, January 1, 1900, GMT, in different indicated time zones.
 (%o7)                           0
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Time and date functions}
 @closecatbox
 @end deffn
@@ -510,7 +539,7 @@ Examples:
                               1000
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Time and date functions}
 @closecatbox
 @end deffn
@@ -567,7 +596,7 @@ Examples:
                                       1000
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Time and date functions}
 @closecatbox
 @end deffn
@@ -594,7 +623,7 @@ Example:
 (%o2)                   2007.265612087104
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Time and date functions}
 @closecatbox
 @end deffn
@@ -624,7 +653,7 @@ Example:
 (%o3)                       7.552087
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Time and date functions}
 @closecatbox
 @end deffn
@@ -654,7 +683,7 @@ Example:
 (%o3)                         1.26
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Time and date functions}
 @closecatbox
 @end deffn

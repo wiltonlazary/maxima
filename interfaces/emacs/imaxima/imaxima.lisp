@@ -1,15 +1,15 @@
 ;; Copyright (C) 2001, 2002, 2003, 2004 Jesper Harder
 ;; Copyright (C) 2007, 2008 Yasuaki Honda
+;; Copyright (C) 2020, 2021, 2022 Leo Butler
 ;;
 ;; Plotting support section of this file is the copy of the same
 ;; section of wxmathml.lisp with very small modification. The file
 ;; wxmathml.lisp is a part of the distribution of wxMaxima.
 
-;; Author: Jesper Harder <harder@ifa.au.dk>
 ;; Created: 14 Nov 2001
-;; Version: 1.0b
+;; Version: See version.texi
 ;; Keywords: maxima
-;; $Id: imaxima.lisp,v 1.8 2011-01-05 22:49:31 riotorto Exp $
+;; Time-stamp: <16-05-2022 10:50:32 Leo Butler>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -23,8 +23,7 @@
 ;;
 ;; You should have received a copy of the GNU General Public
 ;; License along with this program; if not, write to the Free
-;; Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
-;; MA 02111-1307 USA
+;; Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ;;
 ;;; History:
 ;;; Putting prefix package name to the variable does cause
@@ -41,53 +40,25 @@
 ;;; issue.
 ;;; by yasuaki honda
 
-;;;
-;;; There is a report that some Linux provides Maxima with GCL
-;;; which does not support handler-bind. The macro
-;;; style-warning-suppressor
-;;; is introduced to check if handler-bind is defined or not.
-;;;
-;;; by yasuaki honda 2007/06/10
-;;;
-
 (in-package :maxima)
 
 (setq $maxima_frontend "imaxima")
 (setq $maxima_frontend_version *autoconf-version*)
+(setq $maxima_frontend_bugreportinfo "imaxima is part of maxima.")
 
 (defvar *windows-OS* (string= *autoconf-windows* "true"))
 (defmvar $wxplot_size '((mlist simp) 400 250))
 (defmvar $wxplot_old_gnuplot nil)
 (defvar *image-counter* 0)
 
-
-;;; Following function wx-gnuplot-installed-p and the macro
-;;; wx-gnuplot-installation-check should be in plotting section
-;;; later in this file. However, because they must be in the
-;;; real toplevel, they are moved here.
-;;; yasuaki honda
-(defun wx-gnuplot-installed-p ()
-  #+gcl
-  (cond ((member :linux *features*)
-	 (let* ((tmp-stream (open "| which gnuplot" :direction :input))
-		(result (read-line tmp-stream nil :eof)))
-	   (if (eql result :eof) nil t)))
-	((and (member :mingw32 *features*)
-	      (probe-file "c:\\Windows\\System32\\where.exe"))
-	 (let* ((tmp-stream (open "| where wgnuplot" :direction :input))
-		(result (read-line tmp-stream nil :eof)))
-	   (if (eql result :eof) nil t)))
-	(t t))
-  #-gcl
+(defun wx-gnuplot-installation-check ()
   ;; The function check-gnuplot-process is defined in
   ;; maxima/src/plot.lisp since at least 5.12.0.
-  (handler-case (progn (check-gnuplot-process) t)
-		(error () nil)))
-
-(defun wx-gnuplot-installation-check ()
-  (if (not (wx-gnuplot-installed-p))
+  (flet ((wx-gnuplot-installed-p ()
+	   (ignore-errors (check-gnuplot-process) t)))
+    (unless (wx-gnuplot-installed-p)
       (merror (format t "Gnuplot error: Gnuplot is not installed,
-nor Gnuplot is not recognized by maxima"))))
+nor Gnuplot is not recognized by maxima")))))
 
 (declare-top (special lop rop $gcprint $inchar *autoconf-version*))
 
@@ -230,14 +201,44 @@ nor Gnuplot is not recognized by maxima"))))
 				   (string chari))))))
   var))
 
+(defun ascii-char-p (c)
+  "Helper function for IMAXIMA-ACCUMULATE."
+  (if (listp c)
+      (every #'identity (mapcar #'ascii-char-p c))
+    (and (characterp c) (< (char-code c) 127.))))
+(defun imaxima-accumulate (l &optional (result '()) (state 'other))
+  "L is a list of characters of length >1. Wrap each sublist of ascii
+characters in \\mathrm{}, leave others alone."
+  (if (null l)
+      (if (eq state 'ascii)
+	  (append result '(#\}))
+	result)
+    (let ((c (list (car l))))
+      (cond ((eq state 'other)
+	     (if (ascii-char-p c)
+		 (setq c (append (coerce "\\mathrm{" 'list) c) state 'ascii)))
+	    ((eq state 'ascii)
+	     (unless (ascii-char-p c)
+	       (setq c (append (list #\}) c) state 'other)))
+	    (t
+	     (merror "imaxima-accumulate")))
+      (setq result (append result c))
+      (imaxima-accumulate (cdr l) result state))))
+
 (defun tex-stripdollar (sym)
+  "TEX-STRIPDOLLAR strips a leading `$' or `&' from symbol SYM. If the
+length of the NAME of SYM is 1, return that string; otherwise, wrap
+NAME in \\mathrm{} (but see IMAXIMA-ACCUMULATE for handling of
+non-ascii characters."
   (or (symbolp sym) (return-from tex-stripdollar sym))
   (let* ((name (print-case-sensitive sym))
-      (pname (if (member (elt name 0) '(#\$ #\&)) (subseq name 1) name))
-      (l (length pname)))
-    (cond
-     ((eql l 1) (myquote pname))
-     (t (concatenate 'string "\\mathrm{" (myquote pname) "}")))))
+	 (pname (if (member (elt name 0) '(#\$ #\&)) (subseq name 1) name))
+	 (mname (myquote pname))
+	 (lname (coerce mname 'list))
+	 (len (length pname)))
+      (cond
+       ((eql len 1) mname)
+       (t (coerce (imaxima-accumulate lname) 'string)))))
 
 ;; (defun strcat (... is removed
 
@@ -507,14 +508,18 @@ nor Gnuplot is not recognized by maxima"))))
 	(declare (special $display2d))
 	(displa x)
 	(return-from latex)))
-  (fresh-line)
   (mapc #'princ
-	(if (and (listp x) (cdr x) (stringp (cadr x))
-		 (equal (string-right-trim '(#\Space) (cadr x)) "Is"))
-	    (tex x (list (string (code-char 21)))
-		   (list (string (code-char 22))) 'mparen 'mparen)
-	  (tex x (list (string (code-char 2)))
-	         (list (string (code-char 5))) 'mparen 'mparen))))
+	(cond ((and (listp x) (cdr x) (stringp (cadr x))
+		    (equal (string-right-trim '(#\Space) (cadr x)) "Is"))
+	       (tex x (list (string (code-char 21)))
+		    (list (string (code-char 22))) 'mparen 'mparen))
+	      ((and (listp x) (cdr x) (stringp (caddr x))
+		    (equal (string-right-trim '(#\Space) (caddr x)) ""))
+	       (tex (reverse (cons "\\ " (rest (reverse x)))) (list (string (code-char 2)))
+		    (list (string (code-char 5))) 'mparen 'mparen))
+	      (t
+	       (tex x (list (string (code-char 2)))
+	         (list (string (code-char 5))) 'mparen 'mparen)))))
 
 (let ((old-displa (symbol-function 'displa)))
   (defun displa (form)
@@ -571,6 +576,15 @@ nor Gnuplot is not recognized by maxima"))))
 	(delete-file filename))
     filename))
 
+(defvar $wx_data_file "data_~a.gnuplot" "A FORMAT string that takes exactly one argument, *image-counter*; or a MAXIMA function.")
+(defvar $wx_gnuplot_file "maxout_~a.gnuplot" "A FORMAT string that takes exactly one argument, *image-counter*; or a MAXIMA function.")
+
+(defun wxplot-data+maxout ()
+  (declare (special *image-counter* $wx_data_file $wx_gnuplot_file))
+  (let ((datafile (if (stringp $wx_data_file) (format nil $wx_data_file *image-counter*) (mfuncall $wx_data_file *image-counter*)))
+	(gnpltfile (if (stringp $wx_data_file) (format nil $wx_gnuplot_file *image-counter*) (mfuncall $wx_gnuplot_file *image-counter*))))
+    (cons datafile gnpltfile)))
+
 (defun $range (i j)
   (let ((x (gensym)))
     (mfuncall '$makelist x x i j)))
@@ -585,21 +599,26 @@ nor Gnuplot is not recognized by maxima"))))
   ;; further execution.
   (wx-gnuplot-installation-check)
   (let ((filename (wxplot-filename))
+	(data+maxout (wxplot-data+maxout))
 	(fun ($get wx-fun '$function)))
     (maybe-load-package-for wx-fun)
     (imaxima-apply fun
 		   `(,@args
 		     ((mlist simp) $plot_format $gnuplot)
 		     ((mlist simp) $gnuplot_term $ps)
-		     ((mlist simp) $gnuplot_out_file ,filename)))
+		     ((mlist simp) $ps_file ,filename)
+		     ((mlist simp) $gnuplot_script_file ,(cdr data+maxout))))
     ($ldisp `((wxxmltag simp) ,filename "img"))
     fun))
 
 (defun wxdraw (wx-fun &rest args)
+  (declare (special *image-counter*))
   ;; if gnuplot is not installed, this will terminate the
   ;; further execution.
   (wx-gnuplot-installation-check)
   (let* ((filename (wxplot-filename nil))
+	 (datafile (format nil "data_~a.gnuplot" *image-counter*))
+	 (gnpltfile (format nil "maxout_~a.gnuplot" *image-counter*))
 	 (fun ($get wx-fun '$function))
 	 (*windows-OS* t))
     (maybe-load-package-for wx-fun)
@@ -612,16 +631,20 @@ nor Gnuplot is not recognized by maxima"))))
 			    ;; convert points to 1/100 of cm
 			    ,(* 3.53 ($first $wxplot_size))
 			    ,(* 3.53 ($second $wxplot_size))))
-			  ((mequal simp) $file_name ,filename))
+			  ((mequal simp) $file_name ,filename)
+			  ((mequal simp) $data_file_name ,datafile)
+			  ((mequal simp) $gnuplot_file_name ,gnpltfile))
 			args))
       ($ldisp `((wxxmltag simp) ,(format nil "~a.eps" filename) "img")))))
 
-(defmacro wx-def-plot/draw (fun pkg parent)
+(defmacro wx-def-plot/draw (fun pkg parent &optional init  &rest body)
   (let ((wx-fun (intern (format nil "$WX~a" (stripdollar fun)))))
     `(progn
+       ,init
        ($put ',wx-fun ',pkg '$load_package)
        ($put ',wx-fun ',fun '$function)
        (defun ,wx-fun (&rest args)
+	 ,body
 	 (imaxima-apply ',parent (cons ',wx-fun args))))))
 
 (wx-def-plot/draw $draw 	 $draw 		wxdraw)
@@ -633,6 +656,11 @@ nor Gnuplot is not recognized by maxima"))))
 (wx-def-plot/draw $contour_plot  nil 		wxplot)
 (wx-def-plot/draw $julia 	 $dynamics 	wxplot)
 (wx-def-plot/draw $mandelbrot    $dynamics 	wxplot)
+
+;; We could load drawdf package, because we want to overwrite wxdrawdf.
+;; However, we do not need to, because wxdrawdf is a wrapper for wxdraw.
+;; The following will load drawdf, then overwrite wxdrawdf with our own:
+;; (wx-def-plot/draw $drawdf 	 $drawdf	wxdraw ($load '$drawdf))
 
 
 ;; end of imaxima.lisp

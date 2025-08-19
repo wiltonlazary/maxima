@@ -311,7 +311,7 @@ a^v * gamma_incomplete (-v, a);
  *    log(1+a*x), log(x+a), log(x)^2.
  */
 
-/* Algorithm 2.4: Laplace transfom of the Whittaker function
+/* Algorithm 2.4: Laplace transform of the Whittaker function
  *
  * Test for Whittaker W function.  Simplify this if possible, or
  * convert to Whittaker M function.
@@ -326,7 +326,7 @@ a^v * gamma_incomplete (-v, a);
  *        *2f1(u+v+1/2,u-k+1/2;v-k+1;(p-a/2)/(p+a/2))
  */
 
-/* Algorithm 2.5: Laplace transfom of bessel_k(0,a*t)
+/* Algorithm 2.5: Laplace transform of bessel_k(0,a*t)
  *
  * The general algorithm handles the Bessel K function for an order |v|<1.
  * but does not include the special case v=0. Return the Laplace transform:
@@ -647,6 +647,33 @@ true;
 
 (kill (foo), tellsimpafter ('laplace (foo (w), w, x), FOO (x)), laplace (foo (w), w, x));
 FOO (x);
+
+/* laplace(t^z,t,s) did not properly support complex z expressions
+ *
+ * See mailing list thread "Laplace transform for complex exponent polynomial functions."
+ * from 2021-04-21.
+ */
+
+laplace (t^(v*%i), t, s);
+s^((-%i*v)-1)*gamma(%i*v+1);
+
+assuming (u > -1, laplace (t^(u + v*%i), t, s));
+s^((-%i*v)-u-1)*gamma(%i*v+u+1);
+
+/* Bug 4398 */
+assuming(a > 0, laplace(delta(t - a) * sin(b*t), t, s));
+-(((%i*%e^(2*%i*a*b)-%i)*%e^(-(a*s)-%i*a*b))/2);
+
+(kill (z),
+ declare (z, complex), assume (realpart (z) > -1), 0);
+0;
+
+laplace (t^z, t, s);
+s^((-z)-1)*gamma(z+1);
+
+(remove (z, complex), forget (realpart (z) > -1), 0);
+0;
+
 
 (remove (n, integer), killcontext (mycontext));
 done;

@@ -1,7 +1,12 @@
-# -*-mode: tcl; fill-column: 75; tab-width: 8; coding: iso-latin-1-unix -*-
+###### OpenMath.tcl ####################################################
 #
-#       $Id: OpenMath.tcl,v 1.17 2011-03-15 01:13:22 villate Exp $
+# Copyright (C) 1998 William F. Schelter
+# For distribution under GNU public License.  See COPYING.tcl
 #
+#     Modified by Jaime E. Villate                         #
+#     Time-stamp: "2024-03-25 21:06:23 villate"            #
+########################################################################
+
 proc genSample { x n } {
     set sample $x
     set m 1
@@ -121,6 +126,9 @@ return
     }
 
 }
+# omPanel
+# Creates the browser window
+#
 proc omPanel { w args } {
     global buttonfont entryfont labelfont maxima_priv
 
@@ -170,7 +178,7 @@ proc omPanel { w args } {
 	    }
 	}
     } else {
-	#mike slate the old histroy list for demolition
+	#mike slate the old history list for demolition
 	button $win.loclabel -text " Url:" \
 	    -command "OpenMathOpenUrl \[$win.location get\] -commandpanel  $win"
 	setHelp $win.loclabel [mc {Fetch the URL or FILE indicated in the entry box. \
@@ -393,8 +401,7 @@ proc saveToFile { commandPanel label file } {
 
     if { [catch { set fi [open $file w] } err] } {
 	return -code error \
-	    [M [mc "Could not open file %s\n%s"] \
-		 [file native $file] $err]
+	    [mc "Could not open file %s\n%s" [file native $file] $err]
     }
     puts $fi $text
     close $fi
@@ -570,7 +577,7 @@ proc doInsertp { tags } {
 #----------------------------------------------------------------
 #
 proc doInvoke { w index } {
-    global evalPrograms MathServer
+    global evalPrograms
     set tags [$w tag names $index]
 
     $w tag delete sel
@@ -583,8 +590,6 @@ proc doInvoke { w index } {
     set res [resolveURL $program [oget $w baseprogram]]
     # puts "program=$program,baseprogram[oget $w baseprogram],res=$res"
 
-    set MathServer "[assoc server $res [lindex $MathServer 0]] \
-	   [assoc port $res [lindex $MathServer 1]]"
     set this [thisRange $w  program:$program $index]
     # puts "this=$this"
 
@@ -865,7 +870,7 @@ proc textShowHelp { win tag index msg } {
 	set program [programFromTags $tags]
 	if { "$program" != ""} {
 	    set msg [string trimright $msg ". "]
-	    append msg [M [mc " by %s."] "$program"]
+	    append msg [mc " by %s." $program]
 	}
 	if { [doInsertp $tags] } {
 	    append msg [mc " The result will be inserted."]
@@ -945,11 +950,7 @@ proc markForProgram { w args } {
 	    $w insert tmp RESULT {Tresult Tmodified}
 	    $w insert tmp " "  {plain}
 	} else {
-	    mxapply $w tag add Tmodified $nextResult
-	}
-
-    }
-}
+	    $w tag add Tmodified {*}$nextResult}}}
 
 ## endsource preamble.tcl
 

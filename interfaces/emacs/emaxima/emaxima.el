@@ -22,8 +22,7 @@
 ;;          
 ;; You should have received a copy of the GNU General Public
 ;; License along with this program; if not, write to the Free
-;; Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
-;; MA 02111-1307 USA
+;; Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ;;
 ;;
 ;; You will need, in addition to this file,
@@ -627,7 +626,7 @@ without asking."
         files parts prompt
         tmp-buffer tmp-alist file-buffer)
     (if (not file)
-        ;; If file has not been specifed, prompt
+        ;; If file has not been specified, prompt
         (progn
               ;; Get default file from cell label, if any
               (save-excursion
@@ -1017,7 +1016,7 @@ then the substring preceding the `...' is used with try-completion on ALIST.
 An exact match is required if optional EXACT is t.
 If text is just `...' and alist is length 1, then the car of its single element
 is returned.
-Oherwise nil is returned."
+Otherwise nil is returned."
   (let (name try-name)
     (if (not (string-match "\\(\\.\\.\\.$\\)" text))
         (setq name text) ; don't do completion on full names
@@ -1155,7 +1154,7 @@ Return nil if no name or error in name."
     found))
 
 (defun emaxima-reference-p ()
-  "Return t if cell contains a cell reference, else retrun nil."
+  "Return t if cell contains a cell reference, else return nil."
   (save-excursion
     (goto-char (emaxima-cell-start))
     (if (re-search-forward "^ *\t*<[^:].*:[^>].*>$" (emaxima-cell-end) t)

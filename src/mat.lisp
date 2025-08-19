@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -14,21 +14,15 @@
 
 ;; this is the mat package
 
-(declare-top (special *ech* *tri* $algebraic $multiplicities equations
-		      mul* $dispflag $nolabels *det*
-		      xm* xn* varlist ax *linelabel*))
+(declare-top (special *ech* *tri*
+		      mul* *det*
+		      xm* xn* ax))
 
 ;;these are arrays.
 (defvar *row*)
 (defvar *col*)
 (defvar *colinv*)
 
-(defmvar $globalsolve nil)
-(defmvar $sparse nil)
-(defmvar $backsubst t)
-
-(defmvar *rank* nil)
-(defmvar *inv* nil)
 
 (defun solcoef (m *c varl flag)
   (prog (cc answer leftover)
@@ -112,14 +106,10 @@
 
 (defvar *mosesflag nil)
 
-(defmvar $%rnum 0)
-
 (defun make-param ()
   (let ((param (intern (format nil "~A~D" '$%r (incf $%rnum)))))
     (tuchus $%rnum_list param)
     param))
-
-(defmvar $linsolve_params t "`linsolve' generates %Rnums")
 
 (defun ith (x n)
   (if (atom x) nil (nth (1- n) x)))
@@ -156,9 +146,9 @@
 
 ;; The author of the following programs is Tadatoshi Minamikawa (TM).
 ;; This program is one-step fraction-free Gaussian elimination with
-;; optimal pivotting.  DRB claims the hair in this program is not
+;; optimal pivoting.  DRB claims the hair in this program is not
 ;; necessary and that straightforward Gaussian elimination is sufficient,
-;; for sake of future implementors.
+;; for sake of future implementers.
 
 ;; To debug, delete the comments around PRINT and BREAK statements.
 
@@ -172,7 +162,7 @@
      (setq *col* (make-array (1+ m) :initial-element 0))
      (setq *row* (make-array (1+ n) :initial-element 0))
      (setq *colinv* (make-array (1+ m) :initial-element 0))
-     ;; (PRINT 'ONESTEP-LIPSON-WITH-PIVOTTING)
+     ;; (PRINT 'ONESTEP-LIPSON-WITH-PIVOTING)
      (setq nrow n)
      (setq nvar (cond (*rank* m) (*det* m) (*inv* n) (*ech* m) (*tri* m) (t (1- m))))
      (do ((i 1 (1+ i)))
@@ -196,7 +186,7 @@
      (return result)))
 
 ;;FORWARD ELIMINATION
-;;IF THE SWITCH *CPIVOT IS NIL, IT AVOIDS THE COLUMN PIVOTTING.
+;;IF THE SWITCH *CPIVOT IS NIL, IT AVOIDS THE COLUMN PIVOTING.
 (defun forward (*cpivot)
   (setq delta 1)		  ;DELTA HOLDS THE CURRENT DETERMINANT
   (do ((k 1 (1+ k))
@@ -354,7 +344,7 @@
       ((> j j2) t)
     (cond ((not (equal (aref ax (aref *row* i) (aref *col* j)) 0)) (return nil)))))
 
-;;PIVOTTING ALGORITHM
+;;PIVOTING ALGORITHM
 (defun pivot (ax k *cpivot)
   (prog (row/optimal col/optimal complexity/i/min complexity/j/min
 	 complexity/i complexity/j complexity/det complexity/det/min dummy)
@@ -441,7 +431,7 @@
 
 ;; Displays list of solutions.
 
-(defun solve2 (llist)
+(defun solve2 (llist equations)
   (setq $multiplicities nil)
   (map2c #'(lambda (equatn multipl)
 	     (setq equations
@@ -450,7 +440,8 @@
 	     (if (and (> multipl 1) $dispflag)
 		 (mtell (intl:gettext "solve: multiplicity ~A~%") multipl)))
 	 llist)
-  (setq $multiplicities (cons '(mlist simp) (nreverse $multiplicities))))
+  (values (setq $multiplicities (cons '(mlist simp) (nreverse $multiplicities)))
+	  equations))
 
 ;; Displays an expression and returns its linelabel.
 

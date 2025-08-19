@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -28,9 +28,9 @@
 (declare-top (special *stop* trl* *xn sharpcont subvar1 anotype invc fctc
 		      subval1 var mcflag alcinv *ab* monic* intbs*
 		      *prime *g* modulu* plim listelm many* *inl3
-		      *sharpa *sharpb limk split* alc ind p l dosimp *odr*
+		      *sharpa *sharpb limk split* alc ind p l *odr*
 		      *i* mcflag elm ne res fact1 fact2 subvar
-		      subval ovarlist valist dlp nn* df1 df2 dn* fcs* uu*))
+		      subval ovarlist valist dlp df1 df2 fcs* uu*))
 
 (defvar *afixn*)
 (defvar *fctcfixn*)
@@ -40,18 +40,7 @@
 
 ;; Internal specials
 
-(defmvar gauss nil)
-(defmvar *min* nil)
-(defmvar *mx* nil)
-(defmvar minpoly* nil)
-(defmvar mplc* nil)
-(defmvar mm* 1)
-(defmvar alpha nil)
 ;(defmvar smallprimes '(3 5 7 11. 13. 17. 19. 23. 29. 31. 37. 41. 43. 47. 53. 59. 61.))
-
-;; External specials
-
-(defmvar $nalgfac t "If t use bmt's algebraic factoring algorithm")
 
 (defun primcyclo (n)
   (let ((*g* (gensym "PRIMCYCLO-"))
@@ -84,7 +73,7 @@
 	 (let* ((gauss nil) (facl (factxn+1 n)))
 	   (cond ((oddp n) facl)
 		 (t (let (($gcd '$subres)
-			  (pfac (list *g* (ash n -1) 1 0 alpha)))
+			  (pfac (list *g* (ash n -1) 1 0 *alpha*)))
 		      (mapcan #'(lambda (q) (subseq (pgcdcofacts q pfac) 0 2)) facl))))))
 	(t (let ((m 1) (nl (reverse (cfactor n))))
 	     (when (equal 2 (cadr nl))
@@ -211,10 +200,23 @@
 (defun zerolp (a)
   (every #'zerop1 a))
 
+;;; TESTDIVIDE
+;;;
+;;; Check if y divides x, assuming that x and y are polynomials in the
+;;; same variable.
 (defun testdivide (x y)
   (if algfac*
       (algtestd x y)
       (eztestdivide x y)))
+
+;;; TESTDIVIDE*
+;;;
+;;; Check if y divides x, for general polynomials x and y (not
+;;; necessarily in the same variable).
+(defun testdivide* (x y)
+  (if algfac*
+      (algtestd x y)
+      (ignore-rat-err (pquotient x y))))
 
 (defun algtestd (x y)
   (and (div-deg-chk (nreverse (pdegreevector x)) (nreverse (pdegreevector y))
@@ -484,7 +486,7 @@
      (cond ((null ql)(return d))
 	   ((null (cdr ql)) (return (cons u d))))
      (return (append d
-		     (cond ((or alpha (> modulus 70.))
+		     (cond ((or *alpha* (> modulus 70.))
 			    (cpbgzass ql (pmod u) (length ql)))
 			   (t (cpbg ql (pmod u) (length ql))))))))
 
@@ -508,7 +510,7 @@
      (setq b2 1)
      (setq r1 f1)
      (setq r2 (cdr ql))
-     test (cond ((or (numberp r2) (and alpha (alg r2))) (go end)))
+     test (cond ((or (numberp r2) (and *alpha* (alg r2))) (go end)))
      (setq ql (pmodquo r1 r2))
      (setq ap (pdifference a1 (ptimes (car ql) a2)))
      (setq bp (pdifference b1 (ptimes (car ql) b2)))
@@ -638,7 +640,7 @@
      (setq var (car poly) elm (listovars poly)
 	   origenvar genvar
 	   genvar (intersect genvar (if algfac*
-					(delete (car alpha) elm :test #'equal)
+					(delete (car *alpha*) elm :test #'equal)
 					elm))
 	   ovarlist (butlast genvar)	;this depends on the order of the above intersection!
 	   nn* (1+ (length ovarlist)))
@@ -664,7 +666,7 @@
      tag  (fixvl subval1 subvar1)
      (setq subval1 nil subvar1 nil)
      (fixvl0 subvar subval (reverse ovarlist))
-     (when algfac* (push (car alpha) genvar))
+     (when algfac* (push (car *alpha*) genvar))
      (setq poly (cpber3 poly p))
      (setq genvar origenvar)
      (return poly)))
@@ -722,11 +724,9 @@
 	    (mapcar
 	     #'(lambda (a b)
 		 (cond ((equal b 0) 1)
-		       (t (max (* (simpbinocoef (list '(%binocoef)
-						      a
-						      (ash a -1))
-						1
-						t)
+		       (t (max (* (ftake '%binomial
+					 a
+					 (ash a -1))
 				  (expt b (ash a -1)))
 			       (expt b a)))))
 	     v
@@ -1008,7 +1008,7 @@
 	    (setq linfac (car ql) uu* (caddr ql) ql (cadr ql))))
      (setq *prime modulus)
      tag0	     (cond ((eq ql 'splitcase)
-			    (setq poly(nalgfac poly (cons (car alpha) (cdr minpoly*))))
+			    (setq poly(nalgfac poly (cons (car *alpha*) (cdr minpoly*))))
 			    (setq plim *alpha *prime plim limk -1)
 			    (return poly))
 			   ((null (cdr (append linfac ql)))

@@ -162,7 +162,7 @@ Zahlen die kleiner oder gleich 255 die Funktion @code{bern} auf.
 
 @c @code{load ("bffac")} loads this function. See also @code{bern}.
 
-Das Kommando @code{load(bffac)} l@"adt die Funktion.  Siehe auch @mrefdot{bern}
+Das Kommando @code{load("bffac")} l@"adt die Funktion.  Siehe auch @mrefdot{bern}
 @end deffn
 
 @c --- 27.03.2012 VN -----------------------------------------------------------
@@ -358,12 +358,12 @@ gilt, dass @code{u = a * @var{n} + b * @var{k}}.
 
 @code{igcdex} verwendet den Euklidischen Algorithmus.  Siehe auch @mref{gcdex}.
 
-Die Eingabe @code{load(gcdex)} l@"adt diese Funktion.
+Die Eingabe @code{load("gcdex")} l@"adt diese Funktion.
 
 Beispiele:
 
 @example
-(%i1) load(gcdex)$
+(%i1) load("gcdex")$
 
 (%i2) igcdex(30, 18);
 (%o2)                      [- 1, 2, 6]
@@ -451,7 +451,7 @@ k@"onnen ganze Zahlen und allgemeine Ausdr@"ucke sein.
 
 @c @code{load ("functs")} loads this function.
 
-Mit dem Kommando @code{load(functs)} wird die Funktion geladen.
+Mit dem Kommando @code{load("functs")} wird die Funktion geladen.
 @end deffn
 
 @c --- 27.07.2013 VvN ----------------------------------------------------------
@@ -637,11 +637,11 @@ F@"uhrt einen Primzahltest f@"ur das Argument @var{n} durch.  Liefert
 Ergebnis @code{true}, ist @var{n} mit sehr gro@ss{}er Wahrscheinlichkeit eine 
 Primzahl.
 
-F@"ur ganze Zahlen @var{n} kleiner als 341550071728321 wird eine deterministische
+F@"ur ganze Zahlen @var{n} kleiner als 3317044064679887385961981 wird eine deterministische
 Variante des Miller-Rabin-Tests angewandt.  Hat in diesem Fall @code{primep} den Wert
 @code{true}, dann ist @var{n} mit Sicherheit eine Primzahl.
 
-F@"ur ganze Zahlen @var{n} gr@"o@ss{}er 341550071728321 f@"uhrt @code{primep}
+F@"ur ganze Zahlen @var{n} gr@"o@ss{}er 3317044064679887385961981 f@"uhrt @code{primep}
 @mref{primep_number_of_tests} Pseudo-Primzahl-Tests nach Miller-Rabin und 
 einen Pseudo-Primzahl-Test nach Lucas durch.  Die Wahrscheinlichkeit, dass 
 eine zusammen gesetzte Zahl @var{n} einen Miller-Rabin-Test besteht, ist kleiner

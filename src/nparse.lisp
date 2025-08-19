@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -14,10 +14,35 @@
 
 (load-macsyma-macros defcal mopers)
 
-(defmvar *alphabet* (list #\_ #\%))
-(defmvar *whitespace-chars*
-         '(#\tab #\space #\linefeed #\return #\page #\newline
-           #+(or unicode sb-unicode openmcl-unicode-strings) #\no-break_space))
+(defvar *ascii-space-chars-for-maxima* '(#\tab #\space #\linefeed #\return #\page #\newline))
+
+(defvar *unicode-space-char-codes-for-maxima*
+      ;; Adapted from the list given by: https://jkorpela.fi/chars/spaces.html
+      ;; omitting SPACE, OGHAM SPACE MARK, MONGOLIAN VOWEL SEPARATOR, IDEOGRAPHIC SPACE,
+      ;; and ZERO WIDTH NO-BREAK SPACE.
+  '(
+    #x00A0 ;; NO-BREAK SPACE
+    #x2000 ;; EN QUAD
+    #x2001 ;; EM QUAD
+    #x2002 ;; EN SPACE
+    #x2003 ;; EM SPACE
+    #x2004 ;; THREE-PER-EM SPACE
+    #x2005 ;; FOUR-PER-EM SPACE
+    #x2006 ;; SIX-PER-EM SPACE
+    #x2007 ;; FIGURE SPACE
+    #x2008 ;; PUNCTUATION SPACE
+    #x2009 ;; THIN SPACE
+    #x200A ;; HAIR SPACE
+    #x200B ;; ZERO WIDTH SPACE
+    #x202F ;; NARROW NO-BREAK SPACE
+    #x205F ;; MEDIUM MATHEMATICAL SPACE
+    ))
+
+(defvar *unicode-space-chars-for-maxima*
+    #-lisp-unicode-capable nil
+    #+lisp-unicode-capable (mapcar 'code-char *unicode-space-char-codes-for-maxima*))
+
+(defmvar *whitespace-chars* (append *ascii-space-chars-for-maxima* *unicode-space-chars-for-maxima*))
 
 (defun alphabetp (n)
   (and (characterp n)
@@ -48,7 +73,8 @@
   (let ((fp (and (not (eq *parse-stream* *standard-input*))
                  (file-position *parse-stream*)))
 	(file (and (not (eq *parse-stream* *standard-input*))
-                   (cadr *current-line-info*))))
+                   (cadr *current-line-info*)))
+	(*standard-output* *error-output*))
     (flet ((line-number ()
 	     ;; Fix me: Neither batch nor load track the line number
 	     ;; correctly. batch, via dbm-read, does not track the
@@ -71,7 +97,8 @@
 	       (loop for i from (1- n) downto (- n 20)
 	     	  while (setq ch (nth i *parse-window*))
 		  do
-		    (cond ((char= ch #\newline)
+		    (cond ((or (eql ch *parse-stream-eof*)
+			       (char= ch #\newline))
 			   (return-from column some))
 			  (t (push ch some))))
 	       some))
@@ -95,11 +122,11 @@
       (apply 'format t format-string (mapcar #'printer l))
       (cond ((or $report_synerr_info (eql *parse-stream* *standard-input*))
 	     (let ((some (column)))
-	       (format t "~%~{~c~}~%~vt^" some (- (length some) 2))
+	       (format t "~%~{~c~}~%~vt^" some (max 0 (- (length some) 2)))
 	       (read-line *parse-stream* nil nil))))
       (terpri)
       (finish-output)
-      (throw-macsyma-top))))
+      (if *quit-on-error* ($quit 1.) (throw-macsyma-top)))))
 
 (defun tyi-parse-int (stream eof)
   (or *parse-window*
@@ -130,6 +157,24 @@
 ;;;;;                                                                    ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+#+gcl
+(defun gobble-whitespace (&aux (ch (parse-tyipeek)) (cd (if (eql -1 ch) 0 (char-code (the character ch)))) l i r)
+  (declare (dynamic-extent l) (fixnum r) ((integer 0 5) i) ((integer 0 255) cd))
+  (cond ((>= cd 128)
+	 (do ((j 5 (1- j))) ((or (< j 3) (zerop (logand cd (the fixnum (ash 1 (the (integer 0 5) j)))))) (setq i j))
+	   (declare ((integer 0 5) j)))
+	 (setq r (logand cd (the fixnum (1- (the fixnum (ash 1 (the (integer 0 5) i)))))) l (cons (parse-tyi) l))
+	 (do ((i i (1+ i))) ((= i 6))
+	   (declare (fixnum i))
+	   (setq ch (parse-tyi) l (cons ch l) cd (if (eql -1 ch) 0 (char-code (the character ch))) r (logior (the fixnum (ash r 6)) (logand cd #.(1- (ash 1 6))))))
+	 (if (member r *unicode-space-char-codes-for-maxima*)
+	     (gobble-whitespace)
+	     (dolist (l l) (unparse-tyi l))))
+	((member ch *whitespace-chars*)
+	 (parse-tyi)
+	 (gobble-whitespace))))
+
+#-gcl
 (defun gobble-whitespace ()
   (do ((ch (parse-tyipeek) (parse-tyipeek)))
       ((not (member ch *whitespace-chars*)))
@@ -349,9 +394,9 @@
   ;; (except when we have a bigfloat, of course!).  So convert exponent
   ;; markers to the flonum-exponent-marker.
   (let ((marker (car (nth 3 data))))
-    (unless (eql marker flonum-exponent-marker)
+    (unless (eql marker +flonum-exponent-marker+)
       (when (member marker '(#\E #\F #\S #\D #\L #+cmu #\W))
-        (setf (nth 3 data) (list flonum-exponent-marker)))))
+        (setf (nth 3 data) (list +flonum-exponent-marker+)))))
   (if (not (equal (nth 3 data) '(#\B)))
       (readlist (apply #'append data))
       (let*
@@ -455,7 +500,7 @@
 ;;;	Implementation Notes ....
 ;;;
 ;;;	JPG	Chars like ^A, ^B, ... get left around after interrupts and
-;;;		should be thrown away by the scanner if not used as editting
+;;;		should be thrown away by the scanner if not used as editing
 ;;;		commands.
 ;;;
 ;;;	KMP	There is RBP stuff in DISPLA, too. Probably this sort of
@@ -530,7 +575,7 @@
 	   (cond  ((eql test *parse-stream-eof*)
 		   (parse-tyi)
 		   (if eof-ok? eof-obj
-		       (maxima-error (intl:gettext "parser: end of file while scanning expression."))))
+		       (mread-synerr (intl:gettext "end of file while scanning expression."))))
 		  ((eql test #\/)
 		   (parse-tyi)
 		   (cond ((char= (parse-tyipeek) #\*)
@@ -568,7 +613,7 @@
 	(parse-tyi)
 	(cond ((= depth 0) (return t)))
 	(cond ((eql c *parse-stream-eof*)
-	       (error (intl:gettext "parser: end of file in comment.")))
+	       (mread-synerr (intl:gettext "end of file in comment.")))
 	      ((char= c #\*)
 	       (cond ((char= (parse-tyipeek) #\/)
 		      (decf depth)
@@ -624,8 +669,7 @@
 ;;;
 
 (eval-when
-  #+gcl (eval compile load)
-  #-gcl (:execute :compile-toplevel :load-toplevel)
+  (:execute :compile-toplevel :load-toplevel)
   (defmacro def-nud-equiv (op equiv)
     (list 'putprop (list 'quote op) (list 'function equiv)
           (list 'quote 'nud)))
@@ -747,15 +791,15 @@
 (defun collision-check (op active-bitmask key)
   (let ((key-bitmask (get key op)))
     (if (not key-bitmask)
-	(mread-synerr "~A is an unknown keyword in a ~A statement."
+	(mread-synerr "`~A' is an unknown keyword in a `~A' statement."
 		      (mopstrip key) (mopstrip op)))
     (let ((collision (collision-lookup op active-bitmask key-bitmask)))
       (if collision
 	  (if (eq collision key)
-	      (mread-synerr "This ~A's ~A slot is already filled."
-			    (mopstrip op)
-			    (mopstrip key))
-	      (mread-synerr "A ~A cannot have a ~A with a ~A field."
+              (mread-synerr "The `~A' slot for `~A' is already filled."
+			    (mopstrip key)
+                            (mopstrip op))
+	      (mread-synerr "A `~A' cannot have a `~A' with a `~A' field."
 			    (mopstrip op)
 			    (mopstrip key)
 			    (mopstrip collision))))
@@ -803,15 +847,6 @@
 (defun mheader (op) (add-lineinfo (or (safe-get op 'mheader) (ncons op))))
 
 (defmacro def-mheader (op header) `(defprop ,op ,header mheader))
-
-
-(defmvar $parsewindow 10.
-	 "The maximum number of 'lexical tokens' that are printed out on
-each side of the error-point when a syntax (parsing) MAXIMA-ERROR occurs.  This
-option is especially useful on slow terminals.  Setting it to -1 causes the
-entire input string to be printed out when an MAXIMA-ERROR occurs."
-	 fixnum)
-
 
 ;;;; Misplaced definitions
 
@@ -907,7 +942,7 @@ entire input string to be printed out when an MAXIMA-ERROR occurs."
 ;;;
 
 (defun parse (mode rbp)
-  (do ((left (nud-call (pop-c))		; Envoke the null left denotation
+  (do ((left (nud-call (pop-c))		; Invoke the null left denotation
 	     (led-call (pop-c) left)))	;  and keep calling LED ops as needed
       ((>= rbp (lbp (first-c)))		; Until next op lbp too low
        (convert left mode))))		;  in which case, return stuff seen
@@ -1247,7 +1282,7 @@ entire input string to be printed out when an MAXIMA-ERROR occurs."
 ;No RPOS
 (def-mheader	|$!| (mfactorial))
 
-(def-mheader |$!!| ($genfact))
+(def-mheader |$!!| (%genfact))
 
 (def-led (|$!!| 160.) (op left)
   (list '$expr
@@ -1292,6 +1327,9 @@ entire input string to be printed out when an MAXIMA-ERROR occurs."
 (def-lpos	|$.| $expr)
 (def-rpos	|$.| $expr)
 (def-mheader	|$.| (mnctimes))
+
+;; Copy properties to noun operator.
+(setf (get '%mnctimes 'op) (get 'mnctimes 'op))
 
 (def-led-equiv	|$*| parse-nary)
 (def-lbp	|$*| 120.)
@@ -1450,8 +1488,7 @@ entire input string to be printed out when an MAXIMA-ERROR occurs."
 	 (case (first-c)
 	   (($else)   (list t (parse '$any (rbp (pop-c)))))
 	   (($elseif) (parse-condition (pop-c)))
-	   (t ; Note: $false instead of () makes DISPLA suppress display!
-	    (list t '$false)))))
+	   (t         (list t '$false)))))
 
 (def-mheader $do (mdo))
 
@@ -1522,7 +1559,7 @@ entire input string to be printed out when an MAXIMA-ERROR occurs."
   ($do	   . ())
   ($for    . ($for))
   ($from   . ($in $from))
-  ($in     . ($in $from $step $next))
+  ($in     . ($in $from $step $next $thru))
   ($step   . ($in       $step $next))
   ($next   . ($in	$step $next))
   ($thru   . ($in $thru)) ;$IN didn't used to get checked for
@@ -1677,7 +1714,6 @@ entire input string to be printed out when an MAXIMA-ERROR occurs."
       (getopr op))))
 
 (defun op-setup (op)
-  (declare (special *mopl*))
   (let ((dummy (or (get op 'op)
                    (coerce (string* op) 'string))))
     (putprop op    dummy 'op )
@@ -1787,8 +1823,9 @@ entire input string to be printed out when an MAXIMA-ERROR occurs."
 ;; STRIP-LINEINFO does not modify EXPR.
 
 (defun strip-lineinfo (expr)
-  (if (atom expr) expr
-    (cons (strip-lineinfo-op (car expr)) (mapcar #'strip-lineinfo (cdr expr)))))
+  (if (or (atom expr) (specrepp expr))
+      expr
+      (cons (strip-lineinfo-op (car expr)) (mapcar #'strip-lineinfo (cdr expr)))))
 
 ;; If something in the operator looks like debugging stuff, remove it.
 ;; It is assumed here that debugging stuff is a list comprising an integer and a string

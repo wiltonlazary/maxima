@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -115,46 +115,27 @@
 
 (declare-top
  (special vlist
-	  varlist		;List of all the variables occurring in a power
-				;series, the power series variables at the end
-	  genvar		;The list of gensyms corresponding to varlist
-	  modulus		;
 	  *a*			;Temporary special
-	  silent-taylor-flag	;If true indicates that errors will be
-				;returned via a throw to TAY-ERR
 	  tlist			;An association list which contains the
 				;relevant information for the expansion which
 				;is passed in at toplevel invocation.
-	  $float		;Indicates whether to convert rational numbers
-				;to floating point numbers.
-	  $keepfloat		;When true retains floatin point numbers
-				;internal to Taylor.
-	  $radexpand		;
 	  log-1			;What log(-1) should be log(-1) or pi*i.
 	  log%i			;Similarly for log(i)
 	  exact-poly		;Inicates whether polynomials are to be
 				;considered exact or not.  True within SRF,
 				;false within TAYLOR.
 	  tvars			;
-	  half%pi		;Has pi/2 to save space.
 	  const-exp-funs	;
 	  tay-const-expand	;For rediculousness like csch(log(x))
-	  $exponentialize	;which we do by exponentiation.
 	  tay-pole-expand	;
 	  trigdisp		;
 	  last-exp		;last-expression through taylor2
-	  $taylordepth		;
-	  $ratexpand		;
-	  genpairs		;List of dotted pairs
-	  ps-bmt-disrep		;
 	  ivars			;Pairlist if gensym and disreped version
 	  key-vars		;Pairlist of gensym and key var (for searching
 				;TLIST)
-	  $algebraic		;
 	  *psacirc		;
 	  *pscirc		;
 	  full-log		;
-	  $logarc		;
 	  trunclist		;
 	  *within-srf?*		;flag for in srf
 	  mainvar-datum		;
@@ -168,10 +149,10 @@
 	  zerolist		; A list of constant expressions which have
 				; been verified to be zero by a call to
 				; $TAYLOR_SIMPLIFIER in taylor2. It is used to
-				; suppress the message that TAYLOR is assumming
+				; suppress the message that TAYLOR is assuming
 				; an expression to be zero.
 	; 0p-funord lexp-non0	; referenced only in commented-out code, so comment out here too
-	$zerobern $simp)
+	)
  )				;Don't want to see closed compilation notes.
 
 (defmvar $psexpand ()
@@ -188,7 +169,7 @@
 
 (defmvar $taylor_truncate_polynomials t
  "When FALSE polynomials input to TAYLOR are considered to have infinite
-  precison; otherwise (the default) they are truncated based upon the input
+  precision; otherwise (the default) they are truncated based upon the input
   truncation levels.")
 
 (defmvar $taylor_logexpand t
@@ -213,7 +194,6 @@
 		 (or (zfree (car l) x) (return () ))))))
 
 (defun mfree (exp varl)
-  (declare (special dummy-variable-operators))
    (cond ((atom exp) (not (member exp varl :test #'eq)))
 	 ((eq (caar exp) 'mrat)
 	  (do ((l (mrat-varlist exp) (cdr l)))
@@ -749,7 +729,7 @@
 	  ((mono-term? (terms p))	;; A monomial to a power
 	   (let ((s (psfind-s n)) (n-s) (x) (l (terms p)))
 	      ;; s is the numeric part of the exponent
-	      (if (floatp (car s)) ;; Perhaps we souldn't
+	      (if (floatp (car s)) ;; Perhaps we shouldn't
 		  ;; rationalize if $keepfloat is true?
 		  (setq s (maxima-rationalize (quot (car s) (cdr s)))))
 	      (setq n-s (psdiff n s)	;; the non-numeric part of exponent
@@ -1007,7 +987,7 @@
 	    (setq strongest-term (if inf-var? (ps-gt p) (ps-lt p)))
 	    ;; If the strongest term has degree 0 in the mainvar then the singular
 	    ;; terms occur in some other weaker var. There may be terms in this
-	    ;; coef which arent singular (e.g. 1 in (1/x+1+...)+exp(-1/x)+...) so
+	    ;; coef which are not singular (e.g. 1 in (1/x+1+...)+exp(-1/x)+...) so
 	    ;; we must recursively psexpt-fn this term to get only what we need.
 	    (if (rczerop (e strongest-term))
 		(setq c (pstimes c (psexpt-fn (c strongest-term))))
@@ -1101,13 +1081,12 @@
 	 ((or (when (lim-finitep lim2) (rotatef lim1 lim2) 't)
 	      (lim-finitep lim1))
 	  (when (and (eq lim1 '$finite) (lim-infp lim1))
-	     (break "Undefined finite*inf in lim-times"))
+	     (tay-error "Undefined finite*inf in lim-times" lim2))
 	  (setq lim (lim-abs lim2)))
-	 (t (break "Undefined limit product ~A * ~A in lim-times" lim1 lim2)))
+	 (t (tay-error "Undefined limit product in lim-times" (list (list 'mtimes) lim1 lim2))))
    (if (or (lim-imagp lim1) (lim-imagp lim2))
        (if (lim-infp lim) '$infinity '$im)
       (if (and (lim-plusp lim1) (lim-plusp lim2)) lim (lim-minus lim)))))
-
 (defun lim-power (lim power)
    (cond ((ezerop power) '$pos)
 	 ((e> (rczero) power) (lim-recip (lim-power lim (e- power))))
@@ -1547,7 +1526,7 @@
 		       (setq trunc (emin trunc (t-o-var (gvar p)))))
 		    ;; When we've divided by the greatest term, all terms
 		    ;; have non-positive exponents and we must perform the
-		    ;; transformation x -> 1/x befor calling pslog1 and then
+		    ;; transformation x -> 1/x before calling pslog1 and then
 		    ;; perform the inverse afterwards.
 		    (when gt (setq l (invert-terms l)))
 		    (when (e> (rczero) inc) (setq inc (e- inc)))
@@ -1768,7 +1747,7 @@
 			    sign (e* chng sign))
 		      (add-term lt-l e (e* (e* sign fact)
 					   (e* (prep1
-						($bern (rcdisrep (e1+ e))))
+						(ftake '%bern (rcdisrep (e1+ e))))
 					       (e* pow (e1- pow)))))
 		      (setq lt-l (n-term lt-l))))
 	     (go a)))
@@ -1783,7 +1762,7 @@
 			    sign (e* chng sign))
 		      (add-term lt-l e (e* (e* sign fact)
 					   (e* (prep1
-						($bern (rcdisrep (e1+ e))))
+						(ftake '%bern (rcdisrep (e1+ e))))
 					       (e+ pow plus))))
 		      (setq lt-l (n-term lt-l))))
 	     (go a)))
@@ -1796,7 +1775,7 @@
 		   (t (setq fact (e// fact (e* e (e1- e)))
 			    sign (e* chng sign))
 		      (add-term lt-l e (e* (e* sign fact)
-					   (prep1 ($euler (rcdisrep e)))))
+					   (prep1 (ftake '%euler (rcdisrep e)))))
 		      (setq lt-l (n-term lt-l))))
 	     (go a)))
 
@@ -1820,7 +1799,7 @@
 ;;;	(<name of the expanding routine for the function or
 ;;;	  (name . le of n-term) if expansion is of order 0>
 ;;;      <first term in the expansion or the name of a routine which
-;;;	  computes the order when it may depend on parameters (e.g subsripts)>
+;;;	  computes the order when it may depend on parameters (e.g subscripts)>
 ;;;      <data for the expanding routine>)
 
 
@@ -1875,8 +1854,8 @@
 ;;; [var, pt, order, asymp]
 
 (defmfun $taylor (e &rest args)
-  (when (not ($ratp e))
-    ;; Not a mrat expression. Remove the special representation.
+  (when (not ($taylorp e))
+    ;; Not a taylor expression. Remove the special representation.
     (setq e (specrepcheck e)))
   (taylor* e args))
 
@@ -2513,6 +2492,13 @@
   (declare (ignore func))
   (taylor2 `((%gamma) ,(m1+ arg))))
 
+(defprop %signum signum-trans tay-trans)
+
+;; signum(x) => x/abs(x)
+;; this gives an error at x=0 and a derivative of 0 elsewhere
+(defun signum-trans (arg func)
+  (declare (ignore func))
+  (taylor2 `((mtimes) ,arg ((mexpt) ((mabs) ,arg) -1))))
 
 (defprop %gamma_incomplete gamma-upper-trans tay-trans)
 (defprop $gamma_incomplete gamma-upper-trans tay-trans)
@@ -2520,13 +2506,24 @@
 (defprop $gamma_incomplete_lower gamma-lower-trans tay-trans)
 
 ;; for gamma_incomplete(s,z)
-;; translate into gamma_incomplete_lower if s>0 and z=0
+;; translate into gamma_incomplete_lower if s>0 and z=0 
+
+;; June 2022: To workaround the bug
+;;     integrate(x*exp(-x^2)*sin(x),x,minf,inf)
+;;     limit: variable must be a symbol or subscripted symbol; found: sin(x)
+;; I (Barton Willis) surrounded the call to $limit with errcatch with
+;; $errormsg set to nil. This change allows Maxima to find the correct 
+;; value of this definite integral. But almost surely there is a bug 
+;; somewhere else that calls gamma-upper-trans with faulty arguments.
+;; The real bug should be fixed, but inserting errcatch here is 
+;; harmless.
 (defun gamma-upper-trans (arg func)
   (let ((s (car arg))
 	(z (cadr arg)))
     (if (and
 	 (eq ($sign s) '$pos)
-	 (zerop1 ($limit z (caar tlist) (exp-pt (car tlist)))))
+	 (let (($errormsg nil))
+	  (zerop1 (car (errcatch ($limit z (caar tlist) (exp-pt (car tlist))))))))
 	(taylor2 `((mplus) ((%gamma) ,s)
 		   ((mtimes) -1 ((%gamma_incomplete_lower) ,s ,z))))
 	(taylor2 (diff-expand `((,func) . ,arg)
@@ -2778,10 +2775,9 @@
 	 (t (tsexpt-red (list (list '(%log) b) e)))))
 
 (defun tsexpt-red (l)
-   (*bind* ((free) (nfree) (full-log) ($logarc t) (expt) (ps) (e)
+   (*bind* ((free) (nfree) (full-log) ($logarc t) (expt) (ps)
 	    (log-1 '((mtimes) $%i $%pi))
 	    (log%i '((mtimes) ((rat) 1 2) $%i $%pi)))
-	   (declare (special e))
     a  (do ((l l (cdr l)))
 	   ((null l) )
 	  (cond ((mtimesp (car l)) (setq l (append l (cdar l))))
@@ -2807,7 +2803,7 @@
 	     e^c0 ord-e^c0)
 	  (unless (rczerop c0)
 	     (setq ord-e^c0 (ord-vector (setq e^c0 (psexpt-fn c0))))
-	     ;; Must emax with 0 so that new singular kernals won't be trunc'd
+	     ;; Must emax with 0 so that new singular kernels won't be trunc'd
 	     ;; e.g exp(1/x+...) to degree -2 should be exp(-1/x)+...
 	     ;; Also try taylor(screwa,x,0,-2).
 	     (mapc #'(lambda (d o) (push-pw d (emax (e- (current-trunc d) o)
@@ -3017,14 +3013,12 @@
 
 (defun no-sing-err (x)			;; try to catch all singularities
   (let ((errorsw t))
-    (declare (special errorsw))
     (let ((ans (catch 'errorsw (eval x))))
       (if (eq ans t) (unfam-sing-err) ans))))
 
 ;; evaluate deriv at location var=pt
 (defun eval-deriv (deriv var pt)
   (let ((errorsw t))
-    (declare (special errorsw))
     (let ((ans (no-sing-err `(meval '(($at) ,deriv ((mequal) ,var ,pt))))))
       ans)))
 
@@ -3089,7 +3083,11 @@
    ;; internal var and likewise shouldn't be displayed.
    (cond ((or (rczerop n) (null var) (equal var 1)) 1)
 	 ((equal n (rcone)) var)
-	 ((and ps-bmt-disrep (mexptp var) (equal (caddr var) -1))
+	 ((and (mexptp var) (equal (caddr var) -1))
+	  ;; This used to be conditioned on ps-bmt-disrep which was
+	  ;; always true.  But I (rtoy) can't find a case where it
+	  ;; would have made a difference.  The testsuite doesn't have
+	  ;; any examples.
 	  (psdisrep^ (e- n) (cadr var)))
 	 ('t `((mexpt ratsimp) ,var ,(edisrep n)))))
 

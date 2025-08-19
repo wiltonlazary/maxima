@@ -131,7 +131,7 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Operators}
 @closecatbox
@@ -153,7 +153,7 @@ See also @mrefcomma{addrow} @mref{addcol} and @mrefdot{join}
 
 Do @code{example(append);} for an example.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -221,14 +221,16 @@ Otherwise, @code{false} is returned.
 @c ===end===
 @example
 @group
-(%i1) assoc (abc, [[x, 111], [y, 222], [z, 333]], none); 
+(%i1) assoc (abc, [[x, 111], [y, 222], [z, 333]], none);
 (%o1)                         none
+@end group
+@group
 (%i2) assoc (abc, [[x, 111], [y, 222], [z, 333]]);
 (%o2)                         false
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -288,7 +290,7 @@ to a nonlist sometimes gives a surprising result; for example
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -300,7 +302,7 @@ to a nonlist sometimes gives a surprising result; for example
 
 Returns a copy of the list @var{list}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 @end deffn
@@ -359,7 +361,7 @@ upper bounds for the iteration.
 Note that the limits or list for the @code{j} variable can
 depend on the current value of @code{i}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 @end deffn
@@ -488,7 +490,7 @@ Arguments which are @code{equal} but not "=" are not removed.
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -501,7 +503,7 @@ Arguments which are @code{equal} but not "=" are not removed.
 Returns the 8th item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -558,7 +560,7 @@ to a nonlist sometimes gives a surprising result; for example
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -572,7 +574,7 @@ to a nonlist sometimes gives a surprising result; for example
 Returns the 5th item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -627,7 +629,7 @@ The functions @code{second} @dots{}
 
 See also @mref{firstn} and @mrefdot{part}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -786,7 +788,7 @@ Note that @code{firstn(@var{expr}, 1)} is not the same as @code{first(@var{expr}
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -799,7 +801,7 @@ Note that @code{firstn(@var{expr}, 1)} is not the same as @code{first(@var{expr}
 Returns the 4th item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -843,7 +845,7 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 @end deffn
@@ -859,7 +861,7 @@ Returns the last part (term, row, element, etc.) of the @var{expr}.
 
 See also @mrefdot{lastn}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1020,7 +1022,7 @@ Note that @code{lastn(@var{expr}, 1)} is not the same as @code{last(@var{expr})}
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1045,7 +1047,7 @@ to the number of elements in the list. If the length of a list is used inside
 a loop it therefore might drastically increase the performance if the length
 is calculated outside the loop instead.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1061,7 +1063,7 @@ when @code{true}, list-matrix operations are contagious causing lists to be
 converted to matrices yielding a result which is always a matrix.  However,
 list-list operations should return lists.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Global flags}
 @closecatbox
@@ -1072,7 +1074,7 @@ list-list operations should return lists.
 
 Returns @code{true} if @var{expr} is a list else @code{false}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Predicate functions}
 @closecatbox
@@ -1131,24 +1133,24 @@ Examples:
 @code{/} is the division operator.
 
 @c ===beg===
-@c lreduce ("^", args ({a, b, c, d}));
-@c lreduce ("/", args ({a, b, c, d}));
+@c lreduce ("^", [a, b, c, d]);
+@c lreduce ("/", [a, b, c, d]);
 @c ===end===
 @example
 @group
-(%i1) lreduce ("^", args (@{a, b, c, d@}));
+(%i1) lreduce ("^", [a, b, c, d]);
                                b c d
 (%o1)                       ((a ) )
 @end group
 @group
-(%i2) lreduce ("/", args (@{a, b, c, d@}));
+(%i2) lreduce ("/", [a, b, c, d]);
                                 a
 (%o2)                         -----
                               b c d
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 
@@ -1222,7 +1224,7 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 @end deffn
@@ -1294,7 +1296,7 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @category{Predicate functions}
@@ -1308,7 +1310,7 @@ Examples:
 Returns the 9th item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1322,7 +1324,7 @@ See @mref{first} for more details.
 @var{list} must be a mapatom that is bound to a nonempty list. If the argument @var{list} is 
 not bound to a nonempty list, Maxima signals an error. For examples, see @mrefdot{push}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1397,7 +1399,7 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1438,7 +1440,7 @@ See also @mref{firstn} and @mrefdot{lastn}
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1457,7 +1459,7 @@ e.g.  @code{reverse(a=b);} gives @code{b=a}.
 
 See also @mrefdot{sreverse}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1516,26 +1518,26 @@ Examples:
 @code{/} is the division operator.
 
 @c ===beg===
-@c rreduce ("^", args ({a, b, c, d}));
-@c rreduce ("/", args ({a, b, c, d}));
+@c rreduce ("^", [a, b, c, d]);
+@c rreduce ("/", [a, b, c, d]);
 @c ===end===
 @example
 @group
-(%i1) rreduce ("^", args (@{a, b, c, d@}));
+(%i1) rreduce ("^", [a, b, c, d]);
                                  d
                                 c
                                b
 (%o1)                         a
 @end group
 @group
-(%i2) rreduce ("/", args (@{a, b, c, d@}));
+(%i2) rreduce ("/", [a, b, c, d]);
                                a c
 (%o2)                          ---
                                b d
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 
@@ -1548,7 +1550,7 @@ Examples:
 Returns the 2nd item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1561,7 +1563,7 @@ See @mref{first} for more details.
 Returns the 7th item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1574,7 +1576,7 @@ See @mref{first} for more details.
 Returns the 6th item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1786,7 +1788,7 @@ and all other elements the same as @code{orderlessp}.
 @c ===end===
 @example
 @group
-(%i1) L: [%i, 1+%i, 2*x, minf, inf, %e, sin(1), 0,1,2,3, 1.0, 1.0b0];
+(%i1) L: [%i, 1+%i, 2*x, minf, inf, %e, sin(1), 0, 1,2,3, 1.0, 1.0b0];
 (%o1) [%i, %i + 1, 2 x, minf, inf, %e, sin(1), 0, 1, 2, 3, 1.0, 
                                                            1.0b0]
 @end group
@@ -1802,7 +1804,7 @@ and all other elements the same as @code{orderlessp}.
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 @end deffn
@@ -1831,7 +1833,7 @@ Example:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 @end deffn
@@ -1887,7 +1889,7 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @closecatbox
 @end deffn
@@ -1899,7 +1901,7 @@ Examples:
 Returns the 10th item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1912,7 +1914,7 @@ See @mref{first} for more details.
 Returns the 3rd item of expression or list @var{expr}.
 See @mref{first} for more details.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Lists}
 @category{Expressions}
 @closecatbox
@@ -1970,7 +1972,7 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Sets}
 @category{Lists}
 @closecatbox
@@ -2077,7 +2079,7 @@ Examples:
 @end group
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Sets}
 @category{Lists}
 @closecatbox
@@ -2109,6 +2111,7 @@ stack or a fifo:
 (%i1) l:[Test,1,2,3,4];
 (%o1)                  [Test, 1, 2, 3, 4]
 @end group
+@group
 (%i2) while l # [] do
    disp(pop(l));
                               Test
@@ -2122,6 +2125,7 @@ stack or a fifo:
                                 4
 
 (%o2)                         done
+@end group
 @end example
 Another even faster example would be:
 @c ===beg===
@@ -2134,6 +2138,7 @@ Another even faster example would be:
 (%i1) l:[Test,1,2,3,4];
 (%o1)                  [Test, 1, 2, 3, 4]
 @end group
+@group
 (%i2) for i in l do
    disp(pop(l));
                               Test
@@ -2147,6 +2152,7 @@ Another even faster example would be:
                                 4
 
 (%o2)                         done
+@end group
 @end example
 
 Beginning traversal with the last element of a list is possible after

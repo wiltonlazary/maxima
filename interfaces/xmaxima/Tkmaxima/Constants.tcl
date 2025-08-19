@@ -1,76 +1,69 @@
-# -*-mode: tcl; fill-column: 75; tab-width: 8; coding: iso-latin-1-unix -*-
-#
-#       $Id: Constants.tcl,v 1.29 2011-03-20 23:14:57 villate Exp $
-#
+############################################################
+# Constants.tcl                                            #
+# Copyright (C) 1998 William F. Schelter                   #
+# For distribution under GNU public License.  See COPYING. #
+#                                                          #
+#     Modified by Jaime E. Villate                         #
+#     Time-stamp: "2024-04-01 14:13:26 villate"            #
+############################################################
 
 proc cMAXINITBeforeIni {} {
-    global maxima_default
+    global maxima_default maxima_priv embed_args tk_version
+
+    # default settings. Might be changed by local configuration file
     set maxima_default(plotwindow) multiple
-
-    # from Send-some.tcl
-    set maxima_default(sMathServerHost) genie1.ma.utexas.edu
-    set maxima_default(iMathServerPort) 4443
-
-    # from Browser.tcl
-    set maxima_default(sMathServerHost) localhost
-    set maxima_default(iMathServerPort) 4443
-
-    #mike turn these off by default
     set maxima_default(iShowBalloons) 0
-
     set maxima_default(fontAdjust) 0
-
     set maxima_default(iConsoleWidth) 80
     set maxima_default(iConsoleHeight) 32
-
+    set maxima_default(browser) 1
+    
     # Set up Maxima console font
     set cfont [font actual TkFixedFont -family]
     set cfontsize [font actual TkFixedFont -size]
     catch {font delete ConsoleFont}
     font create ConsoleFont -family $cfont -size $cfontsize 
     set maxima_default(ConsoleFont) [list $cfont $cfontsize]
-
     set maxima_default(iLocalPort) 4008
-
     set maxima_default(bDebugParse) 0
+    if {[string index $tk_version 0] == 9} {
+        set maxima_priv(home) [file home]
+    } else {
+        set maxima_priv(home) "~"
+    }
 
     # from FileDlg.tcl
-    set maxima_default(OpenDir) "~/"
-    set maxima_default(OpenFile) "~/.xmaximrc"
-    set maxima_default(SaveFile) "~/.xmaximrc"
+    set maxima_default(OpenDir) "$maxima_priv(home)/"
+    # The last files opened and saved. Any default value serves
+    # but a good starting value is Xmaxima's initialization file.
+    # TO DO: change ~ for a home directory customized for each system.
+    set maxima_default(OpenFile) "$maxima_priv(home)/.xmaximarc"
+    set maxima_default(SaveFile) "$maxima_priv(home)/.xmaximarc"
 
-    # From Browser.tcl
-    set maxima_default(defaultservers) {
-	nmtp://genie1.ma.utexas.edu/
-	nmtp://linux51.ma.utexas.edu/
-	nmtp://linux52.ma.utexas.edu/
-    }
-
-    global embed_args
     if { "[info var embed_args]" != "" } {
 	# the following will be defined only in the plugin
-	set maxima_default(defaultservers) nmtp://genie1.ma.utexas.edu/
+	set maxima_default(defaultservers) nmtp://some.server.example.org/
     }
+    set maxima_priv(imgregexp) {[.](gif|png|jpe?g)[^/]*$}
 
-
-    # maxima_default(lProxyHttp)
+    # from Getdata1.tcl
+    set maxima_priv(cachedir) "$maxima_priv(home)/.xmaxima/cache"
 }
 
 proc cMAXINITReadIni {} {
-    if {[file isfile ~/.xmaximarc]} {
-	if {[catch {uplevel "#0" [list source ~/.xmaximarc] } err]} {
-	    tide_failure [M [mc "Error sourcing %s\n%s"] \
-			      [file native ~/.xmaximarc] \
-			      $err]
+    global maxima_priv
+    if {[file isfile "$maxima_priv(home)/.xmaximarc"]} {
+	if {[catch {uplevel "#0" [list source "$maxima_priv(home)/.xmaximarc"]}\
+                 err]} {
+	    tk_messageBox -title Error -icon error -message \
+                [mc "Error sourcing %s\n%s" [file native ~/.xmaximarc] $err]
 	}
     }
 }
 
 proc cMAXINITAfterIni {} {
-    global maxima_default maxima_priv MathServer
+    global maxima_default maxima_priv
     lMaxInitSetOpts
-    set MathServer [list $maxima_default(sMathServerHost) \
-			$maxima_default(iMathServerPort) ]
 
     # from plot3d.tcl
     set maxima_priv(speed) [expr {(9700.0 / (1 + [lindex [time {set i 0 ; while { [incr i] < 1000} {}} 1] 0]))}]
@@ -93,23 +86,14 @@ proc cMAXINITAfterIni {} {
 
 # Constants
 global maxima_priv
-set maxima_priv(date) 14/03/2011
+set maxima_priv(date) 21/03/2024
 
-# from
 if { ![info exists maxima_priv(date)] } {
     set maxima_priv(date) [clock  format [clock seconds] -format {%m/%d/%Y} ]
 }
 
 # from Preamble.tcl
 set maxima_priv(clicks_per_second) 1000000
-
-# from Getdata1.tcl
-set maxima_priv(cachedir) ~/.netmath/cache
-
-# from Plotconf.tcl
-global ftpInfo
-set ftpInfo(host) genie1.ma.utexas.edu
-set ftpInfo(viahost) genie1.ma.utexas.edu
 
 # from Plot2d.tcl
 array set maxima_priv { bitmap,disc4 {#define disc4_width 4
@@ -125,20 +109,14 @@ static unsigned char disc_bits[] = {
 # from xmaxima.tcl
 set maxima_priv(options,maxima) {{doinsert 0 "Do an insertion" boolean}}
 
-# from EOctave.tcl
-set maxima_priv(options,octave) {{doinsert 1 "Do an insertion" boolean}}
-
-# from EOpenplot.tcl
-set maxima_priv(options,openplot) {{doinsert 0 "Do an insertion" boolean}}
-
 # from EHref.tcl
 set maxima_priv(options,href) {
-    {src "" [mc "A URL (universal resource locator) such as http://www.ma.utexas.edu/foo.om"]}
+    {src "" [mc "A URL (universal resource locator) such as http://maxima.sourceforge.net/index.html"]}
     {search "" [mc "A string to search for, to get an initial position"]}
     {searchregexp "" [mc "A regexp to search for, to get an initial position"]}
 }
 
-# from Preamle.tcl
+# from Preamble.tcl
 set maxima_priv(counter) 0
 	
 # the linelength initially will have Maxima's default value.
@@ -152,6 +130,7 @@ set maxima_priv(urlHandlers) {
     text/plain netmath
     image/gif  netmath
     image/png  netmath
+    image/jpg netmath
     image/jpeg netmath
     application/postscript "ghostview -safer %s"
     application/pdf "acroread %s"
@@ -169,6 +148,8 @@ set evalPrograms {  gp gap gb }
 # "The Tango base icon theme is released to the Public Domain.
 # "The palette is in public domain. Developers, feel free to ship it
 # "along with your application."
+
+# Images added by J. Villate
 
 image create photo ::img::brokenimage -format GIF -data {
     R0lGODlhHQAgAOMEAAAAAP9jMcbGxoSEhP///zExY/9jzgCEAP/////////////////////

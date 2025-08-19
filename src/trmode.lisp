@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -32,18 +32,14 @@
       (mcall user-level value)))
   value)
 
-(defvar defined_variables ())
-
-(defvar $define_variable ())
-
 (def%tr $define_variable (form)	;;VAR INIT MODE.
   (cond ((> (length form) 3)
-	 (destructuring-let (((var nil mode) (cdr form)))
+	 (destructuring-let (((var val mode) (cdr form)))
 			    (let ((mode-form `(($modedeclare) ,var ,mode)))
 			      (translate mode-form)
 			      (push-pre-transl-form
 			       ;; POSSIBLE OVERKILL HERE
-			       `(declare (special ,var)))
+			       `(declaim (special ,var)))
 			      (push var defined_variables)
 			      ;; Get rid of previous definitions put on by
 			      ;; the translator.
@@ -57,12 +53,11 @@
 				  ;; so that the rest of the translation gronks this.
 				  (putprop var 'assign-mode-check 'assign))
 			      `($any . (eval-when
-					   #+gcl (compile load eval)
-					   #-gcl (:compile-toplevel :load-toplevel :execute)
+					   (:compile-toplevel :load-toplevel :execute)
 					   (meval* ',mode-form)
 					   ,(if (not (eq mode '$any))
 						`(defprop ,var assign-mode-check assign))
-					   (def-mtrvar ,(cadr form) ,(dtranslate (caddr form))))))))
+					   (def-mtrvar ,var ,(dtranslate val)))))))
 	(t
 	 (tr-format (intl:gettext "error: 'define_variable' must have 3 arguments; found: ~:M~%") form)
 	 nil)))

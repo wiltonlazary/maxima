@@ -1,6 +1,6 @@
 ;;  Author Barton Willis
 ;;  University of Nebraska at Kearney
-;;  Copyright (C) 2011 Barton Willis
+;;  Copyright (C) 2011,2021 Barton Willis
 
 ;;  This program is free software; you can redistribute it and/or modify 
 ;;  it under the terms of the GNU General Public License as published by	 
@@ -22,7 +22,7 @@
 (defmvar $bernstein_explicit nil)
 
 ;; numerical (complex rational, float, or big float) evaluation of bernstein polynomials
-(in-package #-gcl #:bigfloat #+gcl "BIGFLOAT")
+(in-package #:bigfloat)
 
 (defun bernstein-poly (k n x)
   (* (to (maxima::opcons 'maxima::%binomial n k)) (expt x k) (expt (- 1 x) (- n k))))
@@ -42,7 +42,7 @@
 		(x (caddr e)))
 	    (if (and ($featurep k '$integer) ($featurep n '$integer))
 		(opcons '%bernstein_poly k n (opcons '$conjugate x))
-	      `(($conjugate simp) ((%bernstein_poly simp) ,k ,n ,x))))))
+	     (list (list '$conjugate 'simp) (take '(%bernstein_poly) k n x))))))
 
 ;; integrate(bernstein_poly(k,n,x),x) = hypergeometric([k+1,k-n],[k+2],x)*x^(k+1)/(k+1)
 
@@ -51,14 +51,14 @@
    (mul 
     (opcons '%binomial n k)
     (opcons 'mexpt x (add 1 k))
-    (opcons '$hypergeometric 
+    (opcons '%hypergeometric 
 	    (opcons 'mlist (add 1 k) (sub k n))
 	    (opcons 'mlist (add 2 k))
 	    x))
    (add 1 k)))
 	  
-(putprop '%bernstein_poly `((k n x) nil nil ,#'bernstein-integral) 'integral)
-(putprop '$bernstein_poly `((k n x) nil nil ,#'bernstein-integral) 'integral)
+(putprop '%bernstein_poly `((k n x) nil nil ,'bernstein-integral) 'integral)
+(putprop '$bernstein_poly `((k n x) nil nil ,'bernstein-integral) 'integral)
 
 (defun bernstein-poly-simp (e y z)
   (declare (ignore y))
@@ -81,7 +81,7 @@
 
 	  (t (list (list fn 'simp) k n x)))))
 	    
-(setf (get '%bernstein_poly 'operators) #'bernstein-poly-simp)
+(setf (get '%bernstein_poly 'operators) 'bernstein-poly-simp)
 
 (defprop %bernstein_poly
   ((k n x)
@@ -159,5 +159,5 @@
 
     (muln (mapcar #'(lambda (a b z) (opcons '%bernstein_poly a b z)) (margs k) (margs n) (margs x)) t)))
 
-(setf (get '%multibernstein_poly 'operators) #'multi-bernstein-poly-simp)
+(setf (get '%multibernstein_poly 'operators) 'multi-bernstein-poly-simp)
       

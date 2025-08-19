@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -93,7 +93,7 @@
       (setq stream *standard-output*))
     ;; This is all done via macros to save space,
     ;; (No functions, no special variable symbols.)
-    ;; If the lack of flexibilty becomes an issue then
+    ;; If the lack of flexibility becomes an issue then
     ;; it can be changed easily.
     (mformat-loop (output-text))
     ;; Keep from getting bitten by buffering.

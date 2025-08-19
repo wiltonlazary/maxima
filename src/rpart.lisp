@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -20,16 +20,8 @@
 
 (load-macsyma-macros rzmac)
 
-(declare-top (special $%emode $radexpand rp-polylogp $domain $m1pbranch
-		      $logarc rischp $keepfloat))
-
-(defmvar implicit-real nil "If t RPART assumes radicals and logs
-	 of real quantities are real and doesn't ask sign questions")
-
-(defmvar generate-atan2 t "Controls whether RPART will generate ATAN's
-			or ATAN2's, default is to make ATAN2's")
-;; generate-atan2 is set to nil when doing integration to avoid
-;; generating discontinuities that defint can't handle.
+(declare-top (special $radexpand
+		      $keepfloat))
 
 ;;; Realpart gives the real part of an expr.
 
@@ -48,7 +40,7 @@
 	   (cons (div a r) (div b r)))
 	  (t (cons (take '(%realpart) x) (take '(%imagpart) x)))))) ;nothing known
 
-(setf (get '%signum 'risplit-function) #'risplit-signum)
+(setf (get '%signum 'risplit-function) 'risplit-signum)
 
 (defun simp-realpart (expr z simpflag)
   (oneargcheck expr)
@@ -90,13 +82,13 @@
 
 ;;; Rectform gives a result of the form a+b*%i.
 
-(defmfun $rectform (xx)
+(defmfun ($rectform :properties ((evfun t))) (xx)
   (let ((ris (trisplit xx)))
     (add (car ris) (mul (cdr ris) '$%i))))
 
 ;;; Polarform gives a result of the form a*%e^(%i*b).
 
-(defmfun $polarform (xx)
+(defmfun ($polarform :properties ((evfun t))) (xx)
   (cond ((mbagp xx)
 	 (cons (car xx) (mapcar #'$polarform (cdr xx))))
 	(t
@@ -463,14 +455,20 @@
 	  ((and (member (caar l) '(%atan %csc %sec %cot %csch %sech %coth) :test #'eq)
 		(=0 (cdr (risplit (cadr l)))))
 	   (cons l 0))
-          ((and (eq (caar l) '$atan2)
+          ((and (eq (caar l) '%atan2)
                 (not (zerop1 (caddr l)))
                 (=0 (cdr (risplit (div (cadr l) (caddr l))))))
            ;; Case atan2(y,x) and y/x a real expression.
            (cons l 0))
-	  ((or (arcp (caar l)) (eq (caar l) '$atan2))
-	   (let ((ans (risplit (logarc (caar l) (cadr l)))))
-	     (when (eq (caar l) '$atan2)
+	  ((or (arcp (caar l)) (eq (caar l) '%atan2))
+	   (let ((ans (risplit (logarc (caar l)
+				       ;; atan2 has 2 args, unlike all
+				       ;; the other inverse trig
+				       ;; functions.
+				       (if (eq (caar l) '%atan2)
+					   (rest l)
+					   (cadr l))))))
+	     (when (eq (caar l) '%atan2)
 	       (setq ans (cons (sratsimp (car ans)) (sratsimp (cdr ans)))))
 	     (if (and (free l '$%i) (=0 (cdr ans)))
 		 (cons l 0)
@@ -742,7 +740,7 @@
                     (cons (mul (power (car aa) (car sp))
                                (power '$%e (neg (mul (cdr aa) (cdr sp)))))
                           (if generate-atan2
-			      (take '($atan2)
+			      (take '(%atan2)
 				    (take '(%sin) arg)
 				    (take '(%cos) arg))
 			    (take '(%atan) (take '(%tan) arg)))))))))
@@ -780,10 +778,10 @@
 			     (half)))))))))
 
 (defun genatan (num den)
-  (let ((arg (take '($atan2) num den)))
+  (let ((arg (take '(%atan2) num den)))
     (if (or generate-atan2
             (zerop1 den)
-            (free arg '$atan2))
+            (free arg '%atan2))
         arg
         (take '(%atan) (div num den)))))
 

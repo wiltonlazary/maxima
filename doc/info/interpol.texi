@@ -3,7 +3,7 @@
 * Functions and Variables for interpol::
 @end menu
 
-@node Introduction to interpol, Functions and Variables for interpol, interpol-pkg, interpol-pkg
+@node Introduction to interpol, Functions and Variables for interpol, Package interpol, Package interpol
 @section Introduction to interpol
 
 Package @code{interpol} defines the Lagrangian, the linear and the cubic 
@@ -11,13 +11,13 @@ splines methods for polynomial interpolation.
 
 For comments, bugs or suggestions, please contact me at @var{'mario AT edu DOT xunta DOT es'}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Numerical methods}
 @category{Share packages}
 @category{Package interpol}
 @closecatbox
 
-@node Functions and Variables for interpol,  , Introduction to interpol, interpol-pkg
+@node Functions and Variables for interpol,  , Introduction to interpol, Package interpol
 @section Functions and Variables for interpol
 
 
@@ -122,7 +122,7 @@ Examples:
                  84
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package interpol}
 @closecatbox
 
@@ -183,7 +183,7 @@ Otherwise, @code{charfun2} returns a partially-evaluated result in terms of @mre
 (%o5)                           0
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package interpol}
 @closecatbox
 
@@ -262,7 +262,7 @@ Examples:
      3
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package interpol}
 @closecatbox
 
@@ -374,7 +374,7 @@ Examples:
         points(p))$
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package interpol}
 @closecatbox
 
@@ -406,7 +406,7 @@ There is one option to fit specific needs:
 @code{'varname}, default @code{'x}, is the name of the independent variable.
 @end itemize
 
-See also @mrefcomma{lagrange}  @mrefcomma{linearinterpol}  @mrefcomma{cspline}  @mrefcomma{minpack_lsquares}  and @ref{lbfgs-pkg}
+See also @mrefcomma{lagrange}  @mrefcomma{linearinterpol}  @mrefcomma{cspline}  @mrefcomma{minpack_lsquares}  and @ref{Package lbfgs}
 
 Examples:
 
@@ -423,7 +423,7 @@ Examples:
           yrange=[0,10])$
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Package interpol}
 @closecatbox
 

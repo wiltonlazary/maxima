@@ -40,6 +40,7 @@
 ;;      gnuplot
 ;;      vtk or vtk6
 ;;      vtk7
+
 (defvar $draw_renderer '$gnuplot_pipes)
 
 (defvar $draw_use_pngcairo nil "If true, use pngcairo terminal when png is requested.")
@@ -92,7 +93,7 @@
       (gethash '$background_color *gr-options*) "#ffffff"
       (gethash '$color *gr-options*)            "#0000ff" ; for lines, points, borders and labels
       (gethash '$fill_color *gr-options*)       "#ff0000" ; for filled regions
-      (gethash '$fill_density *gr-options*)     0         ; in [0,1], only for object 'bars
+      (gethash '$fill_density *gr-options*)     nil       ; if specified, must be in [0, 1]
 
       ; implicit plot options
       (gethash '$ip_grid *gr-options*)    '((mlist simp) 50 50)
@@ -979,7 +980,7 @@
 
 (defun update-terminal (val)
   (let ((terms '($screen $png $pngcairo $jpg $gif $eps $eps_color $canvas
-                 $epslatex $epslatex_standalone $svg $x11 $qt
+                 $epslatex $epslatex_standalone $svg $tikz $tikz_standalone $x11 $qt
                  $dumb $dumb_file $pdf $pdfcairo $wxt $animated_gif $windows
                  $multipage_pdfcairo $multipage_pdf $multipage_eps 
                  $multipage_eps_color $aquaterm $tiff $vrml $obj $stl $pnm $ply)))
@@ -1361,14 +1362,16 @@
   (cond
     ((and (integerp val) (>= val -1 ))
        (setf (gethash '$point_type *gr-options*) val))
-    (t (let ((shapes '($none $dot $plus $multiply $asterisk
-                       $square $filled_square $circle $filled_circle
-                       $up_triangle $filled_up_triangle $down_triangle
-                       $filled_down_triangle $diamant $filled_diamant
-                       $sphere $cube $cylinder $cone)))
-          (if (member val shapes)
-              (setf (gethash '$point_type *gr-options*) (- (position val shapes) 1))
-              (merror "draw: illegal point type: ~M " val)))))  )
+    (t (let*
+         ((shapes '($none $dot $plus $multiply $asterisk
+                    $square $filled_square $circle $filled_circle
+                    $up_triangle $filled_up_triangle $down_triangle
+                    $filled_down_triangle $diamant $filled_diamant
+                    $sphere $cube $cylinder $cone))
+          (pos (position val shapes)))
+         (if pos
+           (setf (gethash '$point_type *gr-options*) (- pos 1))
+           (merror "draw: illegal point type: ~M " val))))))
 
 
 
@@ -1550,7 +1553,7 @@
                      (<= val 1 ))
                 (setf (gethash opt *gr-options*) val)
                 (merror "draw: fill_density must be a number in [0, 1]")))
-      (($line_width $head_length $head_angle $xaxis_width $yaxis_width $zaxis_width $font_size)
+      (($line_width $head_length $head_angle $xaxis_width $yaxis_width $zaxis_width)
             (update-positive-float opt val))
       ($xyplane ; defined as real number or false
             (setf val ($float val))
@@ -1573,7 +1576,7 @@
          (update-capping val))
       ($point_type
          (update-pointtype val))
-      (($columns $nticks $adapt_depth $xu_grid $yv_grid $delay $x_voxel $y_voxel $z_voxel)
+      (($columns $nticks $adapt_depth $xu_grid $yv_grid $delay $x_voxel $y_voxel $z_voxel $font_size)
             (update-positive-integer opt val))
       (($contour_levels $isolines_levels)   ; positive integer, increment or set
          (update-contour-isolines opt val))

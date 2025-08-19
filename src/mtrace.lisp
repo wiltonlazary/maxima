@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -12,7 +12,7 @@
 
 (macsyma-module mtrace)
 
-(declare-top (special $functions $transrun trace-allp))
+(declare-top (special trace-allp))
 
 ;;; a reasonable trace capability for macsyma users.
 ;;; 8:10pm  Saturday, 10 January 1981 -GJC.
@@ -171,8 +171,7 @@
 ;;; Structures.
 
 (eval-when
-    #+gcl (compile load eval)
-    #-gcl (:compile-toplevel :load-toplevel :execute)
+    (:compile-toplevel :load-toplevel :execute)
     (defmacro trace-p (x)
       `(mget ,x 'trace))
     (defmacro trace-type (x)
@@ -186,7 +185,9 @@
 
 ;;; User interface functions.
 
-(defmvar $trace (list '(mlist)) "List of functions actively traced")
+(defmvar $trace (list '(mlist))
+  "List of functions actively traced"
+  :properties ((assign 'neverset)))
 
 (defun mlistcan-$all (fun llist default)
   "totally random utility function"
@@ -281,7 +282,9 @@
 (defun put-trace-info (fun type ilist)
   (setf (trace-p fun) fun)	 ; needed for MEVAL at this time also.
   (setf (trace-type fun) type)
-  (setf (trace-oldfun fun) (and (fboundp fun) (symbol-function fun)))
+  ;; Pretty sure this next property assignment is clobbered by TRACE-FSHADOW,
+  ;; however, the assignment is conditional there, so I don't know 100%.
+  (setf (trace-oldfun fun) (and (fboundp fun) (symbol-function (or (get fun 'impl-name) fun))))
   (let ((sym (gensym)))
     (setf (symbol-value sym) 0)
     (setf (trace-level fun) sym))
@@ -360,8 +363,8 @@
 			      `((funcall) ,value ,@params))))
 		    'mfexpr))
 	  ((member shadow '(expr subr) :test #'eq)
-	   (setf (trace-oldfun fun) (and (fboundp fun) (symbol-function fun)))
-	   (setf (symbol-function fun) value))
+	   (setf (trace-oldfun fun) (and (fboundp fun) (symbol-function (or (get fun 'impl-name) fun))))
+	   (setf (symbol-function (or (get fun 'impl-name) fun)) value))
 	  (t
 	   (setf (symbol-plist fun) `(,shadow ,value ,@(symbol-plist fun)))))))
 
@@ -373,7 +376,7 @@
 	((member type '(expr subr) :test #'eq)
 	 (let ((oldf (trace-oldfun fun)))
 	   (if (not (null oldf))
-	       (setf (symbol-function  fun)  oldf)
+	       (setf (symbol-function (or (get fun 'impl-name) fun))  oldf)
 	       (fmakunbound fun))))
 	(t (remprop fun (get! type 'shadow))
 	   (fmakunbound fun))))
@@ -410,8 +413,6 @@
 ;; We really want to (BINDF (TRACE-LEVEL FUN) (1+ (TRACE-LEVEL FUN)) ...)
 ;; (Think about PROGV and SETF and BINDF. If the trace object where
 ;; a closure, then we want to fluid bind instance variables.)
-
-(declare-top (special errcatch bindlist loclist))
 
 (defmacro macsyma-errset (form &aux (ret (gensym)))
   `(let ((errcatch (cons bindlist loclist)) ,ret)
@@ -581,7 +582,7 @@
 			      (>= val 0)
 			      (<= val upper)))
 		     dlist
-		     "please reply with an integer from the menue.")))))
+		     "please reply with an integer from the menu.")))))
 
 ;; I GUESS ALL OF THE STRINGS IN THIS FUNCTION NEED TO BE GETTEXT'D TOO
 ;; JUST CAN'T BRING MYSELF TO DO IT
@@ -615,7 +616,7 @@
   (let ((try (macsyma-fsymeval-sub fun)))
     (cond (try try)
 	  ((get fun 'autoload)
-	   (load-and-tell (get fun 'autoload))
+	   ($load (get fun 'autoload))
 	   (setq try (macsyma-fsymeval-sub fun))
 	   (or try
 	       (mtell (intl:gettext "trace: ~@:M has no functional properties after autoloading.~%")
@@ -639,23 +640,12 @@
 	  (t
 	   (or mprops lprops fcell-props)))))
 
-(defprop expr expr hook-type)
-(defprop mexpr expr hook-type)
-(defprop subr expr hook-type)
-(defprop lsubr expr hook-type)
-(defprop mfexpr* macro hook-type)
-(defprop mfexpr*s macro hook-type)
-
 (defun make-trace-hook (fun type handler)
   ;; Argument handling according to FUN's TYPE is already done
   ;; elsewhere: HANDLER, meval...
   (declare (ignore type))
   #'(lambda (&rest trace-args)
       (funcall handler fun trace-args)))
-
-(defmacro trace-setup-call (prop fun type)
-  (declare (ignore fun type))
-  `(setf (symbol-function 'the-trace-apply-hack) ,prop))
 
 (defun trace-apply (fun largs)
   (let ((prop (trace-fsymeval fun))
@@ -664,20 +654,18 @@
     (case type
       ((mexpr)
        (mapply prop largs "A traced function"))
-      ((expr)
+      ((expr subr lsubr)
        (apply prop largs))
-      ((subr lsubr)
-       (setf (symbol-plist 'the-trace-apply-hack) (list type prop))
-       (apply (second (getl 'the-trace-apply-hack '(subr lsubr))) largs))
       ((mfexpr* mfexpr*s)
        (funcall prop (car largs))))))
 
 ;;; I/O cruft
 
-(defmvar $trace_max_indent 15. "max number of spaces it will go right" fixnum)
-
-(putprop '$trace_max_indent 'assign-mode-check 'assign)
-(putprop '$trace_max_indent '$fixnum 'mode)
+(defmvar $trace_max_indent 15.
+  "max number of spaces it will go right"
+  fixnum
+  :properties ((assign 'assign-mode-check)
+	       (mode '$fixnum)))
 
 (defun-prop (spaceout dimension) (form result)
   (dimension-string (make-list (cadr form) :initial-element #\space) result))
@@ -728,7 +716,7 @@
        (total-calls 0))
       ((null l)
        `(($matrix simp)
-	 ((mlist simp) $function $time//call $calls $runtime $gctime)
+	 ((mlist simp) $function $time/call $calls $runtime $gctime)
 	 ,.(nreverse v)
 	 ,(timer-mlist '$total total-calls total-runtime total-gctime)))
     (let*
@@ -742,15 +730,23 @@
 	(incf total-gctime gctime)
 	(push (timer-mlist (car l) calls runtime gctime) v)))))
 
+(defun timer-reset-1 (fun)
+  (let ((fun-opr (getopr fun)))
+    ($put fun-opr 0 '$runtime)
+    ($put fun-opr 0 '$gctime)
+    ($put fun-opr 0 '$calls)))
+
 (defun macsyma-timer (fun)
   (prog1
       (macsyma-trace-sub fun 'timer-handler $timer)
-      (let ((fun-opr (getopr fun)))
-        ($put fun-opr 0 '$runtime)
-        ($put fun-opr 0 '$gctime)
-        ($put fun-opr 0 '$calls))))
+      (timer-reset-1 fun)))
 
 (defun macsyma-untimer (fun) (macsyma-untrace-sub fun 'timer-handler $timer))
+
+(defun $timer_reset (&rest maybe-funs)
+  (let ((funs (or maybe-funs (cdr $timer))))
+    (mapcar #'timer-reset-1 funs)
+    (cons '(mlist) funs)))
 
 (defvar runtime-devalue 0)
 (defvar gctime-devalue 0)

@@ -8,7 +8,7 @@ dnl Note: during Lisp-based builds (see INSTALL.lisp) the version
 dnl number is read from the following AC_INIT line.  It's sensitive to
 dnl whitespace so when updating the version number only make changes
 dnl within the second pair of square brackets.
-AC_INIT([maxima], [5.44post])
+AC_INIT([maxima], [5.47post])
 AC_CONFIG_SRCDIR([src/macsys.lisp])
 AM_INIT_AUTOMAKE([-Wno-portability tar-ustar])
 
@@ -525,9 +525,39 @@ fi
 
 dnl n.b. ccl64_default_name is hardcoded in "with" message
 dnl We assume we're running on an x86 processor.  The user has to
-dnl select a different executable name to match his system, if neceessary.
+dnl select a different executable name to match his system, if necessary.
 
+dnl use as default the macos binary (as before)
 ccl64_default_name=dx86cl64
+dnl try to detect the target system
+dnl TODO: Binary names are documented here: https://ccl.clozure.com/docs/ccl.html#tab_platform-specific-filename-conventions)
+dnl       Are these checks (especially Windows, Linux PPC64) okay?
+dnl Probably at the end we could check if another - CCL64 unsupported - OS was used.
+dnl
+dnl of course the ccl directory needs to be in the path.
+dnl another possibilty would be to default to "ccl64", which is - MAYBE - a platform independent
+dnl startscript in /usr/local/bin.
+case "${host_os}" in
+    *linux-powerpc64*)
+        ccl64_default_name=ppccl64
+        ;;
+    *linux*)
+        ccl64_default_name=lx86cl64
+        ;;
+    *cygwin*|*mingw*|*windows*)
+        ccl64_default_name=wx86cl64.exe
+        ;;
+    *darwin*)
+        ccl64_default_name=dx86cl64
+        ;;
+    *solaris*)
+        ccl64_default_name=sx86cl64
+        ;;
+    *freebsd*)
+        ccl64_default_name=fx86cl64
+        ;;
+esac
+
 AC_ARG_ENABLE(ccl64,
 	[  --enable-ccl64               Use CCL (Clozure Common Lisp), 64-bit],
      	[case "${enableval}" in
@@ -539,7 +569,7 @@ AC_ARG_ENABLE(ccl64,
      	esac],
 	[ccl64=false])
 AC_ARG_WITH(ccl64,
-	[  --with-ccl64=<prog>          Use ccl64 executable <prog> (default dx86cl64)],
+	[  --with-ccl64=<prog>          Use ccl64 executable <prog> (default ${ccl64_default_name})],
 	[ccl64=true
 	lisps_enabled="${lisps_enabled} ccl64"
 	explicit_lisp=true
@@ -616,6 +646,110 @@ AC_ARG_ENABLE(gettext,
 
 AM_CONDITIONAL(ENABLE_GETTEXT, test x$enable_gettext = xtrue)
 
+AC_ARG_ENABLE(build-docs,
+	[  --enable-build-docs        Execute make in doc directories],
+	[case "${enableval}" in
+	       yes) enable_build_docs=true  ;;
+ 	       no)  enable_build_docs=false ;;
+	       *) AC_MSG_ERROR(bad value ${enableval} for --enable-build-docs) ;;
+	 esac],
+	 [enable_build_docs=true])
+
+
+AM_CONDITIONAL(ENABLE_BUILD_DOCS, test x$enable_build_docs = xtrue)
+
+AC_ARG_VAR([MAKEINFO], [The path to the 'makeinfo' executable to use])
+if test x"${enable_build_docs}" = xtrue ; then
+  AC_PATH_PROG([MAKEINFO], [makeinfo])
+  makeinfo_found=true
+  if test -z "$MAKEINFO"; then
+    makeinfo_found=false
+    AC_MSG_ERROR(
+[makeinfo not found; Maxima needs makeinfo to build docs.
+If you have makeinfo installed somewhere not in PATH,
+specify where it is by using
+  ./configure MAKEINFO=/path/to/makinfo
+Or disable building of the docs using
+  ./configure --disable-build-docs
+])
+  fi
+fi
+
+if test x"${enable_build_docs}" = xtrue ; then
+    if test x"${makeinfo_found}" = xfalse ; then
+        AC_MSG_ERROR(No makeinfo found; consider --disable-build-docs)
+    fi
+
+    dnl Check the version number.  First get the first line from
+    dnl 'makeinfo --version' and extract out the version digits.
+    makeinfo_old=false
+    if test x"${makeinfo_found}" = xtrue; then
+	AC_MSG_CHECKING([if makeinfo version >= 5.1])
+	dnl expr is looking for something like "junk<digits-or-dots>"
+	dnl assuming that the end of the version string contains the
+	dnl version number consisting of digits separated by a period.
+	dnl This allows for version numbers like 6.8.90.
+	makeinfo_version_string=`expr "\`$MAKEINFO --version | head -1\`" : '.* \([[.0-9]][[.0-9]]*\)'`
+	dnl echo Makeinfo version ${makeinfo_version}
+
+	dnl From makeinfo_version, extract out the major and minor
+	dnl version numbers.  We only need the major and minor version
+	dnl numbers.
+	makeinfo_major=`expr $makeinfo_version_string : '\([[0-9]][[0-9]]*\)'`
+	makeinfo_minor=`expr $makeinfo_version_string : '[[0-9]][[0-9]]*\.\([[0-9]][[0-9]]*\)'`
+	dnl echo major ${makeinfo_major}
+	dnl echo minor ${makeinfo_minor}
+
+	dnl Create a numerical version number by multiplying the major
+	dnl version by 100 and adding the minor version.  This assumes
+	dnl the minor version is always less than or equal to 99.
+	makeinfo_version=`expr ${makeinfo_major} \* 100 \+ ${makeinfo_minor}`
+	
+	dnl If version is older than 5.1, it's too old for generating
+	dnl maxima docs.
+	if test ${makeinfo_version} -lt 501; then
+	    AC_MSG_ERROR([Makeinfo version (${makeinfo_version_string}) too old; consider --disable-build-docs])
+	else
+            AC_MSG_RESULT([${makeinfo_version_string} (6.8 or later preferred)])
+	fi
+
+        dnl Enable JS highlighting of examples in the HTML docs.
+        dnl The API has changed between 6.8 and 7.0, so we need to substitute the
+        dnl the appropriate things.
+        if test ${makeinfo_version} -le 608; then
+           TEXI_EXTRA_HEAD='$options->{"EXTRA_HEAD"} = '
+           HLJS_CSS_SELECTOR="'pre.example'"
+           TEXI_EXTRA_TAIL=''
+        else
+           TEXI_EXTRA_HEAD='texinfo_set_from_init_file("EXTRA_HEAD", '
+           HLJS_CSS_SELECTOR="'.example-preformatted'"
+           TEXI_EXTRA_TAIL=')'
+        fi
+        AC_SUBST(TEXI_EXTRA_HEAD)
+        AC_SUBST(HLJS_CSS_SELECTOR)
+        AC_SUBST(TEXI_EXTRA_TAIL)
+        TEXI2HTML=texi2html.init
+        AC_SUBST(TEXI2HTML)
+
+	dnl If the makeinfo version is older than or equal to 6.8, we
+	dnl need to include MathJax ourselves when building the HTML
+	dnl files.
+	need_mathjax=false
+	if test ${makeinfo_version} -le 608; then
+	    need_mathjax=true
+	fi
+	if test x"${need_mathjax}" = xtrue; then
+            dnl Need to include Mathjax.
+	    NEED_MATHJAX='<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>'
+	    dnl This also means that makeinfo doesn't support
+	    dnl @displaymath, so we need to do something else.
+	    NO_DISPLAYMATH='true'
+	    AC_SUBST(NEED_MATHJAX)
+	    AC_SUBST(NO_DISPLAYMATH)
+	fi
+    fi
+fi
+
 dnl languages
 AC_ARG_ENABLE(lang-de,
 	[  --enable-lang-de             German language support],
@@ -628,16 +762,16 @@ AC_ARG_ENABLE(lang-de,
 
 AM_CONDITIONAL(LANG_DE, test x$lang_de = xtrue)
 
-AC_ARG_ENABLE(lang-de-utf8,
-	[  --enable-lang-de-utf8        German language support (UTF-8)],
+AC_ARG_ENABLE(lang-ja,
+	[  --enable-lang-ja             Japanese language support],
      	[case "${enableval}" in
-       		yes) lang_de_utf8=true  ;;
-       		no)  lang_de_utf8=false ;;
-		*) AC_MSG_ERROR(bad value ${enableval} for --enable-lang-de-utf8) ;;
+       		yes) lang_ja=true  ;;
+       		no)  lang_ja=false ;;
+		*) AC_MSG_ERROR(bad value ${enableval} for --enable-lang-ja) ;;
      	esac],
-	[lang_de_utf8=false])
+	[lang_ja=false])
 
-AM_CONDITIONAL(LANG_DE_UTF8, test x$lang_de_utf8 = xtrue)
+AM_CONDITIONAL(LANG_JA, test x$lang_ja = xtrue)
 
 AC_ARG_ENABLE(lang-es,
 	[  --enable-lang-es             Spanish language support],
@@ -651,17 +785,6 @@ AC_ARG_ENABLE(lang-es,
 AC_SUBST(lang_es)
 AM_CONDITIONAL(LANG_ES, test x$lang_es = xtrue)
 
-AC_ARG_ENABLE(lang-es-utf8,
-	[  --enable-lang-es-utf8        Spanish language support (UTF-8)],
-     	[case "${enableval}" in
-       		yes) lang_es_utf8=true  ;;
-       		no)  lang_es_utf8=false ;;
-		*) AC_MSG_ERROR(bad value ${enableval} for --enable-lang-es-utf8) ;;
-     	esac],
-	[lang_es_utf8=false])
-
-AM_CONDITIONAL(LANG_ES_UTF8, test x$lang_es_utf8 = xtrue)
-
 AC_ARG_ENABLE(lang-pt,
 	[  --enable-lang-pt             Portuguese language support],
      	[case "${enableval}" in
@@ -673,17 +796,6 @@ AC_ARG_ENABLE(lang-pt,
 
 AC_SUBST(lang_pt)
 AM_CONDITIONAL(LANG_PT, test x$lang_pt = xtrue)
-
-AC_ARG_ENABLE(lang-pt-utf8,
-	[  --enable-lang-pt-utf8        Portuguese language support (UTF-8)],
-     	[case "${enableval}" in
-       		yes) lang_pt_utf8=true  ;;
-       		no)  lang_pt_utf8=false ;;
-		*) AC_MSG_ERROR(bad value ${enableval} for --enable-lang-pt-utf8) ;;
-     	esac],
-	[lang_pt_utf8=false])
-
-AM_CONDITIONAL(LANG_PT_UTF8, test x$lang_pt_utf8 = xtrue)
 
 AC_ARG_ENABLE(lang-pt_BR,
 	[  --enable-lang-pt_BR          Brazilian Portuguese language support],
@@ -697,41 +809,16 @@ AC_ARG_ENABLE(lang-pt_BR,
 AC_SUBST(lang_pt_br)
 AM_CONDITIONAL(LANG_PT_BR, test x$lang_pt_br = xtrue)
 
-AC_ARG_ENABLE(lang-pt_BR-utf8,
-	[  --enable-lang-pt_BR-utf8     Brazilian Portuguese language support (UTF-8)],
+AC_ARG_ENABLE(lang-ru,
+	[  --enable-lang-ru             Russian language support],
      	[case "${enableval}" in
-       		yes) lang_pt_br_utf8=true  ;;
-       		no)  lang_pt_br_utf8=false ;;
-		*) AC_MSG_ERROR(bad value ${enableval} for --enable-lang-pt_BR-utf8) ;;
+       		yes) lang_ru=true  ;;
+       		no)  lang_ru=false ;;
+		*) AC_MSG_ERROR(bad value ${enableval} for --enable-lang-ru) ;;
      	esac],
-	[lang_pt_br_utf8=false])
+	[lang_ru=false])
 
-AM_CONDITIONAL(LANG_PT_BR_UTF8, test x$lang_pt_br_utf8 = xtrue)
-
-AC_ARG_ENABLE(recode,
-	[  --enable-recode              Use recode for charset conversion],
-     	[case "${enableval}" in
-       		yes) use_recode=true  ;;
-       		no)  use_recode=false ;;
-		*) AC_MSG_ERROR(bad value ${enableval} for --enable-recode) ;;
-     	esac],
-	[use_recode=false])
-
-dnl iconv and/or recode
-AC_CHECK_PROG(iconv_found,iconv,true,false)
-AC_CHECK_PROG(recode_found,recode,true,false)
-
-if test x"${use_recode}" = xtrue ; then
-    if test x"${recode_found}" = xfalse ; then
-	AC_MSG_ERROR(No recode found)
-    fi
-elif test x"${iconv_found}" = xfalse ; then
-    use_recode=true 
-else
-    use_recode=false
-fi
-
-AM_CONDITIONAL(USE_RECODE, test x$use_recode = xtrue)
+AM_CONDITIONAL(LANG_RU, test x$lang_ru = xtrue)
 
 dnl Optionally build the windows CHM help files
 dnl default to false as requires win32 and Microsoft HTML Help Workshop
@@ -795,7 +882,7 @@ AC_ARG_ENABLE(xmaxima_exe,
    [xmaxima_exe=false])
 AM_CONDITIONAL(XMAXIMA_EXE, test x$xmaxima_exe = xtrue)
 
-dnl Optionally build xmaxima.exe under windows
+dnl Optionally build winkill.exe under windows
 dnl default to false as additional software
 AC_ARG_ENABLE(winkill_exe,
   [  --enable-winkill             Build Windows winkill.exe and winkill_lib.dll for installer],
@@ -813,31 +900,11 @@ AC_ARG_ENABLE(win64-installer,
   [case "${enableval}" in
                 yes) win64_installer=true ;;
                 no) win64_installer=false ;;
-                *) AC_MSG_ERROR(bad valu ${enableval} for --enable-win64-installer) ;;
+                *) AC_MSG_ERROR(bad value ${enableval} for --enable-win64-installer) ;;
   esac],
   [win64_installer=false])
 AM_CONDITIONAL(WIN64_INSTALLER, test x$win64_installer = xtrue)
 AC_SUBST(win64_installer)
-
-dnl Enable use of MathJax in the html documentation.  This just loads
-dnl MathJax in each html file.  The texi files need to put the
-dnl appropriate @html/@end html text to generate the equations for MathJax.
-AC_ARG_ENABLE(mathjax,
-  [  --enable-mathjax             Enable MathJax support for html manual],
-  [case "${enableval}" in
-      yes) mathjax=true
-           mathjax_enable='@set mathjax true'
-           mathjax_script='<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>'
-;;
-      no)  mathjax=false
-           mathjax_enable='@clear mathjax'
-           mathjax_script="";;
-      *) AC_MSG_ERROR(bad value ${enableval} for --enable-mathjax) ;;
-   esac],
-  [mathjax=false])
-AM_CONDITIONAL(MATHJAX, test x$mathjax = xtrue)
-AC_SUBST(mathjax_script)
-AC_SUBST(mathjax_enable)
 
 dnl Tools for building xmaxima.exe on windows
 dnl Hard code the filenames for now.  Can over-ride on make command line
@@ -845,7 +912,7 @@ GCCVER=undefined
 if test x${xmaxima_exe} = xtrue ; then
   GCCVER=`gcc -dumpversion`
   dnl http://tclkits.rkeene.org/fossil/wiki?name=Downloads
-  dnl and http://www.tcl.tk/starkits/
+  dnl and https://www.tcl.tk/starkits/
   TCLKITSH=/c/programs/star/tclkitsh-8.6.3-win32-ix86.exe
   TCLKIT_RUNTIME=/c/programs/star/tclkit-8.6.3-win32-ix86.exe
   SDXKIT=/c/programs/star/sdx.kit
@@ -874,25 +941,32 @@ if test x"${explicit_lisp}" = xfalse ; then
   	if test x"${clisp_found}" = xtrue ; then
   		clisp=true
 		lisps_enabled="${lisps_enabled} clisp"
-  	elif test x"${gcl_found}" = xtrue ; then
+	fi
+	if test x"${gcl_found}" = xtrue ; then
 		gcl=true
 		lisps_enabled="${lisps_enabled} gcl"
-	elif test x"${cmucl_found}" = xtrue ; then
+	fi
+	if test x"${cmucl_found}" = xtrue ; then
 		cmucl=true
 		lisps_enabled="${lisps_enabled} cmucl"
-	elif test x"${scl_found}" = xtrue ; then
+	fi
+	if test x"${scl_found}" = xtrue ; then
 		scl=true
 		lisps_enabled="${lisps_enabled} scl"
-	elif test x"${sbcl_found}" = xtrue ; then
+	fi
+	if test x"${sbcl_found}" = xtrue ; then
 	   	sbcl=true
 		lisps_enabled="${lisps_enabled} sbcl"
-	elif test x"${acl_found}" = xtrue ; then
+	fi
+	if test x"${acl_found}" = xtrue ; then
 		acl=true
 		lisps_enabled="${lisps_enabled} acl"
-	elif test x"${ecl_found}" = xtrue ; then
+	fi
+	if test x"${ecl_found}" = xtrue ; then
 		ecl=true
 		lisps_enabled="${lisps_enabled} ecl"
-	else
+	fi
+	if test x"${lisps_enabled}" = x; then
 		AC_MSG_ERROR(No lisp implementation specified and none of the default executables [${clisp_default_name}(clisp),${gcl_default_name}(GCL),${cmucl_default_name}(CMUCL),${scl_default_name}(SCL),${sbcl_default_name}(SBCL),${acl_default_name}(ACL),${openmcl_default_name}(OpenMCL),${ecl_default_name}(ECL)] were found in PATH)
 	fi
 fi
@@ -924,7 +998,7 @@ if test x"${clisp}" = xtrue; then
     if test -x ${CLISP_RUNTIME_PATH} ; then
         echo "clisp runtime is \"${CLISP_RUNTIME_PATH}\""
     else
-        AC_MSG_ERROR(clisp runtime \"${CLISP_RUNTIME_PATH}\" is not an executable)
+        AC_MSG_ERROR(clisp runtime "${CLISP_RUNTIME_PATH}" is not an executable)
     fi
     CLISP_RUNTIME=`basename ${CLISP_RUNTIME_PATH}`
 fi
@@ -943,7 +1017,7 @@ dnl be a shell script.
 	   	CMUCL_RUNTIME_PATH="${cmucl_path}"
 	else
 		AC_MSG_ERROR([Unable to determine CMUCL runtime path.
-The best guess for CMUCL runtime, \"${CMUCL_RUNTIME_PATH}\", is not
+The best guess for CMUCL runtime, "${CMUCL_RUNTIME_PATH}", is not
 an executable. Use the argument
    --with-cmucl-runtime=<path>
 to set the actual CMUCL executable. If the CMUCL lisp command is a shell
@@ -981,7 +1055,7 @@ dnl be a shell script.
 	   	SCL_RUNTIME_PATH="${scl_path}"
 	else
 		AC_MSG_ERROR([Unable to determine SCL runtime path.
-The best guess for SCL runtime, \"${SCL_RUNTIME_PATH}\", is not
+The best guess for SCL runtime, "${SCL_RUNTIME_PATH}", is not
 an executable. Use the argument
    --with-scl-runtime=<path>
 to set the actual SCL executable. If the SCL lisp command is a shell
@@ -992,17 +1066,38 @@ script the SCL executable is the program exec'd by that shell script.])
 fi
 
 if test x"${gcl}" = xtrue; then
+   AC_MSG_CHECKING([if gcl version >= 2.6.14])
+   dnl Check gcl version
+   dnl Perhaps could be done better, but this is easy to see that we're
+   dnl correctly getting the version number of gcl at the expense of
+   dnl calling gcl 3 times.
+   gcl_major=`${GCL_NAME} -batch -eval '(princ system::*gcl-major-version*)'`
+   gcl_minor=`${GCL_NAME} -batch -eval '(princ system::*gcl-minor-version*)'`
+   gcl_extra=`${GCL_NAME} -batch -eval '(princ system::*gcl-extra-version*)'`
+   GCL_VERSION="${gcl_major}.${gcl_minor}.${gcl_extra}"
+   dnl echo gcl major = $gcl_major
+   dnl echo gcl_minor = $gcl_minor
+   dnl echo gcl_extra = $gcl_extra
+   dnl Create a numerical version number
+   gcl_version=`expr ${gcl_major} \* 10000 \+ ${gcl_minor} \* 100 \+ ${gcl_extra}`
+
+   if test ${gcl_version} -lt 20614; then
+       AC_MSG_ERROR([GCL version ${GCL_VERSION} too old])
+   else
+       AC_MSG_RESULT([${GCL_VERSION}])
+   fi
+
    result=`"${GCL_NAME}" -batch -eval '#+ansi-cl (format t "MAXIMA_GCL_ANSI_TEST_SUCCESS~%") #-ansi-cl (format t "MAXIMA_GCL_ANSI_TEST_FAILURE~%")' -eval '(si::bye)'`
    retval=$?
    if test ! x"${retval}" = x"0" ; then
-      AC_MSG_ERROR(unable to run gcl executable \"${GCL_NAME}\".)
+      AC_MSG_ERROR(unable to run gcl executable "${GCL_NAME}".)
    fi
    count=`echo "${result}" | grep -c "MAXIMA_GCL_ANSI_TEST_SUCCESS"`
    if test ! "${count}" = "1" ; then
-      AC_MSG_ERROR([The gcl executable \"${GCL_NAME}\" was not compiled with
+      AC_MSG_ERROR([The gcl executable "${GCL_NAME}" was not compiled with
 the --enable-ansi flag, which is required for Maxima.
 The gcl ANSI-CL check returned
-\"${result}\".])
+"${result}".])
    fi
 fi
 
@@ -1198,15 +1293,6 @@ expanded_datadir="$(eval "prefix=\"${tmp_prefix}\";datarootdir=\"${datarootdir}\
 expanded_infodir="$(eval "prefix=\"${tmp_prefix}\";datarootdir=\"${datarootdir}\";echo ${infodir}")"
 
 
-dnl Find all the directories in share, but remove the share directory
-dnl itself and all CVS directories (if any) and fortran directories
-dnl and *.t2p directories (created when generating pdf documentation).
-dnl Remove the leading "share" part of the path, and add double-quotes
-dnl around it.
-
-#default_sharedirs=`find share -type d | sort | egrep -v 'share$|CVS|/fortran' | sed 's;share/\(.*\);        "\1" \\\\;' | sed '$s;\\\\;;'`
-default_sharedirs=`cd $srcdir;find share -type d | sort | egrep -v 'share$|CVS|/fortran' | sed 's;share/\(.*\);"\1";' | tr '\n' ' '`
-
 AC_SUBST(top_srcdir)
 AC_SUBST(abs_top_builddir)
 AC_SUBST(abs_top_srcdir)
@@ -1220,7 +1306,6 @@ AC_SUBST(expanded_infodir)
 default_layout_autotools="true"
 AC_SUBST(default_layout_autotools)
 AC_SUBST(LDFLAGS)
-AC_SUBST(default_sharedirs)
 
 AC_ARG_WITH(emacs-prefix,
 	[  --emacs-prefix=<path>        Where to install the emacs modes to],
@@ -1246,7 +1331,6 @@ AC_SUBST(EGREP)
 AC_PATH_PROG([CAT],[cat])
 AC_PROG_SED
 AC_PROG_AWK
-AM_PATH_PYTHON
 AC_SUBST(SED)
 
 # Configure these files and make them executable
@@ -1255,28 +1339,30 @@ AC_CONFIG_FILES([src/startmaxima_abcl.sh], chmod +x src/startmaxima_abcl.sh)
 AC_CONFIG_FILES([xmaxima-local], chmod +x xmaxima-local)
 AC_CONFIG_FILES([tests/test.sh], chmod +x tests/test.sh)
 AC_CONFIG_FILES([doc/info/build_html.sh], chmod +x doc/info/build_html.sh)
-
-# Convert maxima.bat to DOS line ending
-# sed-3.02 in old mingw distribution doesn't support -i or \r
-# dos2unix may not be present, but perl is required elsewhere
-# perl -i interferes with binmode so need to use a temporary file
-AC_CONFIG_FILES([src/maxima.bat], (perl -ne 'BEGIN{binmode(STDOUT,":crlf")};' -e 'print' < src/maxima.bat > src/maxima.bat.tmp; mv src/maxima.bat.tmp src/maxima.bat))
 AC_CONFIG_FILES([src/maxima], chmod +x src/maxima)
+AC_CONFIG_FILES([src/maxima.bat])
 
-AC_OUTPUT(Makefile maxima.spec maxima.iss \
+AC_CONFIG_FILES([Makefile maxima.spec maxima.iss \
 admin/Makefile src/Makefile src/rmaxima src/autoconf-variables.lisp \
-src/share-subdirs_autogenerated.lisp \
 lisp-utils/Makefile tests/Makefile doc/Makefile \
 crosscompile-windows/Makefile \
 doc/emaxima/Makefile doc/info/Makefile doc/info/include-maxima.texi \
 desktopintegration/Makefile \
+doc/info/category-macros.texi \
 doc/info/texi2html.init \
+doc/info/math.m4 \
 doc/info/figures/Makefile \
 doc/info/de/Makefile \
-doc/info/de.utf8/Makefile doc/info/es/Makefile doc/info/es.utf8/Makefile \
-doc/info/pt/Makefile doc/info/pt.utf8/Makefile \
+doc/info/de/include-maxima.texi \
+doc/info/es/Makefile \
+doc/info/ja/Makefile \
+doc/info/ja/include-maxima.texi \
+doc/info/pt_BR/include-maxima.texi \
+doc/info/pt/Makefile \
 doc/info/pt/include-maxima.texi \
-doc/info/pt_BR/Makefile doc/info/pt_BR.utf8/Makefile \
+doc/info/pt_BR/Makefile \
+doc/info/ru/Makefile \
+doc/info/ru/include-maxima.texi \
 doc/intromax/Makefile doc/man/Makefile doc/man/maxima.1 doc/man/ru/Makefile doc/man/ru/maxima.1 doc/man/de/Makefile doc/man/de/maxima.1 \
 doc/share/Makefile interfaces/Makefile interfaces/emacs/Makefile \
 interfaces/emacs/emaxima/Makefile interfaces/emacs/imaxima/Makefile \
@@ -1285,14 +1371,21 @@ interfaces/xmaxima/autoconf-variables.tcl interfaces/xmaxima/Tkmaxima/Header.tcl
 interfaces/xmaxima/doc/Makefile interfaces/xmaxima/doc/figures/Makefile \
 interfaces/xmaxima/msgs/Makefile interfaces/xmaxima/win32/Makefile \
 plotting/mgnuplot share/Makefile demo/Makefile plotting/Makefile locale/Makefile \
-share/contrib/Makefile share/contrib/integration/Makefile \
+share/contrib/Makefile
+share/contrib/guess/Makefile \
+share/contrib/integration/Makefile \
+share/contrib/lurkmathml/Makefile \
 share/contrib/maxima-odesolve/Makefile \
+share/contrib/symplectic_ode/Makefile \
+share/nelder_mead/Makefile \
+share/raddenest/Makefile \
 share/draw/Makefile share/logic/Makefile  doc/info/es/include-maxima.texi \
-src/lisp)
+src/lisp])
+AC_OUTPUT
 
 # The default of 4096 is sometimes too little for the test suite.
 if test x"${sbcl}" = xtrue ; then
-   AC_MSG_CHECKING(Testing if sbcl complains if we try to enlarge the thread-local storage)
+   AC_MSG_CHECKING(if sbcl complains if we try to enlarge the thread-local storage)
    echo "(quit)" | ${SBCL_NAME} --tls-limit 8192 > /dev/null 2>&1
    if test "$?" = "0" ; then
 	SBCL_EXTRA_ARGS="--tls-limit 8192"
@@ -1304,14 +1397,10 @@ if test x"${sbcl}" = xtrue ; then
 fi
 AC_SUBST(SBCL_EXTRA_ARGS)
 
-if test x"${clisp}" = xtrue ; then
-   	echo
-	AC_MSG_WARN("CLISP 2.49 is known to sporadically produce garbled data if the front-end is fast enough to acknowledge a data packet while a next data packet is still being prepared.")
-fi
 echo
 echo "Summary:"
 if test x"${clisp}" = xtrue ; then
-	echo "Compiling an maxima image that uses \"${CLISP_NAME}\"",
+	echo "Compiling a maxima image using \"${CLISP_NAME}\"",
 	echo "clisp runtime is \"${CLISP_RUNTIME_PATH}\""
 	if test x"${clisp_exec}" = xtrue ; then
 		echo "clisp executable image enabled for maxima."
@@ -1320,7 +1409,7 @@ if test x"${clisp}" = xtrue ; then
 	fi
 fi
 if test x"${cmucl}" = xtrue ; then
-	echo "Compiling an maxima image that uses \"${CMUCL_NAME}\""
+	echo "Compiling a maxima image using \"${CMUCL_NAME}\""
 	echo "cmucl runtime is \"${CMUCL_RUNTIME_PATH}\""
 	if test x"${cmucl_exec}" = xtrue; then
 		echo "CMUCL executable image enabled for maxima."
@@ -1329,11 +1418,11 @@ if test x"${cmucl}" = xtrue ; then
 	fi
 fi
 if test x"${scl}" = xtrue ; then
-	echo "SCL enabled, that uses \"${SCL_NAME}\""
+	echo "SCL enabled, using \"${SCL_NAME}\""
 	echo "SCL runtime is \"${SCL_RUNTIME_PATH}\""
 fi
 if test x"${sbcl}" = xtrue ; then
-   	echo "Compiling an maxima image that uses \"${SBCL_NAME}\""
+   	echo "Compiling a maxima image using \"${SBCL_NAME}\""
 	if test x"${sbcl_exec}" = xtrue ; then
 	   	echo "sbcl executable image enabled for maxima."
 	else
@@ -1341,7 +1430,7 @@ if test x"${sbcl}" = xtrue ; then
 	fi
 fi
 if test x"${gcl}" = xtrue ; then
-	echo "Compiling an maxima image that uses \"${GCL_NAME}\""
+	echo "Compiling a maxima image using \"${GCL_NAME}\""
 	if test x"${gcl_alt_link}" = xtrue ; then
 		echo "    GCL alternative linking method enabled."
 	fi
@@ -1350,7 +1439,7 @@ if test x"${acl}" = xtrue ; then
 	echo "ACL enabled. Executable name: \"${ACL_NAME}\""
 fi
 if test x"${openmcl}" = xtrue ; then
-	echo "Compiling an maxima image that uses \"${OPENMCL_NAME}\""
+	echo "Compiling a maxima image using \"${OPENMCL_NAME}\""
 	if test x"${openmcl_exec}" = xtrue ; then
 		echo "OpenMCL executable image enabled for maxima."
 	else
@@ -1358,7 +1447,7 @@ if test x"${openmcl}" = xtrue ; then
 	fi
 fi
 if test x"${ccl64}" = xtrue ; then
-	echo "Compiling an maxima image that uses \"${CCL64_NAME}\""
+	echo "Compiling a maxima image using \"${CCL64_NAME}\""
 	if test x"${ccl64_exec}" = xtrue ; then
 	   	echo "CCL64 executable image enabled for maxima."
 	else

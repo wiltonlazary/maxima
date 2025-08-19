@@ -1,19 +1,19 @@
-# -*-mode: tcl; fill-column: 75; tab-width: 8; coding: iso-latin-1-unix -*-
+###### Plot3d.tcl #################################################
 #
-#       $Id: Plot3d.tcl,v 1.19 2011-03-12 17:29:04 villate Exp $
+# Copyright (C) 1998 William F. Schelter
+# For distribution under GNU public License. See COPYING.tcl
 #
-###### Plot3d.tcl ######
-############################################################
-# Netmath       Copyright (C) 1998 William F. Schelter     #
-# For distribution under GNU public License.  See COPYING. #
-############################################################
+#     Modified by Jaime E. Villate 
+#     Time-stamp: "2024-03-20 14:40:38 villate
+#
+###################################################################
 
 global plot3dOptions
 set plot3dOptions {
     {xradius 1 "Width in x direction of the x values" }
     {yradius 1 "Height in y direction of the y values"}
 
-    {width 500 "Width of canvas in pixels"}
+    {width 700 "Width of canvas in pixels"}
     {height 500 "Height of canvas in pixels" }
     {xcenter 0.0 {(xcenter,ycenter) is the origin of the window}}
     {ycenter 0.0 "see xcenter"}
@@ -35,8 +35,6 @@ set plot3dOptions {
     or {matrix_mesh xmat ymat zmat} or {grid {xmin xmax} {ymin ymax} zmatrix}"}
     {nsteps "10 10" "steps in x and y direction"}
     {rotationcenter "" "Origin about which rotation will be done"}
-    {zoomfactor "1.6 1.6" "Factor to zoom the x and y axis when zooming.  Zoom out will be reciprocal" }
-    {screenwindow "20 20 700 700" "Part of canvas on screen"}
     {windowname ".plot3d" "window name"}
     {psfile "" "A filename where the graph will be saved in PostScript."}
     {nobox 0 "if not zero, do not draw the box around the plot."}
@@ -205,7 +203,7 @@ proc addAxes { win } {
 
 proc addBbox { win } {
     global plot3dMeshes$win
-    makeLocal $win xmin xmax ymin ymax zmin zmax  cmap
+    makeLocal $win xmin xmax ymin ymax zmin zmax cmap
     linkLocal $win points lmesh
     set ll [llength $points]
     append points " $xmin $ymin $zmin \
@@ -284,26 +282,24 @@ proc setupPlot3dColors { win first_mesh} {
 
 proc calculateRotated { win } {
     set pideg [expr {3.14159/180.0}]
-    linkLocal $win scale
+    linkLocal $win scalemat
     makeLocal $win az el rotationcenter xradius zradius yradius
-    set rotmatrix [rotationMatrix [expr {$az * $pideg }] \
-		       [expr {$el * $pideg }] \
-		      ]
+    set rotmatrix [rotationMatrix [expr {$az*$pideg }] [expr {$el*$pideg}] ]
 
     # shrink by .2 on z axis
     # set fac [expr  {[vectorlength $xradius $yradius] / (sqrt(2) * $zradius)}]
 
-    set rotmatrix [ matMul  $rotmatrix 3 $scale 3 ]
-    set tem [matMul $scale 3 $rotationcenter 1]
+    set rotmatrix [ matMul  $rotmatrix $scalemat]
+    set tem [matMul $scalemat $rotationcenter]
 
-    mkMultLeftFun  $rotmatrix 3 _rot$win
+    mkMultLeftFun  $rotmatrix _rot$win
     set rot _rot$win
     set ans ""
     # puts "points=[oget $win points]"
-    if { "$rotationcenter" != "" } {
+    if { $rotationcenter ne "" } {
 	#puts "rotationcenter = $rotationcenter"
 	set constant [vectorOp $tem - [eval $rot $rotationcenter]]
-	mkMultLeftFun  $rotmatrix 3 _rot$win $constant
+	mkMultLeftFun  $rotmatrix _rot$win $constant
     }
     #puts "win $win"
     foreach { x y z } [oget $win points] {
@@ -359,48 +355,27 @@ proc getOrderedMeshIndices { win } {
     return
 }
 
-
-proc setUpTransforms3d { win } {
-    global screenwindow
-    #set scr $screenwindow
-    # setUpTransforms $win .7
-    # set screenwindow $scr
-    linkLocal $win scale
-    makeLocal $win xcenter ycenter xradius yradius c zmin zmax xmin xmax ymin ymax zradius
-    #dshow xcenter ycenter xradius yradius c zmin zmax xmin xmax ymin ymax zradius
-    set fac .5
-
-    set delx [$c cget -width]
-    set dely [$c cget -height]
-    set f1 [expr {(1 - $fac)/2.0}]
-
-    set scale [list [expr {1.5/($xradius)}] 0 0 0 [expr {1.5/($yradius)}] 0 0 0 [expr {1.5/($zradius)}] ]
-
-    set x1 [expr {$f1 *$delx}]
-    set y1 [expr {$f1 *$dely}]
-    set x2 [expr {$x1 + $fac*$delx}]
-    set y2 [expr {$y1 + $fac*$dely}]
-    # set xmin [expr {($xcenter - $xradius) * 1.5/ ($xradius)}]
-    # set ymin [expr {($ycenter - $yradius) * 1.5/ ($yradius)}]
-    # set xmax [expr {($xcenter + $xradius) * 1.5/ ($xradius)}]
-    # set ymax [expr {($ycenter + $yradius) * 1.5/ ($yradius)}]
-    #puts "RANGES=$xmin,$xmax $ymin,$ymax $zmin,$zmax"
-    desetq "xmin ymin" [matMul $scale 3 "$xmin $ymin 0" 1]
-    desetq "xmax ymax" [matMul $scale 3 "$xmax $ymax 0" 1]
-    #puts "RANGES=$xmin,$xmax $ymin,$ymax $zmin,$zmax"
-    # set transform [makeTransform "$xmin $ymin $x1 $y2" "$xmin $ymax $x1 $y1 " "$xmax $ymin $x2 $y2"]
-    # desetq "xmin xmax ymin ymax" "-2 2 -2 2"
-
-    set transform [makeTransform "$xmin $ymin $x1 $y2" "$xmin $ymax $x1 $y1 " "$xmax $ymin $x2 $y2"]
-    oset $win transform $transform
-    oset $win transform0 $transform
-
-    getXtransYtrans $transform rtosx$win rtosy$win
-    getXtransYtrans [inverseTransform $transform] storx$win story$win
-
-}
-
 #
+#-----------------------------------------------------------------
+#
+# set_xy_region_3d --  set up the bounds of the x and y coordinates
+# of the projection of the surface on the xy plane and the part of the
+# window that will be filled by that projection (fac, a number between
+# 0 and 1).
+#
+#----------------------------------------------------------------
+#
+proc set_xy_region_3d { win fac } {
+    linkLocal $win scalemat
+    makeLocal $win xcenter ycenter xradius yradius xmin xmax ymin ymax zradius
+    set scalemat [list [list [expr {1.5/($xradius)}] 0 0] \
+                      [list 0 [expr {1.5/($yradius)}] 0] \
+                      [list 0 0 [expr {1.5/($zradius)}]]]
+    oset $win fac $fac
+    oset $win xmin [expr {1.5*$xmin/($xradius)}]
+    oset $win xmax [expr {1.5*$xmax/($xradius)}]
+    oset $win ymin [expr {1.5*$ymin/($yradius)}]
+    oset $win ymax [expr {1.5*$ymax/($yradius)}]}
 
 proc plot3d { args } {
     global  plot3dOptions
@@ -408,7 +383,7 @@ proc plot3d { args } {
     if { "$win" == "" } {
 	set win [getOptionDefault windowname $plot3dOptions] }
     clearLocal $win
-    mxapply mkPlot3d  $win $args
+    mkPlot3d  $win {*}$args
     #    bind $win <Configure> {}	
     replot3d $win
 }
@@ -455,15 +430,16 @@ proc replot3d { win } {
 	addOnePlot3d $win $data
     }
 
-    setUpTransforms3d $win
-
     if { $nobox == 0 } {
 	addBbox $win
     }
+
+    set_xy_region_3d $win 0.5
+    set_xy_transforms $win
     # grab the bbox just as itself
     global maxima_priv
     linkLocal $win lmesh
-    if { [llength $lmesh] >   100 * $maxima_priv(speed)  } {
+    if { [llength $lmesh] > 100 * $maxima_priv(speed)  } {
 	# if we judge that rotation would be too slow, we make a secondary list
 	# of meshes (random) including the bbox, and display those.
 	linkLocal $win  points lmeshBbox pointsBbox
@@ -645,35 +621,6 @@ proc drawOneMesh { win  canv k mesh color } {
     }
 }
 
-proc doHelp3d { win } {
-    global Parser
-    doHelp $win [join [list \
-			[mc {
-
-XMAXIMA'S PLOTTER FOR THREE-DIMENSIONAL GRAPHICS
-
-To quit this help click anywhere on this text.
-
-Clicking on Config will open a menu where several settings can be changed, \
-such as the function being plotted, the azimuth and elevation angles, \
-and the x and y centers and radii. Replot is used to update the plot with \
-the changes made in the Config menu.
-
-By clicking on Zoom, the mouse will allow you to zoom in on a region \
-of the plot. Each click near a point magnifies the plot, keeping the center \
-at the point you clicked. Depressing the SHIFT key while clicking \
-zooms in the opposite direction.
-
-Clicking on Rotate will return the mouse to its default behavior, namely, \
-pressing the left mouse button while the mouse is moved will rotate the \
-graph.
-
-Holding the right mouse button down while moving the mouse will drag \
-(translate) the plot sideways or up and down.
-
-The plot can be saved as a postscript file, by clicking on Save.
-} ] $Parser(help)]]
-}
 
 proc makeFrame3d { win } {
     global plot3dPoints
@@ -681,20 +628,15 @@ proc makeFrame3d { win } {
     set top $w
     catch { set top [winfo parent $w]}
     catch {
-	wm title $top [mc "Xmaxima: Plot3d"]
+	wm title $top {Xmaxima: plot3d}
 	wm iconname $top "plot3d"
-	#   wm geometry $top 750x700-0+20
     }
-
-    pack $w
-
+    #pack $w
 }
 
 proc mkPlot3d { win  args } {
     global plot3dOptions  printOption [oarray $win] axisGray
-
     getOptions $plot3dOptions $args -usearray [oarray $win]
-    #puts "$win width=[oget $win width],args=$args"
     setPrintOptions $args
     set printOption(maintitle) ""
     set wb $win.menubar
@@ -707,9 +649,7 @@ proc mkPlot3d { win  args } {
     makeLocal $win buttonFont c
     [winfo parent $c].position config -text {}
     bind $c <Motion> ""
-#    setBalloonhelp $win $wb.rotate [mc {Dragging the mouse with the left button depressed will cause the object to rotate.  The rotation keeps the z axis displayed in an upright position (ie parallel to the sides of the screen), but changes the viewpoint.   Moving right and left changes the azimuth (rotation about the z axis), and up and down changes the elevation (inclination of z axis).   The red,blue and green sides of the bounding box are parallel to the X, Y and Z axes, and are on the smaller side.}]
 
-    #$win.position config -width 15
     setForRotate $win
 }
 

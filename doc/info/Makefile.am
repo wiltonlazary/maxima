@@ -2,42 +2,34 @@ if LANG_ES
   ES_DIR = es
 endif
 
-if LANG_ES_UTF8
-  ES_DIR_UTF8 = es.utf8
-endif
-
 if LANG_PT
   PT_DIR = pt
-endif
-
-if LANG_PT_UTF8
-  PT_DIR_UTF8 = pt.utf8
 endif
 
 if LANG_PT_BR
   PT_BR_DIR = pt_BR
 endif
 
-if LANG_PT_BR_UTF8
-  PT_BR_DIR_UTF8 = pt_BR.utf8
-endif
-
 if LANG_DE
   DE_DIR = de
 endif
 
-if LANG_DE_UTF8
-  DE_DIR_UTF8 = de.utf8
+if LANG_JA
+  JA_DIR = ja
 endif
 
-SUBDIRS = $(ES_DIR) $(ES_DIR_UTF8) $(PT_DIR) $(PT_DIR_UTF8) $(PT_BR_DIR) $(PT_BR_DIR_UTF8) $(DE_DIR) $(DE_DIR_UTF8)
+if LANG_RU
+  RU_DIR = ru
+endif
+
+SUBDIRS = $(ES_DIR) $(PT_DIR) $(PT_BR_DIR) $(DE_DIR) $(JA_DIR) $(RU_DIR)
 
 info_TEXINFOS = #maxima.texi
 maxima_TEXINFOS = include-maxima.texi category-macros.texi Introduction.texi \
  Bugs.texi Help.texi Command.texi DataTypes.texi Constants.texi Lists.texi \
  Arrays.texi defstruct.texi Expressions.texi Operators.texi Evaluation.texi \
  Simplification.texi MathFunctions.texi Database.texi Plotting.texi \
- Input.texi Polynomials.texi Special.texi Elliptic.texi Limits.texi \
+ Input.texi Polynomials.texi extensions.texi Special.texi Elliptic.texi Limits.texi \
  Differentiation.texi Integration.texi Equations.texi Differential.texi \
  Numerical.texi Matrices.texi Affine.texi Itensor.texi Ctensor.texi \
  Atensor.texi Series.texi Number.texi Symmetries.texi Groups.texi \
@@ -45,21 +37,22 @@ maxima_TEXINFOS = include-maxima.texi category-macros.texi Introduction.texi \
  Program.texi Debugging.texi alt-display.texi asympa.texi \
  augmented_lagrangian.texi bitwise.texi bernstein.texi bode.texi celine.texi \
  clebsch_gordan.texi combinatorics.texi odepack.texi \
- cobyla.texi contrib_ode.texi descriptive.texi diag.texi distrib.texi \
+ cobyla.texi colnew.texi contrib_ode.texi descriptive.texi diag.texi distrib.texi \
  draw.texi drawdf.texi dynamics.texi engineering-format.texi \
- wrstcse.texi ezunits.texi f90.texi finance.texi \
- fractals.texi ggf.texi graphs.texi grobner.texi impdiff.texi interpol.texi \
- lapack.texi lbfgs.texi lindstedt.texi linearalgebra.texi lsquares.texi \
+ wrstcse.texi ezunits.texi f90.texi finance.texi fractals.texi gentran.texi \
+ ggf.texi graphs.texi grobner.texi hompack.texi impdiff.texi interpol.texi \
+ lapack.texi levin.texi lbfgs.texi lindstedt.texi linearalgebra.texi lsquares.texi \
  minpack.texi makeOrders.texi mnewton.texi numericalio.texi opsubst.texi \
- operatingsystem.texi \
- orthopoly.texi pytranslate.texi ratpow.texi romberg.texi simplex.texi simplifications.texi solve_rec.texi \
+ operatingsystem.texi orthopoly.texi pytranslate.texi quantum_computing.texi \
+ ratpow.texi romberg.texi simplex.texi simplifications.texi solve_rec.texi \
  stats.texi stirling.texi stringproc.texi to_poly_solve.texi unit.texi \
- zeilberger.texi errormessages.texi
+ zeilberger.texi errormessages.texi commandline-options.texi \
+ pslq.texi trigtools.texi format.texi
 
 figurefiles = \
-figures/introduction1.gif\
-figures/introduction2.gif\
-figures/introduction3.gif\
+figures/introduction1.png\
+figures/introduction2.png\
+figures/introduction3.png\
 figures/dynamics1.png\
 figures/dynamics2.png\
 figures/dynamics3.png\
@@ -68,13 +61,14 @@ figures/dynamics5.png\
 figures/dynamics6.png\
 figures/dynamics7.png\
 figures/dynamics8.png\
-figures/plotdf1.gif\
-figures/plotdf2.gif\
-figures/plotdf3.gif\
-figures/plotdf4.gif\
-figures/plotdf5.gif\
-figures/plotdf6.gif\
-figures/plotting1.png\
+figures/maxima-unicode-display-variety-1-ascii.png\
+figures/maxima-unicode-display-variety-1.png\
+figures/plotdf1.png\
+figures/plotdf2.png\
+figures/plotdf3.png\
+figures/plotdf4.png\
+figures/plotdf5.png\
+figures/plotdf6.png\
 figures/plotting2.png\
 figures/plotting3.png\
 figures/plotting4.png\
@@ -100,183 +94,190 @@ figures/plotting23.png\
 figures/plotting24.png\
 figures/plotting25.png\
 figures/plotting26.png\
-figures/orthopoly1.gif\
-figures/graphs01.gif\
-figures/graphs02.gif\
-figures/graphs03.gif\
-figures/graphs04.gif\
-figures/graphs05.gif\
-figures/graphs06.gif\
-figures/graphs07.gif\
-figures/graphs08.gif\
-figures/graphs09.gif\
-figures/graphs10.gif\
-figures/graphs11.gif\
-figures/graphs12.gif\
-figures/graphs13.gif\
-figures/graphs14.gif\
-figures/graphs15.gif\
+figures/orthopoly1.png\
+figures/graphs01.png\
+figures/graphs02.png\
+figures/graphs03.png\
+figures/graphs04.png\
+figures/graphs05.png\
+figures/graphs06.png\
+figures/graphs07.png\
+figures/graphs08.png\
+figures/graphs09.png\
+figures/graphs10.png\
+figures/graphs11.png\
+figures/graphs12.png\
+figures/graphs13.png\
+figures/graphs14.png\
+figures/graphs15.png\
 figures/favicon.ico\
-figures/bodegain1.gif\
-figures/bodegain2.gif\
-figures/bodegain3.gif\
-figures/bodegain4.gif\
-figures/bodegain5.gif\
-figures/bodegain6.gif\
-figures/bodegain7.gif\
-figures/bodegain8.gif\
-figures/bodephase1.gif\
-figures/bodephase2.gif\
-figures/bodephase3.gif\
-figures/bodephase4.gif\
-figures/bodephase5.gif\
-figures/bodephase6.gif\
-figures/bodephase7.gif\
-figures/bodephase8.gif\
-figures/bodephase9.gif\
+figures/bodegain1.png\
+figures/bodegain2.png\
+figures/bodegain3.png\
+figures/bodegain4.png\
+figures/bodegain5.png\
+figures/bodegain6.png\
+figures/bodegain7.png\
+figures/bodegain8.png\
+figures/bodephase1.png\
+figures/bodephase2.png\
+figures/bodephase3.png\
+figures/bodephase4.png\
+figures/bodephase5.png\
+figures/bodephase6.png\
+figures/bodephase7.png\
+figures/bodephase8.png\
+figures/bodephase9.png\
 figures/scene1.png\
 figures/scene2.png\
 figures/color_terminal.png\
-figures/draw_allocation.gif\
-figures/draw_allocation2.gif\
-figures/draw_axis3d.gif\
-figures/draw_axis_bottom.gif\
-figures/draw_bars.gif\
-figures/draw_border.gif\
-figures/draw_cbrange.gif\
-figures/draw_cbtics.gif\
-figures/draw_colorbox2.gif\
-figures/draw_colorbox.gif\
-figures/draw_color.gif\
-figures/draw_color2.gif\
-figures/draw_color3.gif\
-figures/draw_color4.gif\
-figures/draw_columns.gif\
-figures/draw_contour2.gif\
-figures/draw_contour.gif\
-figures/draw_cylindrical.gif\
-figures/draw_elevation_grid.gif\
-figures/draw_ellipse.gif\
-figures/draw_enhanced3d10.gif\
-figures/draw_enhanced3d11.gif\
-figures/draw_enhanced3d2.gif\
-figures/draw_enhanced3d3.gif\
-figures/draw_enhanced3d4.gif\
-figures/draw_enhanced3d5.gif\
-figures/draw_enhanced3d6.gif\
-figures/draw_enhanced3d7.gif\
-figures/draw_enhanced3d8.gif\
-figures/draw_enhanced3d9.gif\
-figures/draw_enhanced3d.gif\
-figures/draw_equiv.gif\
-figures/draw_errors2.gif\
-figures/draw_errors.gif\
-figures/draw_explicit2.gif\
-figures/draw_explicit3.gif\
-figures/draw_explicit.gif\
-figures/draw_filledfunc2.gif\
-figures/draw_filledfunc.gif\
-figures/draw_grid2.gif\
-figures/draw_grid.gif\
-figures/draw_head_angle.gif\
-figures/draw_head_both.gif\
-figures/draw_head_length.gif\
-figures/draw_head_type.gif\
-figures/draw_image2.gif\
-figures/draw_image3.gif\
-figures/draw_image4.gif\
-figures/draw_image5.gif\
-figures/draw_image6.gif\
-figures/draw_image.gif\
-figures/draw_implicit2.gif\
-figures/draw_implicit.gif\
-figures/draw_interpolate_color2.gif\
-figures/draw_interpolate_color3.gif\
-figures/draw_interpolate_color4.gif\
-figures/draw_interpolate_color5.gif\
-figures/draw_interpolate_color6.gif\
-figures/draw_interpolate_color.gif\
-figures/draw_intro.gif\
-figures/draw_intro3.gif\
-figures/draw_intro2.gif\
-figures/draw_key.gif\
-figures/draw_key_label_alignment.gif\
-figures/draw_key_label_orientation.gif\
-figures/draw_key_pos2.gif\
-figures/draw_key_pos.gif\
-figures/draw_label2.gif\
-figures/draw_label_alignment.gif\
-figures/draw_label.gif\
-figures/draw_label_orientation.gif\
-figures/draw_line_type.gif\
-figures/draw_line_width.gif\
-figures/draw_logcb.gif\
-figures/draw_logx_secondary.gif\
-figures/draw_mesh2.gif\
-figures/draw_mesh3.gif\
-figures/draw_mesh.gif\
+figures/draw_allocation.png\
+figures/draw_allocation2.png\
+figures/draw_axis3d.png\
+figures/draw_axis_bottom.png\
+figures/draw_bars.png\
+figures/draw_border.png\
+figures/draw_cbrange.png\
+figures/draw_cbtics.png\
+figures/draw_colorbox2.png\
+figures/draw_colorbox.png\
+figures/draw_color.png\
+figures/draw_color2.png\
+figures/draw_color3.png\
+figures/draw_color4.png\
+figures/draw_columns.png\
+figures/draw_contour2.png\
+figures/draw_contour.png\
+figures/draw_cylindrical.png\
+figures/draw_elevation_grid.png\
+figures/draw_ellipse.png\
+figures/draw_enhanced3d10.png\
+figures/draw_enhanced3d11.png\
+figures/draw_enhanced3d2.png\
+figures/draw_enhanced3d3.png\
+figures/draw_enhanced3d4.png\
+figures/draw_enhanced3d5.png\
+figures/draw_enhanced3d6.png\
+figures/draw_enhanced3d7.png\
+figures/draw_enhanced3d8.png\
+figures/draw_enhanced3d9.png\
+figures/draw_enhanced3d.png\
+figures/draw_equiv.png\
+figures/draw_errors2.png\
+figures/draw_errors.png\
+figures/draw_explicit2.png\
+figures/draw_explicit3.png\
+figures/draw_explicit.png\
+figures/draw_filledfunc2.png\
+figures/draw_filledfunc.png\
+figures/draw_grid2.png\
+figures/draw_grid.png\
+figures/draw_head_angle.png\
+figures/draw_head_both.png\
+figures/draw_head_length.png\
+figures/draw_head_type.png\
+figures/draw_image2.png\
+figures/draw_image3.png\
+figures/draw_image4.png\
+figures/draw_image5.png\
+figures/draw_image6.png\
+figures/draw_image.png\
+figures/draw_implicit2.png\
+figures/draw_implicit.png\
+figures/draw_interpolate_color2.png\
+figures/draw_interpolate_color3.png\
+figures/draw_interpolate_color4.png\
+figures/draw_interpolate_color5.png\
+figures/draw_interpolate_color6.png\
+figures/draw_interpolate_color.png\
+figures/draw_intro.png\
+figures/draw_intro3.png\
+figures/draw_intro2.png\
+figures/draw_key.png\
+figures/draw_key_label_alignment.png\
+figures/draw_key_label_orientation.png\
+figures/draw_key_pos2.png\
+figures/draw_key_pos.png\
+figures/draw_label2.png\
+figures/draw_label_alignment.png\
+figures/draw_label.png\
+figures/draw_label_orientation.png\
+figures/draw_line_type.png\
+figures/draw_line_width.png\
+figures/draw_logcb.png\
+figures/draw_logx_secondary.png\
+figures/draw_mesh2.png\
+figures/draw_mesh3.png\
+figures/draw_mesh.png\
 figures/draw_multiplot.png\
-figures/draw_nticks.gif\
-figures/draw_palette2.gif\
-figures/draw_palette3.gif\
-figures/draw_palette4.gif\
-figures/draw_palette5.gif\
-figures/draw_palette.gif\
-figures/draw_parametric3.gif\
-figures/draw_parametric2.gif\
-figures/draw_parametric.gif\
-figures/draw_points2.gif\
-figures/draw_points3.gif\
-figures/draw_points4.gif\
-figures/draw_points5.gif\
-figures/draw_points6.gif\
-figures/draw_points7.gif\
-figures/draw_points8.gif\
-figures/draw_point_size.gif\
-figures/draw_points_joined.gif\
-figures/draw_points.gif\
-figures/draw_point_type.gif\
-figures/draw_polygon.gif\
-figures/draw_polar.gif\
-figures/draw_proportional_axis2.gif\
-figures/draw_proportional_axis.gif\
-figures/draw_quadrilateral.gif\
-figures/draw_rectangle.gif\
-figures/draw_region.gif\
-figures/draw_scene.gif\
-figures/draw_spherical.gif\
-figures/draw_surface_hide.gif\
-figures/draw_title.gif\
-figures/draw_transform2.gif\
-figures/draw_transparent.gif\
-figures/draw_triangle.gif\
-figures/draw_tube_extremes.gif\
-figures/draw_tube.gif\
-figures/draw_unit_vectors.gif\
-figures/draw_user_preamble.gif\
-figures/draw_user_preamble2.gif\
-figures/draw_vector2.gif\
-figures/draw_vector.gif\
-figures/draw_view2.gif\
-figures/draw_view.gif\
-figures/draw_wired_surface.gif\
-figures/draw_xaxis.gif\
-figures/draw_xaxis_secondary.gif\
-figures/draw_xugrid.gif\
-figures/draw_ylabel_secondary.gif\
-figures/draw_transform.gif\
-figures/worldmap_make_poly_continent.gif\
-figures/worldmap_make_poly_continent2.gif\
-figures/worldmap_make_poly_country.gif\
-figures/worldmap_make_polygon.gif\
-figures/worldmap_region_boundaries.gif\
-figures/worldmap_region_boundaries_plus.gif\
-figures/worldmap_geomap.gif\
-figures/worldmap_geomap2.gif\
-figures/worldmap_geomap3.gif\
-figures/worldmap_geomap4.gif\
-figures/worldmap_geomap5.gif\
-figures/worldmap_geomap6.gif
+figures/draw_nticks.png\
+figures/draw_palette2.png\
+figures/draw_palette3.png\
+figures/draw_palette4.png\
+figures/draw_palette5.png\
+figures/draw_palette.png\
+figures/draw_parametric3.png\
+figures/draw_parametric2.png\
+figures/draw_parametric.png\
+figures/draw_points2.png\
+figures/draw_points3.png\
+figures/draw_points4.png\
+figures/draw_points5.png\
+figures/draw_points6.png\
+figures/draw_points7.png\
+figures/draw_points8.png\
+figures/draw_point_size.png\
+figures/draw_points_joined.png\
+figures/draw_points.png\
+figures/draw_point_type.png\
+figures/draw_polygon.png\
+figures/draw_polar.png\
+figures/draw_proportional_axis2.png\
+figures/draw_proportional_axis.png\
+figures/draw_quadrilateral.png\
+figures/draw_rectangle.png\
+figures/draw_region.png\
+figures/draw_scene.png\
+figures/draw_spherical.png\
+figures/draw_surface_hide.png\
+figures/draw_title.png\
+figures/draw_transform2.png\
+figures/draw_transparent.png\
+figures/draw_triangle.png\
+figures/draw_tube_extremes.png\
+figures/draw_tube.png\
+figures/draw_unit_vectors.png\
+figures/draw_user_preamble.png\
+figures/draw_user_preamble2.png\
+figures/draw_vector2.png\
+figures/draw_vector.png\
+figures/draw_view2.png\
+figures/draw_view.png\
+figures/draw_wired_surface.png\
+figures/draw_xaxis.png\
+figures/draw_xaxis_secondary.png\
+figures/draw_xugrid.png\
+figures/draw_ylabel_secondary.png\
+figures/draw_transform.png\
+figures/worldmap_make_poly_continent.png\
+figures/worldmap_make_poly_continent2.png\
+figures/worldmap_make_poly_country.png\
+figures/worldmap_make_polygon.png\
+figures/worldmap_region_boundaries.png\
+figures/worldmap_region_boundaries_plus.png\
+figures/worldmap_geomap.png\
+figures/worldmap_geomap2.png\
+figures/worldmap_geomap3.png\
+figures/worldmap_geomap4.png\
+figures/worldmap_geomap5.png\
+figures/worldmap_geomap6.png\
+figures/trigtools-1.png\
+figures/trigtools-2.png\
+figures/trigtools-3.png\
+figures/trigtools-4.png\
+figures/trigtools-5.png\
+figures/trigtools-6.png\
+figures/trigtools-7.png
 
 pdffigures = \
 figures/introduction1.pdf\
@@ -290,13 +291,14 @@ figures/dynamics5.pdf\
 figures/dynamics6.pdf\
 figures/dynamics7.pdf\
 figures/dynamics8.pdf\
+figures/maxima-unicode-display-variety-1-ascii.pdf\
+figures/maxima-unicode-display-variety-1.pdf\
 figures/plotdf1.pdf\
 figures/plotdf2.pdf\
 figures/plotdf3.pdf\
 figures/plotdf4.pdf\
 figures/plotdf5.pdf\
 figures/plotdf6.pdf\
-figures/plotting1.pdf\
 figures/plotting2.pdf\
 figures/plotting3.pdf\
 figures/plotting4.pdf\
@@ -501,61 +503,220 @@ figures/worldmap_geomap4.pdf\
 figures/worldmap_geomap5.pdf\
 figures/worldmap_geomap6.pdf
 
-macfiles = figures/draw_allocation2.mac figures/draw_allocation.mac figures/draw_axis3d.mac figures/draw_axis_bottom.mac figures/draw_bars.mac figures/draw_border.mac figures/draw_cbrange.mac figures/draw_cbtics.mac figures/draw_colorbox2.mac figures/draw_colorbox.mac figures/draw_color.mac figures/draw_columns.mac figures/draw_contour2.mac figures/draw_contour.mac figures/draw_cylindrical.mac figures/draw_elevation_grid.mac figures/draw_ellipse.mac figures/draw_enhanced3d10.mac figures/draw_enhanced3d11.mac figures/draw_enhanced3d2.mac figures/draw_enhanced3d3.mac figures/draw_enhanced3d4.mac figures/draw_enhanced3d5.mac figures/draw_enhanced3d6.mac figures/draw_enhanced3d7.mac figures/draw_enhanced3d8.mac figures/draw_enhanced3d9.mac figures/draw_enhanced3d.mac figures/draw_equiv.mac figures/draw_errors2.mac figures/draw_errors.mac figures/draw_explicit2.mac figures/draw_explicit3.mac figures/draw_explicit.mac figures/draw_filledfunc2.mac figures/draw_filledfunc.mac figures/draw_grid2.mac figures/draw_grid.mac figures/draw_head_angle.mac figures/draw_head_both.mac figures/draw_head_length.mac figures/draw_head_type.mac figures/draw_image2.mac figures/draw_image3.mac figures/draw_image4.mac figures/draw_image5.mac figures/draw_image6.mac figures/draw_image.mac figures/draw_implicit2.mac figures/draw_implicit.mac figures/draw_interpolate_color2.mac figures/draw_interpolate_color3.mac figures/draw_interpolate_color4.mac figures/draw_interpolate_color5.mac figures/draw_interpolate_color6.mac figures/draw_interpolate_color.mac figures/draw_key.mac figures/draw_key_pos2.mac figures/draw_key_pos.mac figures/draw_label2.mac figures/draw_label_alignment.mac figures/draw_label.mac figures/draw_label_orientation.mac figures/draw_line_type.mac figures/draw_line_width.mac figures/draw_logcb.mac figures/draw_logx_secondary.mac figures/draw_mesh2.mac figures/draw_mesh3.mac figures/draw_mesh.mac figures/draw_nticks.mac figures/draw_palette2.mac figures/draw_palette3.mac figures/draw_palette4.mac figures/draw_palette5.mac figures/draw_palette.mac figures/draw_parametric2.mac figures/draw_parametric3.mac figures/draw_parametric.mac figures/draw_points2.mac figures/draw_points3.mac figures/draw_points4.mac figures/draw_points5.mac figures/draw_points6.mac figures/draw_points7.mac figures/draw_points8.mac figures/draw_point_size.mac figures/draw_points_joined.mac figures/draw_points.mac figures/draw_point_type.mac figures/draw_polar.mac figures/draw_polygon.mac figures/draw_proportional_axis2.mac figures/draw_proportional_axis.mac figures/draw_quadrilateral.mac figures/draw_rectangle.mac figures/draw_region.mac figures/draw_scene.mac figures/draw_spherical.mac figures/draw_surface_hide.mac figures/draw_title.mac figures/draw_transform2.mac figures/draw_transform.mac figures/draw_transparent.mac figures/draw_triangle.mac figures/draw_tube_extremes.mac figures/draw_tube.mac figures/draw_unit_vectors.mac figures/draw_user_preamble2.mac figures/draw_user_preamble.mac figures/draw_vector2.mac figures/draw_vector.mac figures/draw_view2.mac figures/draw_view.mac figures/draw_wired_surface.mac figures/draw_xaxis.mac figures/draw_xaxis_secondary.mac figures/draw_xugrid.mac figures/draw_ylabel_secondary.mac figures/worldmap_geomap2.mac figures/worldmap_geomap3.mac figures/worldmap_geomap4.mac figures/worldmap_geomap5.mac figures/worldmap_geomap6.mac figures/worldmap_geomap.mac figures/worldmap_make_poly_continent2.mac figures/worldmap_make_poly_continent.mac figures/worldmap_make_poly_country.mac figures/worldmap_make_polygon.mac figures/worldmap_region_boundaries.mac figures/worldmap_region_boundaries_plus.mac
-
-
-
-if CHM
-MAXIMA_CHM = maxima.chm
-INSTALL_CHM = install-chm
-UNINSTALL_CHM = uninstall-chm
-CLEAN_CHM = clean-chm
-endif
+macfiles = \
+figures/draw_allocation2.mac\
+figures/draw_allocation.mac\
+figures/draw_axis3d.mac\
+figures/draw_axis_bottom.mac\
+figures/draw_bars.mac\
+figures/draw_border.mac\
+figures/draw_cbrange.mac\
+figures/draw_cbtics.mac\
+figures/draw_color2.mac\
+figures/draw_color3.mac\
+figures/draw_color4.mac\
+figures/draw_colorbox2.mac\
+figures/draw_colorbox.mac\
+figures/draw_color.mac\
+figures/draw_columns.mac\
+figures/draw_contour2.mac\
+figures/draw_contour.mac\
+figures/draw_cylindrical.mac\
+figures/draw_elevation_grid.mac\
+figures/draw_ellipse.mac\
+figures/draw_enhanced3d10.mac\
+figures/draw_enhanced3d11.mac\
+figures/draw_enhanced3d2.mac\
+figures/draw_enhanced3d3.mac\
+figures/draw_enhanced3d4.mac\
+figures/draw_enhanced3d5.mac\
+figures/draw_enhanced3d6.mac\
+figures/draw_enhanced3d7.mac\
+figures/draw_enhanced3d8.mac\
+figures/draw_enhanced3d9.mac\
+figures/draw_enhanced3d.mac\
+figures/draw_equiv.mac\
+figures/draw_errors2.mac\
+figures/draw_errors.mac\
+figures/draw_explicit2.mac\
+figures/draw_explicit3.mac\
+figures/draw_explicit.mac\
+figures/draw_filledfunc2.mac\
+figures/draw_filledfunc.mac\
+figures/draw_grid2.mac\
+figures/draw_grid.mac\
+figures/draw_head_angle.mac\
+figures/draw_head_both.mac\
+figures/draw_head_length.mac\
+figures/draw_head_type.mac\
+figures/draw_image2.mac\
+figures/draw_image3.mac\
+figures/draw_image4.mac\
+figures/draw_image5.mac\
+figures/draw_image6.mac\
+figures/draw_image.mac\
+figures/draw_implicit2.mac\
+figures/draw_implicit.mac\
+figures/draw_interpolate_color2.mac\
+figures/draw_interpolate_color3.mac\
+figures/draw_interpolate_color4.mac\
+figures/draw_interpolate_color5.mac\
+figures/draw_interpolate_color6.mac\
+figures/draw_interpolate_color.mac\
+figures/draw_intro2.mac\
+figures/draw_intro3.mac\
+figures/draw_intro.mac\
+figures/draw_key.mac\
+figures/draw_key_pos2.mac\
+figures/draw_key_pos.mac\
+figures/draw_label2.mac\
+figures/draw_label_alignment.mac\
+figures/draw_label.mac\
+figures/draw_label_orientation.mac\
+figures/draw_line_type.mac\
+figures/draw_line_width.mac\
+figures/draw_logcb.mac\
+figures/draw_logx_secondary.mac\
+figures/draw_mesh2.mac\
+figures/draw_mesh3.mac\
+figures/draw_mesh.mac\
+figures/draw_nticks.mac\
+figures/draw_palette2.mac\
+figures/draw_palette3.mac\
+figures/draw_palette4.mac\
+figures/draw_palette5.mac\
+figures/draw_palette.mac\
+figures/draw_parametric2.mac\
+figures/draw_parametric3.mac\
+figures/draw_parametric.mac\
+figures/draw_points2.mac\
+figures/draw_points3.mac\
+figures/draw_points4.mac\
+figures/draw_points5.mac\
+figures/draw_points6.mac\
+figures/draw_points7.mac\
+figures/draw_points8.mac\
+figures/draw_point_size.mac\
+figures/draw_points_joined.mac\
+figures/draw_points.mac\
+figures/draw_point_type.mac\
+figures/draw_polar.mac\
+figures/draw_polygon.mac\
+figures/draw_proportional_axis2.mac\
+figures/draw_proportional_axis.mac\
+figures/draw_quadrilateral.mac\
+figures/draw_rectangle.mac\
+figures/draw_region.mac\
+figures/draw_scene.mac\
+figures/draw_spherical.mac\
+figures/draw_surface_hide.mac\
+figures/draw_title.mac\
+figures/draw_transform2.mac\
+figures/draw_transform.mac\
+figures/draw_transparent.mac\
+figures/draw_triangle.mac\
+figures/draw_tube_extremes.mac\
+figures/draw_tube.mac\
+figures/draw_unit_vectors.mac\
+figures/draw_user_preamble2.mac\
+figures/draw_user_preamble.mac\
+figures/draw_vector2.mac\
+figures/draw_vector.mac\
+figures/draw_view2.mac\
+figures/draw_view.mac\
+figures/draw_wired_surface.mac\
+figures/draw_xaxis.mac\
+figures/draw_xaxis_secondary.mac\
+figures/draw_xugrid.mac\
+figures/draw_ylabel_secondary.mac\
+figures/plotting10.mac\
+figures/plotting11.mac\
+figures/plotting12.mac\
+figures/plotting13.mac\
+figures/plotting14.mac\
+figures/plotting15.mac\
+figures/plotting16.mac\
+figures/plotting17.mac\
+figures/plotting18.mac\
+figures/plotting19.mac\
+figures/plotting20.mac\
+figures/plotting21.mac\
+figures/plotting22.mac\
+figures/plotting23.mac\
+figures/plotting24.mac\
+figures/plotting25.mac\
+figures/plotting26.mac\
+figures/plotting2.mac\
+figures/plotting3.mac\
+figures/plotting4.mac\
+figures/plotting5.mac\
+figures/plotting6.mac\
+figures/plotting7.mac\
+figures/plotting8.mac\
+figures/plotting9.mac\
+figures/worldmap_geomap2.mac\
+figures/worldmap_geomap3.mac\
+figures/worldmap_geomap4.mac\
+figures/worldmap_geomap5.mac\
+figures/worldmap_geomap6.mac\
+figures/worldmap_geomap.mac\
+figures/worldmap_make_poly_continent2.mac\
+figures/worldmap_make_poly_continent.mac\
+figures/worldmap_make_poly_country.mac\
+figures/worldmap_make_polygon.mac\
+figures/worldmap_region_boundaries.mac\
+figures/worldmap_region_boundaries_plus.mac
 
 INFOLANG ?= en
 
 # We need the html docu to be generated on "make all" because if we fail
 # to do so a "sudo make install" will generate the html docu as read-only
 # fails conflicting with a subsequent "make html".
-all-local: html maxima.info maxima-index.lisp $(MAXIMA_CHM)
+all-local: html maxima.info maxima-index.lisp maxima-index-html.lisp
 
 infoname = maxima
 include $(top_srcdir)/common-info.mk
 maxima.info : maxima.texi $(maxima_TEXINFOS)
-	-$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) \
+	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) \
 	  --split-size=1000000 $(srcdir)/maxima.texi
 
-html: maxima_toc.html contents.hhc
+html: index.html
 
 maxima-index.lisp: build_index.pl maxima.info
 	/usr/bin/env perl $^ ':crlf' > $@
 
+# Really depends on all the individual html files, but let's assume
+# that if index.html is done, we have all the remaining html
+# files.
+#
+# Load build-html-index.lisp and run the builder to create
+# maxima-index-html.lisp.  In a clean directory, there won't be a
+# maxima-index-html.lisp, so we don't want to try to verify the html
+# index to prevent spurious warnings.  Then after it's done, run
+# maxima to verify the index.
+maxima-index-html.lisp : index.html build-html-index.lisp
+	../../maxima-local --no-init --preload=$(top_srcdir)/doc/info/build-html-index.lisp --batch-string='build_and_dump_html_index("./*.html");'
+	../../maxima-local --no-init --verify-html-index --batch-string="quit();"
+
 DOLLAR_SIGN = $$
 
-maxima_toc.html: maxima.texi $(maxima_TEXINFOS) $(figurefiles) manual.css texi2html.init
+maxima_singlepage.html index.html: maxima.texi $(maxima_TEXINFOS) $(figurefiles) manual.css texi2html.init
 	./build_html.sh
 
-maxima.epub: maxima_toc.html
+maxima.epub: maxima_singlepage.html
 	ebook-convert maxima_singlepage.html maxima.epub --breadth-first "--title=Maxima @manual_version@ Manual" "--authors=Maxima Team" --language=en
 
-maxima.pdf: maxima_pdf.texi $(maxima_TEXINFOS) $(pdffigures)
+maxima.pdf: maxima.texi $(maxima_TEXINFOS) $(pdffigures)
 	$(TEXI2PDF) $(AM_V_texinfo) -o maxima.pdf $<
 	rm -f maxima.fns maxima.vr maxima.tp maxima.pg maxima.ky maxima.cp \
 	maxima.toc maxima.fn maxima.aux maxima.log
 
-contents.hhc index.hhk: maxima_toc.html
-	/usr/bin/env perl $(srcdir)/create_index maxima_toc.html
-
-# Squash error on exit from hhc
-maxima.chm: maxima.hhp contents.hhc index.hhk
-	-"$(HHC)" maxima.hhp
 
 include $(top_srcdir)/common.mk
 genericdir = $(dochtmldir)
-genericdirDATA = $(figurefiles) \
-contents.hhc index.hhk header.hhp maxima.hhp
+genericdirDATA = $(figurefiles)
 
-htmlname = maxima
+htmlname = *
 htmlinstdir = $(dochtmldir)
 include $(top_srcdir)/common-html.mk
 
@@ -563,46 +724,34 @@ all-local: warn_texinfo
 dist-hook: check_texinfo html
 pdf-local: maxima.pdf
 
-install-data-local: install-maxima-index $(INSTALL_CHM)
-uninstall-local: uninstall-maxima-index $(UNINSTALL_CHM)
+install-data-local: install-maxima-index
+uninstall-local: uninstall-maxima-index
 
-install-maxima-index: maxima-index.lisp
+install-maxima-index: maxima-index.lisp maxima-index-html.lisp
 	$(MKDIR_P) "$(DESTDIR)$(infodir)"
 	$(INSTALL_DATA) maxima-index.lisp "$(DESTDIR)$(infodir)/maxima-index.lisp"
+	$(INSTALL_DATA) maxima-index-html.lisp "$(DESTDIR)$(infodir)/maxima-index-html.lisp"
 
-uninstall-maxima-index: maxima-index.lisp
+uninstall-maxima-index: maxima-index.lisp maxima-index-html.lisp
 	rm -f "$(DESTDIR)$(infodir)/maxima-index.lisp"
+	rm -f "$(DESTDIR)$(infodir)/maxima-index-html.lisp"
 
-clean-local: clean-info clean-html $(CLEAN_CHM)
+clean-local: clean-info clean-html
 
 clean-info:
-	rm -f $(wildcard maxima.info* maxima-index.lisp) \
-	      $(wildcard $(addprefix $(srcdir),maxima.info* maxima-index.lisp))
+	rm -f $(wildcard maxima.info* maxima-index.lisp maxima-index-html.lisp)
 	rm -f maxima.fns
 
 clean-html:
-	rm -f $(wildcard maxima*.html contents.hhc index.hhk maxima.chm) \
-	      $(wildcard $(addprefix $(srcdir),maxima*.html contents.hhc index.hhk maxima.chm))
+	rm -f $(wildcard *.html) \
+	      $(wildcard $(addprefix $(srcdir),*.html))
 
-if CHM
-install-chm: maxima.chm
-	$(MKDIR_P) "$(DESTDIR)$(docchmdir)"
-	$(INSTALL_DATA) maxima.chm "$(DESTDIR)$(docchmdir)/maxima.chm"
-
-uninstall-chm:
-	rm -f "$(DESTDIR)$(docchmdir)"
-
-clean-chm:
-	rm -f maxima.chm
-	rm -rf chm
-endif
-
-EXTRA_DIST = texi2html manual.css texi2html.init maxima.texi maxima.html \
+EXTRA_DIST = manual.css texi2html.init maxima.texi dlmf-ref-macros.texi \
     $(genericdirDATA) $(pdffigures) $(macfiles) $(maxima_TEXINFOS) $(figurefiles) \
-    create_index build_index.pl maxima-index.lisp docdraw.mac \
+    create_index build_index.pl maxima-index.lisp maxima-index-html.lisp docdraw.mac \
     extract_categories1.awk extract_categories1.sed check_tab fix_tab \
     figures/Makefile.am figures/Makefile.in figures/README \
-    maxima-init.lisp mmref.tex README.update_examples maxima_pdf.texi \
+    maxima-init.lisp README.update_examples maxima-index-html.lisp build-html-index.lisp \
     figures/orthopoly1.ps.gz figures/plotdf1.ps.gz figures/plotdf2.ps.gz figures/plotdf3.ps.gz figures/plotdf4.ps.gz figures/plotdf5.ps.gz figures/plotdf6.ps.gz
 
 check_texinfo:
@@ -622,3 +771,7 @@ distclean-local:
 
 
 .PHONY: check_texinfo warn_texinfo
+
+# Preprocess the files with m4 to handle math equations.
+%.texi : math.m4 %.texi.m4
+	m4 --prefix-builtins $^ > $@

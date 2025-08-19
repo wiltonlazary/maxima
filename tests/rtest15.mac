@@ -8,9 +8,11 @@ fpprec:16;
 16;
 
 /* apropos function added 7 april 2002 
-   changed to accept only a string as an argument 06/2009
 */
 apropos("tr_optimize_max_loop");
+[tr_optimize_max_loop]$
+
+apropos(tr_optimize_max_loop);
 [tr_optimize_max_loop]$
 
 /* test introduced 7 april 2002. bug fix incorporated 9 june 2002 */
@@ -1588,3 +1590,66 @@ integrate(1/(x^8+x+1),x,0,1);
 
 integrate(1/(1+s^7),s,0,%pi);
 'integrate(1/(1+s^7),s,0,%pi);
+
+/*
+ * SF bug #4153: rectform(atan2(1,1+%i)) signals Lisp error
+ */
+rectform(atan2(1,1+%i));
+atan(2)/2-(%i*log(5))/4;
+
+/*
+ * SF bug #4143: atan2(0,minf) is wrong.
+ *
+ * atan2 on the branch cut is defined to be continuous with the second
+ *  quadrant.
+ */
+atan2(0, minf);
+%pi;
+
+/*
+ * SF bug 4121: atan2(0, <nz>) doesn't simplify
+ */
+atan2(0, -abs(x));
+%pi;
+
+/*
+ * SF bug #4181
+ *
+ * Test that we signal an error for incorrect singular points.  And
+ * also if the integrand does not return a real number.
+ */
+errcatch(quad_qags(sqrt(x), x, -1, 1));
+[quad_qags(sqrt(x), x, - 1, 1, epsrel = 1.0e-8, epsabs = 0.0, limit = 200)];
+
+errcatch(quad_qagp(sqrt(x), x, 0, 1, [0, 2]));
+[];
+
+/*
+ * SF Bug 4254:  plog doesn't always simplify results
+ */
+plog(-1);
+%i*%pi;
+
+assume(xp > 0);
+[xp > 0];
+
+plog(-xp);
+log(xp) + %i*%pi;
+
+plog(xp*%i);
+log(xp) + %i*%pi/2;
+
+plog(-xp*%i);
+log(xp) - %i*%pi/2;
+
+forget(xp > 0);
+[xp > 0];
+
+/*
+ * SF bug 4257: incorrect change of variable involving diff
+ *
+ * Just check that this integral returns a correct noun form.
+ */
+integrate(cos(2*x)*diff(f(x),x),x);
+'integrate(cos(2*x)*'diff(f(x),x,1),x);
+

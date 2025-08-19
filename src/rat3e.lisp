@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -16,38 +16,12 @@
 ;;	It includes the conversion and top-level routines used
 ;;	by the rest of the functions.
 
-(declare-top (special intbs* alflag var dosimp alc $myoptions
-		      vlist scanmapp radlist expsumsplit *ratsimp* mplc*
-		      $ratsimpexpons $expop $expon $negdistrib $gcd))
-
-(defmvar genvar nil
-  "List of gensyms used to point to kernels from within polynomials.
-	 The values cell and property lists of these symbols are used to
-	 store various information.")
-
-(defmvar genpairs nil)
-(defmvar varlist nil "List of kernels")
-(defmvar *fnewvarsw nil)
-(defmvar *ratweights nil)
+(declare-top (special intbs* alflag var alc
+		      vlist radlist expsumsplit *ratsimp*))
 
 (defvar *ratsimp* nil)
 
 (defmvar factorresimp nil "If `t' resimplifies factor(x-y) to x-y")
-
-;; User level global variables.
-
-(defmvar $keepfloat nil  "If `t' floating point coeffs are not converted to rationals")
-(defmvar $factorflag nil "If `t' constant factor of polynomial is also factored")
-(defmvar $dontfactor '((mlist)))
-(defmvar $norepeat t)
-(defmvar $ratweights '((mlist simp)))
-
-(defmvar $ratfac nil "If `t' cre-forms are kept factored")
-(defmvar $algebraic nil)
-(defmvar $ratvars '((mlist simp)))
-(defmvar $facexpand t)
-
-(declare-top (special evp $infeval))
 
 (defun mrateval (x)
   (let ((varlist (caddar x)))
@@ -79,8 +53,6 @@
               (member 'trunc (cdar x) :test #'eq))
          ($taytorat x))
         (t ($rat x))))
-
-(defmvar tellratlist nil)
 
 (defun tellratdisp (x)
   (pdisrep+ (trdisp1 (cdr x) (car x))))
@@ -140,7 +112,7 @@
 
 (defmvar inratsimp nil)
 
-(defmfun $fullratsimp (exp &rest argl)
+(defmfun ($fullratsimp :properties ((evfun t))) (exp &rest argl)
   (prog (exp1)
      loop (setq exp1 (simplify (apply #'$ratsimp (cons exp argl))))
      (when (alike1 exp exp1) (return exp))
@@ -182,7 +154,7 @@
       (cons (car exp) (mapcar #'rat0 (cdr exp)))
       (ratf exp)))
 
-(defmfun $ratsimp (e &rest vars)
+(defmfun ($ratsimp :properties ((evfun t))) (e &rest vars)
   (cond ((not (null vars))
 	 (let (varlist)
 	   (joinvarlist vars)
@@ -211,8 +183,6 @@
 
 (declare-top (special var))
 
-(defmvar adn* 1 "common denom for algebraic coefficients")
-
 (defun factoralg (p)
   (prog (alc ans adn* $gcd)
      (setq $gcd '$algebraic)
@@ -235,11 +205,11 @@
 		  (cdr ans)))))
 
 (defun albk (p)				;to undo monicizing subst
-  (let ((alpha (pdis alpha)) ($ratfac t))
-    (declare (special alpha))
+  (let ((*alpha* (pdis *alpha*)) ($ratfac t))
+    (declare (special *alpha*))
 	;; don't multiply them back out
-    (maxima-substitute (list '(mtimes simp) mplc* alpha) ;assumes mplc* is int
-		       alpha p)))
+    (maxima-substitute (list '(mtimes simp) mplc* *alpha*) ;assumes mplc* is int
+		       *alpha* p)))
 
 
 (defmfun $gfactor (p &aux (gauss t))
@@ -249,7 +219,7 @@
   (let (($expop 0) ($expon 0) $negdistrib)
     (maxima-substitute '$%i '%i p)))
 
-(defmfun $factor (e &optional (mp nil mp?))
+(defmfun ($factor :properties ((evfun t))) (e &optional (mp nil mp?))
   (let ($intfaclim (varlist (cdr $ratvars)) genvar ans)
     (setq ans (if mp? (factor e mp) (factor e)))
     (if (and factorresimp $negdistrib
@@ -265,9 +235,9 @@
 	(genvar nil)
 	($gcd $gcd)
 	($negdistrib $negdistrib))
-    (prog (fn var mm* mplc* intbs* alflag minpoly* alpha p algfac*
+    (prog (fn var mm* mplc* intbs* alflag minpoly* *alpha* p algfac*
 	   $keepfloat $algebraic cargs)
-       (declare (special cargs fn alpha))
+       (declare (special cargs fn *alpha*))
        (unless (member $gcd *gcdl* :test #'eq)
 	 (setq $gcd (car *gcdl*)))
        (let ($ratfac)
@@ -281,19 +251,19 @@
 	 (when (mbagp p)
 	   (return (cons (car p) (mapcar #'(lambda (x) (apply #'factor (cons x cargs))) (cdr p)))))
 	 (cond (mp?
-		(setq alpha (meqhk mp))
-		(newvar alpha)
-		(setq minpoly* (cadr (ratrep* alpha)))
+		(setq *alpha* (meqhk mp))
+		(newvar *alpha*)
+		(setq minpoly* (cadr (ratrep* *alpha*)))
 		(when (or (pcoefp minpoly*)
 			  (not (univar (cdr minpoly*)))
 			  (< (cadr minpoly*) 2))
-		  (merror (intl:gettext "factor: second argument must be a nonlinear, univariate polynomial; found: ~M") alpha))
-		(setq alpha (pdis (list (car minpoly*) 1 1))
+		  (merror (intl:gettext "factor: second argument must be a nonlinear, univariate polynomial; found: ~M") *alpha*))
+		(setq *alpha* (pdis (list (car minpoly*) 1 1))
 		      mm* (cadr minpoly*))
 		(unless (equal (caddr minpoly*) 1)
 		  (setq mplc* (caddr minpoly*))
 		  (setq minpoly* (pmonz minpoly*))
-		  (setq p (maxima-substitute (div alpha mplc*) alpha p)))
+		  (setq p (maxima-substitute (div *alpha* mplc*) *alpha* p)))
 		(setq $algebraic t)
 		($tellrat(pdis minpoly*))
 		(setq algfac* t))
@@ -315,12 +285,12 @@
 	     ((atom p) (return p)))
        (and $ratfac (not $factorflag) ($ratp e) (return ($rat p)))
        (and $factorflag (mtimesp p) (mnump (cadr p))
-	    (setq alpha (factornumber (cadr p)))
-	    (cond ((alike1 alpha (cadr p)))
-		  ((mtimesp alpha)
-		   (setq p (cons (car p) (append (cdr alpha) (cddr p)))))
+	    (setq *alpha* (factornumber (cadr p)))
+	    (cond ((alike1 *alpha* (cadr p)))
+		  ((mtimesp *alpha*)
+		   (setq p (cons (car p) (append (cdr *alpha*) (cddr p)))))
 		  (t
-		   (setq p (cons (car p) (cons alpha (cddr p)))))))
+		   (setq p (cons (car p) (cons *alpha* (cddr p)))))))
        (when (null (member 'factored (car p) :test #'eq))
 	 (setq p (cons (append (car p) '(factored)) (cdr p))))
        (return p))))
@@ -855,19 +825,15 @@
        (putprop g p 'tellrat))
      (return (rget g))))
 
-;;  Any program which calls RATF on
-;;  a floating point number but does not wish to see "RAT replaced ..."
-;;  message, must bind $RATPRINT to NIL.
-
-(defmvar $ratprint t)
-
-(defmvar $ratepsilon 2e-15)
-
 ;; This control of conversion from float to rational appears to be explained
 ;; nowhere. - RJF
 
 (defun maxima-rationalize (x)
   (cond ((not (floatp x)) x)
+	;; Handle denormalized floats -- see maxima-discuss 2021-04-27 and bug 3777
+	((and (not (= x 0.0)) (< (abs x) COMMON-LISP:LEAST-POSITIVE-NORMALIZED-DOUBLE-FLOAT))
+	 (let ((r ($rationalize x)))
+	   (cons (cadr r) (caddr r))))
 	((< x 0.0)
 	 (setq x (ration1 (* -1.0 x)))
 	 (rplaca x (* -1 (car x))))
@@ -920,6 +886,7 @@
                                 (eq (caar var) 'mplus))
                             (copy-list var))
                            (t var)))
+	((eql var 1) 1)
 	(t (list '(mexpt ratsimp) var n))))
 
 (defun pdisrep+ (p)
@@ -945,11 +912,7 @@
 		(p p (cddr p)))
 	       ((null p) (nreverse l))))))
 
-;; IF $RATEXPAND IS TRUE, (X+1)*(Y+1) WILL DISPLAY AS
-;; XY + Y + X + 1  OTHERWISE, AS (X+1)Y + X + 1
-(defmvar $ratexpand nil)
-
-(defmfun $ratexpand (x)
+(defmfun ($ratexpand :properties ((evfun t))) (x)
   (if (mbagp x)
       (cons (car x) (mapcar '$ratexpand (cdr x)))
       (let (($ratexpand t) ($ratfac nil))
@@ -1051,7 +1014,7 @@
   (setq varlist (nconc (sortgreat vlist) varlist)))
 
 (defun sortgreat (l)
-  (and l (nreverse (sort l 'great))))
+  (and l (nreverse (stable-sort l 'great))));FIXME consider a total order function with #'sort
 
 (defun fnewvar (l &aux (*fnewvarsw t))
   (newvar l))

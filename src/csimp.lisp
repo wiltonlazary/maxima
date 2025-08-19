@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -12,33 +12,11 @@
 
 (macsyma-module csimp)
 
-(declare-top (special rsn* $factlim $exponentialize
-		      var varlist genvar $%emode $ratprint
-		      nn* dn* $errexp sqrt3//2 -sqrt3//2
-		      $demoivre errorsw $keepfloat $ratfac))
+(declare-top (special $exponentialize
+		      var genvar $ratprint
+		      errorsw))
 
 (load-macsyma-macros rzmac)
-
-(declare-top (special $nointegrate $lhospitallim $tlimswitch $limsubst
-		      $abconvtest plogabs))
-
-(defmvar $demoivre nil)
-(defmvar $nointegrate nil)
-(defmvar $lhospitallim 4)
-(defmvar $tlimswitch t)
-(defmvar $limsubst nil)
-(defmvar $abconvtest nil)
-(defvar rsn* nil)
-(defvar plogabs nil)
-
-;; Simplified shortcuts of constant expressions involving %pi.
-(defvar %p%i '((mtimes) $%i $%pi))
-(defvar fourth%pi '((mtimes) ((rat simp) 1 4) $%pi))
-(defvar half%pi '((mtimes) ((rat simp) 1 2) $%pi))
-(defvar %pi2 '((mtimes) 2 $%pi))
-(defvar half%pi3 '((mtimes) ((rat simp) 3 2) $%pi))
-
-(defmvar $sumsplitfact t) ;= nil minfactorial is applied after a factocomb.
 
 (loop for (a b) on
        '(%sin %asin %cos %acos %tan %atan
@@ -68,7 +46,6 @@
 ;; If expr is of the form a*var1+b where a is freeof var1
 ;; then (a . b) is returned else nil.
 (defun islinear (expr var1)
-  (declare (special *islinp*))
   (let ((a (let ((*islinp* t))
              (sdiff expr var1))))
     (if (freeof var1 a)
@@ -179,6 +156,22 @@
 		      nil)))
   (values nn* dn*))
 
+;; Like NUMDEN but dependency on VAR is explicit.  Use this instead of
+;; NUMDEN if possible.  Also, we do not set the special variables DN*
+;; and NN*.  The callers are responsible for doing that, now.
+(defun numden-var (e var1)
+  (let ((varlist (list var1))
+        dn nn)
+     (newvar (setq e (fmt e)))
+     (setq e (cdr (ratrep* e)))
+     (setq dn
+	   (simplifya (pdis (ratdenominator e))
+		      nil))
+     (setq nn
+	   (simplifya (pdis (ratnumerator e))
+		      nil))
+     (values nn dn)))
+
 (defun fmt (exp)
   (let (nn*)
     (cond ((atom exp) exp)
@@ -220,6 +213,12 @@
 (defun subin (y x)
   (cond ((not (among var x)) x)
 	(t (maxima-substitute y var x))))
+
+;; Like SUBIN but dependency on VAR is explicit.  Use this instead
+;; when possible.
+(defun subin-var (y x ivar)
+  (cond ((not (among ivar x)) x)
+	(t (maxima-substitute y ivar x))))
 
 ;; Right-hand side (rhs) and left-hand side (lhs) of binary infix expressions.
 ;; These are unambiguous for relational operators, some other built-in infix operators,
@@ -359,6 +358,23 @@
 		       (polyp (cadr a))))))
 	(t (andmapcar #'(lambda (subexp)
 			  (free subexp var))
+		      (cdr a)))))
+
+;; Like polyp but takes an extra arg for the variable.
+(defun polyp-var (a var2)
+  (cond ((atom a) t)
+	((member (caar a) '(mplus mtimes) :test #'eq)
+	 (every #'(lambda (p)
+                    (polyp-var p var2))
+                (cdr a)))
+	((eq (caar a) 'mexpt)
+	 (cond ((free (cadr a) var2)
+		(free (caddr a) var2))
+	       (t (and (integerp (caddr a))
+		       (> (caddr a) 0)
+		       (polyp-var (cadr a) var2)))))
+	(t (andmapcar #'(lambda (subexp)
+			  (free subexp var2))
 		      (cdr a)))))
 
 (defun pip (e)

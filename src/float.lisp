@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -28,68 +28,10 @@
 ;; file so they can be accessible to all Macsyma files.
 
 (eval-when
-    #+gcl (compile load eval)
-    #-gcl (:compile-toplevel :load-toplevel :execute)
+    (:compile-toplevel :load-toplevel :execute)
     (defconstant +machine-fixnum-precision+ (integer-length most-positive-fixnum)))
 
-;; External variables
-
-(defmvar $float2bf t
-  "If TRUE, no MAXIMA-ERROR message is printed when a floating point number is
-converted to a bigfloat number.")
-
-(defmvar $bftorat nil
-  "Controls the conversion of bigfloat numbers to rational numbers.  If
-FALSE, RATEPSILON will be used to control the conversion (this results in
-relatively small rational numbers).  If TRUE, the rational number generated
-will accurately represent the bigfloat.")
-
-(defmvar $bftrunc t
-  "If TRUE, printing of bigfloat numbers will truncate trailing zeroes.
-  Otherwise, all trailing zeroes are printed.")
-
-(defmvar $fpprintprec 0
-  "Controls the number of significant digits printed for floats.  If
-  0, then full precision is used."
-  fixnum)
-
-(defmvar $maxfpprintprec (ceiling (log (expt 2 (float-digits 1.0)) 10.0))
-  "The maximum number of significant digits printed for floats.")
-
-(defmvar $fpprec $maxfpprintprec
-  "Number of decimal digits of precision to use when creating new bigfloats.
-One extra decimal digit in actual representation for rounding purposes.")
-
-(defmvar bigfloatzero '((bigfloat simp 56.) 0 0)
-  "Bigfloat representation of 0" in-core)
-
-(defmvar bigfloatone  '((bigfloat simp 56.) #.(expt 2 55.) 1)
-  "Bigfloat representation of 1" in-core)
-
-(defmvar bfhalf	      '((bigfloat simp 56.) #.(expt 2 55.) 0)
-  "Bigfloat representation of 1/2")
-
-(defmvar bfmhalf      '((bigfloat simp 56.) #.(- (expt 2 55.)) 0)
-  "Bigfloat representation of -1/2")
-
-(defmvar bigfloat%e   '((bigfloat simp 56.) 48968212118944587. 2)
-  "Bigfloat representation of %E")
-
-(defmvar bigfloat%pi  '((bigfloat simp 56.) 56593902016227522. 2)
-  "Bigfloat representation of %pi")
-
-(defmvar bigfloat%gamma '((bigfloat simp 56.) 41592772053807304. 0)
-  "Bigfloat representation of %gamma")
-
-(defmvar bigfloat_log2 '((bigfloat simp 56.) 49946518145322874. 0)
-  "Bigfloat representation of log(2)")
-
 ;; Internal specials
-
-;; Number of bits of precision in the mantissa of newly created bigfloats.
-;; FPPREC = ($FPPREC+1)*(Log base 2 of 10)
-
-(defvar fpprec)
 
 ;; FPROUND uses this to return a second value, i.e. it sets it before
 ;; returning.  This number represents the number of binary digits its input
@@ -104,13 +46,14 @@ One extra decimal digit in actual representation for rounding purposes.")
 
 (defvar *decfp nil)
 
+;; FIXME:  These don't appear to be used anywhere.  Remove these.
 (defvar max-bfloat-%pi bigfloat%pi)
 (defvar max-bfloat-%e  bigfloat%e)
 (defvar max-bfloat-%gamma bigfloat%gamma)
 (defvar max-bfloat-log2 bigfloat_log2)
 
 
-(declare-top (special *cancelled $float $bfloat $ratprint $ratepsilon $domain $m1pbranch))
+(declare-top (special *cancelled $bfloat))
 
 ;; Representation of a Bigfloat:  ((BIGFLOAT SIMP precision) mantissa exponent)
 ;; precision -- number of bits of precision in the mantissa.
@@ -176,7 +119,7 @@ One extra decimal digit in actual representation for rounding purposes.")
 	 (list '|0| '|.| '|0| '|b| '|0|))
 	(t ;; L IS ALWAYS POSITIVE FP NUMBER
 	 (let* ((extradigs (floor (1+ (quotient (integer-length (caddr l)) #.(/ (log 10.0) (log 2.0))))))
-		    (fpprec (+ extradigs (decimalsin (- (bigfloat-prec l) 2))))
+		(fpprec (+ extradigs (decimalsin (- (bigfloat-prec l) 2))))
 	        (*m 1)
 	        (*cancelled 0))
 	   (setq l
@@ -190,21 +133,30 @@ One extra decimal digit in actual representation for rounding purposes.")
 			       (fptimes* (intofp (car l)) (fpintexpt 2 expon of))))
 		   (incf fpprec (- extradigs))
 		   (list (fpround (car l)) (+ (- extradigs) *m (cadr l)))))
-       (let ((*print-base* 10.)
-             *print-radix*
-             (l1 nil))
-         (setq l1 (let*
-                    ((effective-printprec (if (or (= $fpprintprec 0) (> $fpprintprec fpprec)) fpprec $fpprintprec))
-                     (integer-to-explode (round (car l) (expt 10 (- fpprec effective-printprec))))
-                     (exploded-integer (explodec integer-to-explode)))
-                    (if $bftrunc
-                      (do ((l (nreverse exploded-integer) (cdr l)))
-                        ((not (eq '|0| (car l))) (nreverse l)))
-                      exploded-integer)))
-         (nconc (ncons (car l1)) (ncons '|.|)
-                (or (cdr l1) (ncons '|0|))
-                (ncons '|b|)
-                (explodec (1- (cadr l)))))))))
+	   (let ((*print-base* 10.)
+		 *print-radix*
+		 (expo-adjust 0)
+		 (l1 nil))
+             (setq l1 (let*
+			  ((effective-printprec (if (or (= $fpprintprec 0) (> $fpprintprec fpprec)) fpprec $fpprintprec))
+			   (integer-to-explode (round (car l) (expt 10 (- fpprec effective-printprec))))
+			   (exploded-integer (explodec integer-to-explode)))
+			;; If the rounded integer has more digits than
+			;; expected, we need to adjust the exponent by
+			;; this amount.  This also means we need to remove
+			;; these extra digits so that the result has the
+			;; desired number of digits.
+			(setf expo-adjust (- (length exploded-integer) effective-printprec))
+			(when (plusp expo-adjust)
+			  (setf exploded-integer (butlast exploded-integer expo-adjust)))
+			(if $bftrunc
+			    (do ((l (nreverse exploded-integer) (cdr l)))
+				((not (eq '|0| (car l))) (nreverse l)))
+			    exploded-integer)))
+             (nconc (ncons (car l1)) (ncons '|.|)
+                    (or (cdr l1) (ncons '|0|))
+                    (ncons '|b|)
+                    (explodec (+ (1- (cadr l)) expo-adjust))))))))
 
 ;; NOTE: This is a modified version of FORMAT-EXP-AUX from CMUCL to
 ;; support printing of bfloats.
@@ -223,7 +175,7 @@ One extra decimal digit in actual representation for rounding purposes.")
 	      (format nil "~{~A~}" (nthcdr (1+ marker) f)))))
 	 (bfloat-to-string (x fdigits scale)
 	   ;; Print the bfloat X with FDIGITS after the decimal
-	   ;; point. This means, roughtly, FDIGITS+1 significant
+	   ;; point. This means, roughly, FDIGITS+1 significant
 	   ;; digits.
 	   (let* (($fpprintprec (if fdigits
 				    (if (zerop fdigits)
@@ -498,7 +450,7 @@ One extra decimal digit in actual representation for rounding purposes.")
 	      (format nil "~{~A~}" (nthcdr (1+ marker) f)))))
 	 (bfloat-to-string (x fdigits)
 	   ;; Print the bfloat X with FDIGITS after the decimal
-	   ;; point. This means, roughtly, FDIGITS+1 significant
+	   ;; point. This means, roughly, FDIGITS+1 significant
 	   ;; digits.
 	   (let* (($fpprintprec (if fdigits
 				    (if (zerop fdigits)
@@ -689,7 +641,7 @@ One extra decimal digit in actual representation for rounding purposes.")
 
 (defun extreme-float-values (x)
   ;; BLECHH, I HATE ENUMERATING CASES. IS THERE A BETTER WAY ??
-  (case (type-of x)
+  (typecase x ;gcl returns an atomic list type with type-of
     (short-float (values most-negative-short-float most-positive-short-float))
     (single-float (values most-negative-single-float most-positive-single-float))
     (double-float (values most-negative-double-float most-positive-double-float))
@@ -707,7 +659,9 @@ One extra decimal digit in actual representation for rounding purposes.")
   (if (float-inf-p x)
     (merror (intl:gettext "bfloat: attempted conversion of floating-point infinity.~%")))
   (unless $float2bf
-    (mtell (intl:gettext "bfloat: converting float ~S to bigfloat.~%") x))
+    (let ((p (float-precision x)))
+      (if (< fpprec p)
+        (mtell (intl:gettext "bfloat: converting float ~S to bigfloat.~%") x))))
 
   ;; Need to check for zero because different lisps return different
   ;; values for integer-decode-float of a 0.  In particular CMUCL
@@ -763,18 +717,18 @@ One extra decimal digit in actual representation for rounding purposes.")
 (defun bcons (s)
   `((bigfloat simp ,fpprec) . ,s))
 
-(defmfun $bfloat (x)
+(defmfun ($bfloat :properties ((evfun t))) (x)
   (let (y)
     (cond ((bigfloatp x))
+	  #+nil
+          ((eq x '$%i)
+	   ;; Handle %i specially.
+	   (mul ($bfloat 1) '$%i))
 	  ((or (numberp x)
-	       (member x '($%e $%pi $%gamma) :test #'eq))
+	       (member x *builtin-numeric-constants* :test #'eq))
 	   (bcons (intofp x)))
 	  ((or (atom x) (member 'array (cdar x) :test #'eq))
-	   (if (eq x '$%phi)
-	       ($bfloat '((mtimes simp)
-			  ((rat simp) 1 2)
-			  ((mplus simp) 1 ((mexpt simp) 5 ((rat simp) 1 2)))))
-	       x))
+	   x)
 	  ((eq (caar x) 'mexpt)
 	   (if (equal (cadr x) '$%e)
 	       (*fpexp ($bfloat (caddr x)))
@@ -793,7 +747,21 @@ One extra decimal digit in actual representation for rounding purposes.")
 		      (setq y ($bfloat (logarc (caar x) y)))
 		      (if (free y '$%i)
 			  y (let ($ratprint) (fparcsimp ($rectform y)))))
-		     ((member (caar x) '(%cot %sec %csc) :test #'eq)
+                     ((eq (caar x) '%sec)
+                      ;; sec(x) = 1/cos(x).  Note that cos(x) /= 0 for
+                      ;; any bfloat value of x, so we should never
+                      ;; divide by zero.
+                      (invertbigfloat
+		       ($bfloat (list (ncons (safe-get (caar x) 'recip)) y))))
+		     ((member (caar x) '(%cot %csc) :test #'eq)
+                      ;; cot(x) = 1/tan(x) and csc(x) = 1/sin(x)
+                      ;;
+                      ;; But x = 0 is not in the domain, so check for
+                      ;; that and signal a domain error if so.  There
+                      ;; are no other bfloat values where tan(x) or
+                      ;; sin(x) is zero.
+                      (when (equal (second x) bigfloatzero)
+                        (domain-error (second x) (caar x)))
 		      (invertbigfloat
 		       ($bfloat (list (ncons (safe-get (caar x) 'recip)) y))))
 		     (t ($bfloat (exponentialize (caar x) y))))
@@ -947,14 +915,41 @@ One extra decimal digit in actual representation for rounding purposes.")
 	   (t
 	    ;; |x| <= 1/2.  Use Taylor series (A&S 4.4.42, first
 	    ;; formula).
+            ;;
+            ;; The n'th term is (-1)^n*x^(2*n+1)/(2*n+1).  We want to
+            ;; stop summing when the relative error between the n'th
+            ;; term and the first is small.  That is
+            ;; |x^(2*n+1)/(2*n+1)/x| <= tol. Hence, |x^(2*n)|/(2*n+1)
+            ;; <= tol.  Or |x^(2*n)| <= tol.  But we know |x| <= 1/2,
+            ;; so (1/2)^(2*n) <= tol.  Then n = -log2(tol)/2.  Since
+            ;; tol is basically 2^(-fpprec), n = fpprec/2.  But double
+            ;; it so that the testsuite passes without differences.
 	    (setq ans x x2 (fpminus (fptimes* x x)) term x)
-	    (do ((n 3 (+ n 2)))
-		((equal ans oans))
-	      (setq term (fptimes* term x2))
-	      (setq oans ans
-		    ans (fpplus ans (fpquotient term (intofp n)))))))
+            (let ((max-n fpprec))
+	      (do ((n 3 (+ n 2)))
+		  ((or (equal ans oans)
+                       (>= n max-n))
+                   #+nil
+                   (progn
+                     (format t "n max-n ~A ~A~%" n max-n)
+                     (format t "ans oans = ~A ~A~%" ans oans)))
+	        (setq term (fptimes* term x2))
+	        (setq oans ans
+		      ans (fpplus ans (fpquotient term (intofp n))))))))
      (return ans)))
 
+(defun big-float-atan (x &optional y)
+  "Compute atan(x+%i*y) when X and Y are bigfloat objects.  Y is optional." 
+  (cond (y
+         ;; atan(z) = -i*atanh(i*z)
+         (multiple-value-bind (u v)
+             (complex-atanh (neg y) x)
+           ;; -%i*(u+%i*v) = v - %i*u
+           (sub v
+                (mul '$%i u))))
+         (t
+         (bcons (fpatan (cdr x))))))
+      
 ;; atan(y/x) taking into account the quadrant.  (Also equal to
 ;; arg(x+%i*y).)
 (defun fpatan2 (y x)
@@ -988,15 +983,28 @@ One extra decimal digit in actual representation for rounding purposes.")
 		  (fpquotient (fpsin a t) (fpsin a nil)))
 		 (t (list '(%tan) a))))))
 
-;; Returns a list of a mantissa and an exponent.
+;; Returns a list of a mantissa and an exponent.  This function MUST
+;; recognize any symbol in *builtin-numeric-constants* and compute a
+;; bfloat value for it.
 (defun intofp (l)
-  (cond ((not (atom l)) ($bfloat l))
-	((floatp l) (floattofp l))
-	((equal 0 l) '(0 0))
-	((eq l '$%pi) (fppi))
-	((eq l '$%e) (fpe))
-	((eq l '$%gamma) (fpgamma))
-	(t (list (fpround l) (+ *m fpprec)))))
+  (cond ((not (atom l))
+         ($bfloat l))
+	((floatp l)
+         (floattofp l))
+	((equal 0 l)
+         '(0 0))
+	((eq l '$%pi)
+         (fppi))
+	((eq l '$%e)
+         (fpe))
+	((eq l '$%gamma)
+         (fpgamma))
+        ((eq l '$%catalan)
+         (fpcatalan))
+        ((eq l '$%phi)
+         (fpphi))
+	(t
+         (list (fpround l) (+ *m fpprec)))))
 
 ;; It seems to me that this function gets called on an integer
 ;; and returns the mantissa portion of the mantissa/exponent pair.
@@ -1162,49 +1170,44 @@ One extra decimal digit in actual representation for rounding purposes.")
 ;; See
 ;; https://sourceforge.net/p/maxima/bugs/1842/
 ;; for an explanation.
-(let ((table (make-hash-table)))
-  (defun fpe ()
-    (let ((value (gethash fpprec table)))
-      (if value
-	  value
-	  (setf (gethash fpprec table) (cdr (fpe1))))))
-  (defun fpe-table ()
-    table)
-  (defun clear_fpe_table ()
-    (clrhash table)))
-
-(let ((table (make-hash-table)))
-  (defun fppi ()
-    (let ((value (gethash fpprec table)))
-      (if value
-	  value
-	  (setf (gethash fpprec table) (cdr (fppi1))))))
-  (defun fppi-table ()
-    table)
-  (defun clear_fppi_table ()
-    (clrhash table)))
-
-(let ((table (make-hash-table)))
-  (defun fpgamma ()
-    (let ((value (gethash fpprec table)))
-      (if value
-	  value
-	  (setf (gethash fpprec table) (cdr (fpgamma1))))))
-  (defun fpgamma-table ()
-    table)
-  (defun clear_fpgamma_table ()
-    (clrhash table)))
-
-(let ((table (make-hash-table)))
-  (defun fplog2 ()
-    (let ((value (gethash fpprec table)))
-      (if value
-	  value
-	  (setf (gethash fpprec table) (comp-log2)))))
-  (defun fplog2-table ()
-    table)
-  (defun clear_fplog2_table ()
-    (clrhash table)))
+(macrolet
+    ((memoize (name compute-form)
+       ;; Macro creates a closure over a hash table containing the
+       ;; bigfloat values of a constant.  The key of the hash table is
+       ;; the number of bits of precision of the bigfloat.  This keeps
+       ;; Maxima from constantly computing the numeric value of a
+       ;; constant.  Once computed for a certain precision, we can
+       ;; just look up precomputed value.
+       ;;
+       ;; A function with the name NAME is created that looks up the
+       ;; value in hash table.  If it exists, return it.  If not
+       ;; update the hash table with a new value computed via
+       ;; COMPUTE-FORM.  This value is returned.
+       ;;
+       ;; For debugging, we define a function to get the hash table
+       ;; and a function to clear the hash table of all entries.
+       (let ((table-getter-name
+               (intern (concatenate 'string (string name) "-TABLE")))
+             (table-clearer-name
+               (intern (concatenate 'string
+                                    "CLEAR_" (string name) "_TABLE")))
+             (table-name (gensym (concatenate 'string "TABLE-" (string name)))))
+         `(let ((,table-name (make-hash-table)))
+            (defun ,name ()
+              (let ((value (gethash fpprec ,table-name)))
+                (if value
+	            value
+	            (setf (gethash fpprec ,table-name) ,compute-form))))
+            (defun ,table-getter-name ()
+              ,table-name)
+            (defun ,table-clearer-name ()
+              (clrhash ,table-name))))))
+  (memoize fpe (cdr (fpe1)))
+  (memoize fppi (cdr (fppi1)))
+  (memoize fpgamma (cdr (fpgamma1)))
+  (memoize fplog2 (comp-log2))
+  (memoize fpcatalan (cdr (fpcatalan1)))
+  (memoize fpphi (cdr (fpphi1))))
 
 ;; This doesn't need a hash table because there's never a problem with
 ;; using a high precision value and rounding to a lower precision
@@ -1611,6 +1614,30 @@ One extra decimal digit in actual representation for rounding purposes.")
     (values tt qq bb pp) ))
 ;;
 ;;----------------------------------------------------------------------------;;
+(defun fpcatalan1 ()
+  ;; Use 5 extra bits when computing %catalan.  Not exactly sure what
+  ;; is right value, but 5 seems good enough.
+  (let ((catalan (cdr (bigfloat::comp-catalan (+ fpprec 5)))))
+    ;; Round value that has extra bits to the current number of bits
+    ;; in a bfloat.
+    (bcons (list (fpround (car catalan))
+                 (cadr catalan)))))
+
+;;
+;;
+(defun fpphi1 ()
+  (let* ((phi (let ((fpprec (+ fpprec 2)))
+                ;; Use couple of extra bits to compute %phi =
+                ;; (1+sqrt(5))/2.
+                (cdr ($bfloat (div (add 1 (power 5 1//2))
+                                   2))))))
+    ;; Round value that has extra bits to the current number of bits
+    ;; in a bfloat.
+    (bcons (list (fpround (car phi))
+                 (cadr phi)))))
+    
+;;
+;;----------------------------------------------------------------------------;;
 
 
 (defun fpdifference (a b)
@@ -1790,7 +1817,7 @@ One extra decimal digit in actual representation for rounding purposes.")
 	(t a)))
 
 (defun fparcsimp (e)   ; needed for e.g. ASIN(.123567812345678B0) with
-  ;; FPPREC 16, to get rid of the miniscule imaginary
+  ;; FPPREC 16, to get rid of the minuscule imaginary
   ;; part of the a+bi answer.
   (if (and (mplusp e) (null (cdddr e))
 	   (mtimesp (caddr e)) (null (cdddr (caddr e)))
@@ -1814,7 +1841,7 @@ One extra decimal digit in actual representation for rounding purposes.")
 ;; BAD FEATURES:  IT IS NOT NECESSARY TO USE EXTRA PRECISION FOR, E.G.
 ;; SIN(PI/2), WHICH IS NOT NEAR ZERO, BUT  EXTRA
 ;; PRECISION IS USED SINCE IT IS NEEDED FOR COS(PI/2).
-;; PRECISION SEEMS TO BE 100% SATSIFACTORY FOR LARGE ARGUMENTS, E.G.
+;; PRECISION SEEMS TO BE 100% SATISFACTORY FOR LARGE ARGUMENTS, E.G.
 ;; SIN(31415926.0B0), BUT LESS SO FOR SIN(3.1415926B0).  EXPLANATION
 ;; NOT KNOWN.  (9/12/75  RJF)
 
@@ -2342,7 +2369,7 @@ One extra decimal digit in actual representation for rounding purposes.")
 ;; log(((1+x)^2+y^2)/((1-x)^2+y^2)) = log(1+4*x/((1-x)^2+y^2))
 ;;
 ;; When y = 0, Im atanh z = 1/2 (arg(1 + x) - arg(1 - x))
-;;                        = if x < -1 then %pi/2 else if x > 1 then -%pi/2 else <whatever>
+;;                        = if x < -1 then %pi/2 else if x > 1 then -%pi/2 else 0
 ;;
 ;; Otherwise, arg(1 - x + %i*(-y)) = - arg(1 - x + %i*y),
 ;; and Im atanh z = 1/2 (arg(1 + x + %i*y) + arg(1 - x + %i*y)).
@@ -2359,9 +2386,9 @@ One extra decimal digit in actual representation for rounding purposes.")
 	 (beta (if (minusp (car fpx))
 		   (fpminus (fpone))
 		   (fpone)))
-     (x-lt-minus-1 (mevalp `((mlessp) ,x -1)))
-     (x-gt-plus-1 (mevalp `((mgreaterp) ,x 1)))
-     (y-equals-0 (like y '((bigfloat) 0 0)))
+         (x-lt-minus-1 (mevalp `((mlessp) ,x -1)))
+         (x-gt-plus-1 (mevalp `((mgreaterp) ,x 1)))
+         (y-equals-0 (like y '((bigfloat) 0 0)))
 	 (x (fptimes* beta fpx))
 	 (y (fptimes* beta (fpminus fpy)))
 	 ;; Kahan has rho = 4/most-positive-float.  What should we do
@@ -2377,21 +2404,25 @@ One extra decimal digit in actual representation for rounding purposes.")
 				    (fpplus (fptimes* 1-x 1-x)
 					    t1^2)))
 	       (intofp 4)))
-     ;; If y = 0, then Im atanh z = %pi/2 or -%pi/2.
+         ;; If y = 0, then Im atanh z = %pi/2 or -%pi/2 or 0 depending
+         ;; on whether x > 1, x < -1 or |x| <=1, respectively.
+         ;;
 	 ;; Otherwise nu = 1/2*atan2(2*y,(1-x)*(1+x)-y^2)
 	 (nu (if y-equals-0
-	   ;; EXTRA FPMINUS HERE TO COUNTERACT FPMINUS IN RETURN VALUE
-	   (fpminus (if x-lt-minus-1
-			(cdr ($bfloat '((mquotient) $%pi 2)))
-			(if x-gt-plus-1
-			    (cdr ($bfloat '((mminus) ((mquotient) $%pi 2))))
-			    (merror "COMPLEX-ATANH: HOW DID I GET HERE?"))))
-	   (fptimes* (cdr bfhalf)
-		       (fpatan2 (fptimes* (intofp 2) y)
-				(fpdifference (fptimes* 1-x (fpplus (fpone) x))
-					      t1^2))))))
+	         ;; Extra fpminus here to counteract fpminus in return
+	         ;; value because we don't support signed zeroes.
+	         (fpminus (if x-lt-minus-1
+			      (cdr ($bfloat '((mquotient) $%pi 2)))
+			      (if x-gt-plus-1
+			          (cdr ($bfloat '((mminus) ((mquotient) $%pi 2))))
+			          '(0 0))))
+	         (fptimes* (cdr bfhalf)
+		           (fpatan2 (fptimes* (intofp 2) y)
+				    (fpdifference (fptimes* 1-x (fpplus (fpone) x))
+					          t1^2))))))
     (values (bcons (fptimes* beta eta))
-	;; WTF IS FPMINUS DOING HERE ??
+	    ;; Minus sign here because Kahan's algorithm assumed
+	    ;; signed zeroes, which we don't have in maxima.
 	    (bcons (fpminus (fptimes* beta nu))))))
 
 (defun big-float-atanh (x &optional y)
@@ -2495,6 +2526,5 @@ One extra decimal digit in actual representation for rounding purposes.")
 	    (bcons (fproot x 2))))))
 
 (eval-when
-    #+gcl (load eval)
-    #-gcl (:load-toplevel :execute)
+    (:load-toplevel :execute)
     (fpprec1 nil $fpprec))		; Set up user's precision

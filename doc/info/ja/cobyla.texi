@@ -47,10 +47,13 @@ the phrase Constrained Optimization BY Linear Approximations(線形近似によ�
 
 [2] M. J. D. Powell, "A direct search optimization method that models the objective and constraint functions by linear interpolation," in Advances in Optimization and Numerical Analysis, eds. S. Gomez and J.-P. Hennart (Kluwer Academic: Dordrecht, 1994), p. 51-67. 
 
-[3] M. J. D. Powell, "Direct search algorithms for optimization calculations," Acta Numerica 7, 287-336 (1998).  Also available as University of Cambridge, Department of Applied Mathematics and Theoretical Physics,  Numerical Analysis Group, Report NA1998/04 from @url{http://www.damtp.cam.ac.uk/user/na/reports.html}
+[3] M. J. D. Powell, "Direct search algorithms for optimization calculations," Acta Numerica 7, 287-336 (1998).  Also available as University of Cambridge, Department of Applied Mathematics and Theoretical Physics,  Numerical Analysis Group, Report NA1998/04 from @url{https://web.archive.org/web/20160607190705/http://www.damtp.cam.ac.uk:80/user/na/reports.html}
 
 @opencatbox
-@category{Numerical methods}  @category{Optimization} @category{Share packages} @category{Package cobyla}
+@category{Numerical methods}
+@category{Optimization}
+@category{Share packages}
+@category{Package cobyla}
 @closecatbox
 
 @node Functions and Variables for cobyla, Examples for cobyla, Introduction to cobyla, cobyla
@@ -122,7 +125,7 @@ RHOとSIGMAのそれぞれの新しい値が印字されます。
  @end enumerate
 @end enumerate
 
-@code{load(fmin_cobyla)}はこの関数をロードします。
+@code{load("fmin_cobyla")}はこの関数をロードします。
 
 @end deffn
 
@@ -136,7 +139,7 @@ RHOとSIGMAのそれぞれの新しい値が印字されます。
 
 更に知るには@code{fmin_cobyla}を参照してください。
 
-@code{load(fmin_cobyla)}はこの関数をロードします。
+@code{load("fmin_cobyla")}はこの関数をロードします。
 
 @end deffn
 
@@ -147,12 +150,12 @@ x1*x2を1-x1^2-x2^2 >= 0の条件で最小化します。
 理論的解はx1 = 1/sqrt(2), x2 = -1/sqrt(2)です。
 
 @c ===beg===
-@c load(fmin_cobyla)$
+@c load("fmin_cobyla")$
 @c fmin_cobyla(x1*x2, [x1, x2], [1,1], 
 @c             constraints = [x1^2+x2^2<=1], iprint=1);
 @c ===end===
 @example
-(%i1) load(fmin_cobyla)$
+(%i1) load("fmin_cobyla")$
 @group
 (%i2) fmin_cobyla(x1*x2, [x1, x2], [1,1], 
                   constraints = [x1^2+x2^2<=1], iprint=1);

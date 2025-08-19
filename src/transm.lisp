@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -18,7 +18,8 @@
   (setq definition
 	(if (and (null body) (symbolp lambda-list))
 	    `(def-same%tr ,name ,lambda-list)
-	    `(defun-prop (,name translate) ,lambda-list ,@body)))
+	    `(defun-prop (,name translate) ,lambda-list
+	       (block ,name ,@body))))
   `(eval-when (:compile-toplevel :execute :load-toplevel)
     ,definition))
 
@@ -45,7 +46,8 @@
 		      *in-compfile*
 		      *in-translate-file*
 		      *in-translate*
-		      *untranslated-functions-called*))
+		      *untranslated-functions-called*
+		      $tr_numer))
 
 (defmacro bind-transl-state (&rest forms)
   ;; this binds all transl state variables to NIL.
@@ -65,7 +67,8 @@
 	 *in-translate*
 	 *pre-transl-forms*
 	 ($tr_numer $tr_numer)
-	 defined_variables)
+	 defined_variables
+	 *local*)
     ,@forms))
 
 (defun tr-format (sstring &rest argl &aux strs)
@@ -83,10 +86,13 @@
        (bind-transl-state (translate-macexpr-toplevel (second u)))))
 
 (defmacro maset (val ar &rest inds)
-  `(progn
-    (when (symbolp ,ar)
-      (setf ,ar (make-equal-hash-table ,(if (cdr inds) t nil))))
-    (maset1 ,val ,ar ,@inds)))
+  (if (or (eq ar 'mqapply)
+          (and (consp ar) (member 'mqapply ar :test #'eq)))
+      `(marrayset ,val ,(car inds) ,@(cdr inds))
+      `(progn
+         (when (symbolp ,ar)
+           (setf ,ar (make-equal-hash-table ,(if (cdr inds) t nil))))
+         (maset1 ,val ,ar ,@inds))))
 
 (defmacro maref (ar &rest inds)
   (cond ((or (eql ar 'mqapply)(and (consp ar) (member 'mqapply ar :test #'eq)))

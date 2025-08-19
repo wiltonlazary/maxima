@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -27,7 +27,7 @@
 ;; and should not be called externally.
 
 ;; I have added the macro DEFGRAD as an interface to the $DERIVATIVE function
-;; for use by macsyma programers who want to do a bit of lisp programming. -GJC
+;; for use by macsyma programmers who want to do a bit of lisp programming. -GJC
 
 (defmacro =0 (x) `(equal ,x 0))
 (defmacro =1 (x) `(equal ,x 1))
@@ -90,6 +90,11 @@
       `(ncmuln (list ,@factors) t)))
 
 ;; (TAKE '(%TAN) X) = tan(x)
+;;
+;; Stavros says it's named take:
+;;   "Take as in 'take the sine of ...'.  call or apply might imply
+;;   it's a function call, which it isn't."
+;;
 ;; This syntax really loses.  Not only does this syntax lose, but this macro
 ;; has to look like a subr.  Otherwise, the definition would look like
 ;; (DEFMACRO TAKE ((NIL (OPERATOR)) . ARGS) ...)
@@ -98,23 +103,33 @@
 ;; (TAKE '(%SIN) A) --> (SIMP-%SIN (LIST '(%SIN) A) 1 T)
 
 (defmacro take (operator &rest args)
-; Cutting out the code which bypasses the simplifier.
-;  (let ((simplifier (and (not (atom operator))
-;			 (eq (car operator) 'quote)
-;			 (cdr (assoc (caadr operator) '((%atan  . simp-%atan)
-;							(%tan   . simp-%tan)
-;							(%log   . simpln)
-;							(mabs   . simpabs)
-;							(%sin   . simp-%sin)
-;							(%cos   . simp-%cos)
-;							($atan2 . simpatan2)) :test #'eq)))))
-;    (if simplifier
-;	`(,simplifier (list ,operator ,@args) 1 t)
 	`(simplifya (list ,operator ,@args) t))
 
 ;; take* does not assume that the arguments are simplified.
 (defmacro take* (operator &rest args)
   `(simplifya (list ,operator ,@args) nil))
+
+;; Like TAKE, but you only need to specify then name.  So
+;;
+;; (ftake name x y) => (take '(name) x y)
+;;
+;; The name should be the verb form, like %foo.
+(defmacro ftake (name &rest args)
+  `(simplifya (list (list ,name) ,@args)
+	      t))
+
+(defmacro ftake* (name &rest args)
+  `(simplifya (list (list ,name) ,@args)
+	      nil))
+
+;; Apply a function f to a list of its arguments 'args' and simplify the result. Assume
+;; that the list args is simplified.
+(defmacro fapply (f args)
+	`(simplifya (cons (list ,f) ,args) t))
+
+;; Same as fapply, but don't assume that the list of arguments is simplified.
+(defmacro fapply* (f args)
+	`(simplifya (cons (list ,f) ,args) nil))        
 
 (declaim (inline simplify))
 (defun simplify (x)

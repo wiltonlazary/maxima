@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -33,7 +33,7 @@
 
 (declare-top (special n nx ix))
 
-(declare-top (special $linenum $dispflag $linechar $wise $fool))
+(declare-top (special $wise $fool))
 
 (defvar *tmarrays* nil)
 
@@ -95,7 +95,7 @@
 ;; IS CONSTRUCTED BY EXTRACTING ROWS (K,K+1,K+2,...,N) AND COLUMNS SPECIFIED BY
 ;; INDEX. N IS THE DIMENSION OF THE ORIGINAL MATRIX A2.  WHEN TMINOR IS USED
 ;; FOR LINEAR EQUATION PROGRAM, JRIGHT SPECIFIES A COLUMN OF THE CONSTANT
-;; MATRIX WHICH IS PLUGED INTO AN IX-TH COLUMN OF THE COEFFICIENT MATRIX FOR
+;; MATRIX WHICH IS PLUGGED INTO AN IX-TH COLUMN OF THE COEFFICIENT MATRIX FOR
 ;; ABTAINING IX-TH UNKNOWN. IN OTHER WORDS, JRIGHT SPECIFIES JRIGHT-TH
 ;; EQUATION.
 
@@ -149,7 +149,7 @@
 	(return (list (car ind) (nconc subindx (cdr ind))))
 	(setq subindx (nconc subindx (list (car ind)))))))
 
-(declare-top (special vlist varlist genvar))
+(declare-top (special vlist))
 
 (defun tmratconv (bbb n m)
   (prog (ccc)
@@ -404,7 +404,7 @@
 ;;((I1 I2 ...) (J1 J2...) ...) WHERE (I1
 ;;I2 ..) SHOWS THE ROWS WHICH BELONGS TO
 ;;THE FIRST BLOCK, AND SO ON.  THE ROWS
-;;SHOUD BE REORDERED IN THIS ORDER. THE
+;;SHOULD BE REORDERED IN THIS ORDER. THE
 ;;COLUMNS ARE NOT CHANGED. IT RETURNS NIL
 ;;IF A3 IS "OBVIOUSLY" SINGULAR.
 
@@ -472,9 +472,9 @@
 ;; 	   (STORE (B (ROW P) (COL I)) NIL)
 ;; 	   (STORE (B (ROW I) (COL P)) NIL)))
 
-;;TMPIVOT-ISOLATE CARRIES OUT PIVOTTING
+;;TMPIVOT-ISOLATE CARRIES OUT PIVOTING
 ;;SO THAT THE ALL DIAGONAL ELEMENTS ARE
-;;NONZERO. THIS GARANTIES WE HAVE MAXIMUM
+;;NONZERO. THIS GUARANTEES WE HAVE MAXIMUM
 ;;NUMBER OF BLOCKS ISOLATED.
 
 (defun tmpivot-isolate (k)
@@ -639,10 +639,10 @@
 ;;(L1 L2 ... LM) WHERE M IS THE NUMBER OF
 ;;BLOCKS (STRONGLY CONNECTED SUBGRAPHS),
 ;;AND L1 L2 ... ARE LIST OF ROW AND
-;;COLUMN NUBERS WHICH BELONG TO EACH
+;;COLUMN NUMBERS WHICH BELONG TO EACH
 ;;BLOCKS. THE LIST LOOKS LIKE ((R1 C1)
 ;;(R2 C2) ...) WHERE R R'S ARE ROWS AND
-;;C'S ARE COLUMMS.
+;;C'S ARE COLUMNS.
 
 (defun tmlattice (a3 xrow xcol n)
   (setq a3 (get-array-pointer a3))
@@ -759,7 +759,7 @@
       (return nil))))
 
 ;;UNPIVOT IS USED IN PAUL WANG'S PROGRAM
-;;TO RECOVER THE PIVOTTING. TO GET THE
+;;TO RECOVER THE PIVOTING. TO GET THE
 ;;INVERSE OF A, PAUL'S PROGRAM COMPUTES
 ;;THE INVERSE OF U*A*V BECAUSE OF
 ;;BLOCKING. LET THE INVERSE Y. THEN

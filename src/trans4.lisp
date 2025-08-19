@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -46,7 +46,7 @@
   (cond ((eq (car form) '$fixnum)
 	 `($number . (factorial ,(cdr form))))
 	(t
-	 `($any . (simplify  `((mfactorial) ,,(cdr form)))))))
+	 `($any . (simplify (list '(mfactorial) ,(cdr form)))))))
 
 (defun yuk-su-meta-prop (f form)
   (let ((meta-prop-p t)

@@ -30,17 +30,15 @@
   (and (consp x) (consp (car x)) (equal (caar x) 'mexpt)))
 
 (eval-when
-    #+gcl (load compile eval)
-    #-gcl (:load-toplevel :compile-toplevel :execute)
-    ($load "polynomialp")
-    ($load "sqfr")
-    ($load "spherodialwave")
-    ($load "kummer")
-    ($load "extrabessel")
-    ($load "lazysolver")
-    ($load "gauss")
-    ($load "functs") ;; wronskian
-    ($load "odeutils"))
+    (:load-toplevel :compile-toplevel :execute)
+  ($load "sqfr")
+  ($load "spherodialwave")
+  ($load "kummer")
+  ($load "extrabessel")
+  ($load "lazysolver")
+  ($load "gauss")
+  ($load "functs") ;; wronskian
+  ($load "odeutils"))
 
 (defun ode-polynomialp (p x)
   ($polynomialp p `((mlist) ,x) `((lambda) ((mlist) s) ($freeof ,x s))))
@@ -82,7 +80,7 @@
 	  (t (merror "'odelin' doesn't handle DEs with order ~:M" (- n 1))))))
 
 (defun odelin-order-one (cfs x)
-  (fss-cleanup (take '($set) ($exp ($integrate (div (car cfs) (cadr cfs)) x))) x))
+  (fss-cleanup (take '($set) ($exp ($integrate (mul -1 (div (car cfs) (cadr cfs))) x))) x))
 
 (defun expunge-const-factors (e x)
   (let ((acc 1))

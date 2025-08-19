@@ -23,10 +23,11 @@ lisp構造として実装されます。
 @code{draw_graph}はMaxima @code{draw}パッケージに基づいています。
 
 @code{graphs}パッケージを使うには、
-最初に@code{load(graphs)}でロードしてください。
+最初に@code{load("graphs")}でロードしてください。
 
 @opencatbox
-@category{Share packages} @category{Package graphs}
+@category{Share packages}
+@category{Package graphs}
 @closecatbox
 
 @node Functions and Variables for graphs, , Introduction to graphs, graphs
@@ -54,12 +55,12 @@ lisp構造として実装されます。
 
 例1: 頂点3つの循環を生成する。
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : create_graph([1,2,3], [[1,2], [2,3], [1,3]])$
 @c print_graph(g)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : create_graph([1,2,3], [[1,2], [2,3], [1,3]])$
 (%i3) print_graph(g)$
 Graph on 3 vertices with 3 edges.
@@ -71,13 +72,13 @@ Adjacencies:
 
 例2: 辺の重みを持つ頂点3つの循環を生成する。
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : create_graph([1,2,3], [[[1,2], 1.0], [[2,3], 2.0],
 @c                           [[1,3], 3.0]])$
 @c print_graph(g)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : create_graph([1,2,3], [[[1,2], 1.0], [[2,3], 2.0],
                           [[1,3], 3.0]])$
 (%i3) print_graph(g)$
@@ -90,7 +91,7 @@ Adjacencies:
 
 例3: 有向グラフを生成する:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c d : create_graph(
 @c         [1,2,3,4], 
 @c         [
@@ -101,7 +102,7 @@ Adjacencies:
 @c print_graph(d)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) d : create_graph(
         [1,2,3,4],
         [
@@ -127,7 +128,8 @@ Adjacencies:
 グラフ@var{g}のコピーを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -136,12 +138,12 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : circulant_graph(10, [1,3])$
 @c print_graph(g)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : circulant_graph(10, [1,3])$
 (%i3) print_graph(g)$
 Graph on 10 vertices with 20 edges.
@@ -159,7 +161,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -167,7 +170,8 @@ Adjacencies:
 Clebschグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -175,7 +179,8 @@ Clebschグラフを返します。
 グラフ @var{g}の補グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -183,7 +188,8 @@ Clebschグラフを返します。
 @var{n+m}この頂点上の完全2部グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -191,7 +197,8 @@ Clebschグラフを返します。
 @var{n}この頂点上の完全グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -199,7 +206,8 @@ Clebschグラフを返します。
 @var{n}個の頂点上の有向グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -207,7 +215,8 @@ Clebschグラフを返します。
 @var{n}この頂点上の閉路を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -215,7 +224,8 @@ Clebschグラフを返します。
 立方八面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -223,7 +233,8 @@ Clebschグラフを返します。
 @var{n}次元立方体を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -231,7 +242,8 @@ Clebschグラフを返します。
 十二面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -239,7 +251,8 @@ Clebschグラフを返します。
 @var{n}個の頂点上の空グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -248,19 +261,20 @@ Clebschグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c f5 : flower_snark(5)$
 @c chromatic_index(f5);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) f5 : flower_snark(5)$
 (%i3) chromatic_index(f5);
 (%o3)                           4
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -268,7 +282,8 @@ Clebschグラフを返します。
 隣接行列 @var{A}で表現されるグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -276,7 +291,8 @@ Clebschグラフを返します。
 Fruchtグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -285,30 +301,32 @@ Fruchtグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c grid : graph_product(path_graph(3), path_graph(4))$
 @c draw_graph(grid)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) grid : graph_product(path_graph(3), path_graph(4))$
 (%i3) draw_graph(grid)$
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
 @ifhtml
-@image{figures/graphs01,6cm}
+@image{@value{figuresfolder}/graphs01,6cm}
 @end ifhtml
 
 @deffn {関数} graph_union (@var{g1}, @var{g1})
 グラフ@var{g1}と @var{g2}の和を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -316,7 +334,8 @@ Fruchtグラフを返します。
 @var{n x m}グリッドを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -324,7 +343,8 @@ Fruchtグラフを返します。
 大菱形二十・十二面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -332,7 +352,8 @@ Fruchtグラフを返します。
 大斜方立方八面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -340,7 +361,8 @@ Fruchtグラフを返します。
 Grotzchグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -348,7 +370,8 @@ Grotzchグラフを返します。
 Heawoodグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -356,7 +379,8 @@ Heawoodグラフを返します。
 二十面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -364,7 +388,8 @@ Heawoodグラフを返します。
 二十・十二面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -373,14 +398,14 @@ Heawoodグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c V : [0,1,2,3,4]$
 @c g : induced_subgraph(V, p)$
 @c print_graph(g)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) V : [0,1,2,3,4]$
 (%i4) g : induced_subgraph(V, p)$
@@ -395,7 +420,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -403,7 +429,8 @@ Adjacencies:
 グラフ @var{g}の折れ線グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -424,13 +451,13 @@ Adjacencies:
 
 例 1:
 @c ===beg===
-@c load(graphs)$
+@c load("graphs")$
 @c g : make_graph(powerset({1,2,3,4,5}, 2), disjointp)$
 @c is_isomorphic(g, petersen_graph());
 @c get_vertex_label(1, g);
 @c ===end===
 @example
-(%i1) load(graphs)$
+(%i1) load("graphs")$
 (%i2) g : make_graph(powerset(@{1,2,3,4,5@}, 2), disjointp)$
 (%i3) is_isomorphic(g, petersen_graph());
 (%o3)                         true
@@ -440,14 +467,14 @@ Adjacencies:
 
 例 2:
 @c ===beg===
-@c load(graphs)$
+@c load("graphs")$
 @c f(i, j) := is (mod(j, i)=0)$
 @c g : make_graph(20, f, directed=true)$
 @c out_neighbors(4, g);
 @c in_neighbors(18, g);
 @c ===end===
 @example
-(%i1) load(graphs)$
+(%i1) load("graphs")$
 (%i2) f(i, j) := is (mod(j, i)=0)$
 (%i3) g : make_graph(20, f, directed=true)$
 (%i4) out_neighbors(4, g);
@@ -457,7 +484,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -465,7 +493,8 @@ Adjacencies:
 グラフ @var{g}のMycielskiグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -473,7 +502,8 @@ Adjacencies:
 頂点も辺も持たないグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -481,7 +511,8 @@ Adjacencies:
 @var{n}個の頂点上の有向道を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -489,7 +520,8 @@ Adjacencies:
 @var{n}個の頂点上の道を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -500,7 +532,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 @code{n=5}と @code{d=2}です。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -509,7 +542,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 辺それぞれは確率 @var{p}で存在します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -518,7 +552,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 弧それぞれは確率 @var{p}で存在します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -529,7 +564,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 @var{d}のデフォルト値は @code{d=3}です。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -538,7 +574,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 辺それぞれは確率 @var{p}で存在します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -546,7 +583,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 @var{n}個の頂点とランダムな @var{m}個の辺上のランダムグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -558,13 +596,13 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c [net, s, t] : random_network(50, 0.2, 10.0);
 @c max_flow(net, s, t)$
 @c first(%);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) [net, s, t] : random_network(50, 0.2, 10.0);
 (%o2)                   [DIGRAPH, 50, 51]
 (%i3) max_flow(net, s, t)$
@@ -573,7 +611,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -581,7 +620,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 @var{n}個の頂点上のランダムなトーナメントを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -589,7 +629,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 @var{n}個の頂点上のランダムな木を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -597,7 +638,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 斜方二十・十二面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -605,7 +647,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 斜方立方八面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -613,7 +656,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 変形立方体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -621,7 +665,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 変形十二面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -629,7 +674,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 切頂六面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -637,7 +683,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 切頂十二面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -646,7 +693,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 切頂二十面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -655,7 +703,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 切頂四面体グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -663,7 +712,8 @@ Petersenグラフ @var{P_@{n,d@}}を返します。
 Tutteグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -671,7 +721,8 @@ Tutteグラフを返します。
 有向グラフ @var{g}の台グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -679,7 +730,8 @@ Tutteグラフを返します。
 @var{n+1}個の頂点上の車輪グラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - constructions}
+@category{Package graphs}
+@category{Package graphs - constructions}
 @closecatbox
 @end deffn
 
@@ -690,12 +742,12 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c c5 : cycle_graph(4)$
 @c adjacency_matrix(c5);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) c5 : cycle_graph(4)$
 (%i3) adjacency_matrix(c5);
                          [ 0  1  0  1 ]
@@ -708,7 +760,8 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -717,11 +770,11 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c average_degree(grotzch_graph());
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) average_degree(grotzch_graph());
                                40
 (%o2)                          --
@@ -729,7 +782,8 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -738,7 +792,7 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : create_graph(
 @c             [1,2,3,4,5,6,7],
 @c             [
@@ -748,7 +802,7 @@ Tutteグラフを返します。
 @c biconnected_components(g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : create_graph(
             [1,2,3,4,5,6,7],
             [
@@ -760,11 +814,12 @@ Tutteグラフを返します。
 @end example
 
 @ifhtml
-@image{figures/graphs13,6cm}
+@image{@value{figuresfolder}/graphs13,6cm}
 @end ifhtml
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -774,13 +829,13 @@ Tutteグラフを返します。
 例:
 
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c h : heawood_graph()$
 @c [A,B]:bipartition(h);
 @c draw_graph(h, show_vertices=A, program=circular)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) h : heawood_graph()$
 (%i3) [A,B]:bipartition(h);
 (%o3)  [[8, 12, 6, 10, 0, 2, 4], [13, 5, 11, 7, 9, 1, 3]]
@@ -788,12 +843,13 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
 @ifhtml
-@image{figures/graphs02,6cm}
+@image{@value{figuresfolder}/graphs02,6cm}
 @end ifhtml
 
 @deffn {関数} chromatic_index (@var{gr})
@@ -801,19 +857,20 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c chromatic_index(p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) chromatic_index(p);
 (%o3)                           4
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -822,12 +879,12 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c chromatic_number(cycle_graph(5));
 @c chromatic_number(cycle_graph(6));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) chromatic_number(cycle_graph(5));
 (%o2)                           3
 (%i3) chromatic_number(cycle_graph(6));
@@ -835,7 +892,8 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -845,14 +903,14 @@ Tutteグラフを返します。
 例:
 
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : create_graph(3, [[[0,1], 1.5], [[1,2], 1.3]])$
 @c get_edge_weight([0,1], g);
 @c clear_edge_weight([0,1], g)$
 @c get_edge_weight([0,1], g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : create_graph(3, [[[0,1], 1.5], [[1,2], 1.3]])$
 (%i3) get_edge_weight([0,1], g);
 (%o3)                          1.5
@@ -862,7 +920,8 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -871,14 +930,14 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : create_graph([[0,"Zero"], [1, "One"]], [[0,1]])$
 @c get_vertex_label(0, g);
 @c clear_vertex_label(0, g);
 @c get_vertex_label(0, g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : create_graph([[0,"Zero"], [1, "One"]], [[0,1]])$
 (%i3) get_vertex_label(0, g);
 (%o3)                         Zero
@@ -889,7 +948,8 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -898,19 +958,20 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g: graph_union(cycle_graph(5), path_graph(4))$
 @c connected_components(g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g: graph_union(cycle_graph(5), path_graph(4))$
 (%i3) connected_components(g);
 (%o3)            [[1, 2, 3, 4, 0], [8, 7, 6, 5]]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -919,17 +980,18 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c diameter(dodecahedron_graph());
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) diameter(dodecahedron_graph());
 (%o2)                           5
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -941,14 +1003,14 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c [ch_index, col] : edge_coloring(p);
 @c assoc([0,1], col);
 @c assoc([0,5], col);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) [ch_index, col] : edge_coloring(p);
 (%o3) [4, [[[0, 5], 3], [[5, 7], 1], [[0, 1], 1], [[1, 6], 2], 
@@ -962,7 +1024,8 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -971,17 +1034,18 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c degree_sequence(random_graph(10, 0.4));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) degree_sequence(random_graph(10, 0.4));
 (%o2)            [2, 2, 2, 2, 2, 2, 3, 3, 3, 3]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -991,7 +1055,8 @@ Tutteグラフを返します。
 @code{min_edge_cut}も参照してください。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1000,17 +1065,18 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c edges(complete_graph(4));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) edges(complete_graph(4));
 (%o2)   [[2, 3], [1, 3], [1, 2], [0, 3], [0, 2], [0, 1]]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1025,14 +1091,14 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c c5 : cycle_graph(5)$
 @c get_edge_weight([1,2], c5);
 @c set_edge_weight([1,2], 2.0, c5);
 @c get_edge_weight([1,2], c5);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) c5 : cycle_graph(5)$
 (%i3) get_edge_weight([1,2], c5);
 (%o3)                           1
@@ -1043,7 +1109,8 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1052,19 +1119,20 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : create_graph([[0,"Zero"], [1, "One"]], [[0,1]])$
 @c get_vertex_label(0, g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : create_graph([[0,"Zero"], [1, "One"]], [[0,1]])$
 (%i3) get_vertex_label(0, g);
 (%o3)                         Zero
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1073,12 +1141,12 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c graph_charpoly(p, x), factor;
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) graph_charpoly(p, x), factor;
                                    5        4
@@ -1086,7 +1154,8 @@ Tutteグラフを返します。
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1095,19 +1164,20 @@ Tutteグラフを返します。
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : grid_graph(5,5)$
 @c graph_center(g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : grid_graph(5,5)$
 (%i3) graph_center(g);
 (%o3)                         [12]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1118,19 +1188,20 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c graph_eigenvalues(p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) graph_eigenvalues(p);
 (%o3)               [[3, - 2, 1], [1, 4, 5]]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1139,19 +1210,20 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : grid_graph(5,5)$
 @c graph_periphery(g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : grid_graph(5,5)$
 (%i3) graph_periphery(g);
 (%o3)                    [24, 20, 4, 0]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1160,19 +1232,20 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c graph_size(p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) graph_size(p);
 (%o3)                          15
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1181,19 +1254,20 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c graph_order(p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) graph_order(p);
 (%o3)                          10
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1202,19 +1276,20 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : heawood_graph()$
 @c girth(g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : heawood_graph()$
 (%i3) girth(g);
 (%o3)                           6
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1224,13 +1299,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c c : cube_graph(3)$
 @c hc : hamilton_cycle(c);
 @c draw_graph(c, show_edges=vertices_to_cycle(hc))$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) c : cube_graph(3)$
 (%i3) hc : hamilton_cycle(c);
 (%o3)              [7, 3, 2, 6, 4, 0, 1, 5, 7]
@@ -1238,12 +1313,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
 @ifhtml
-@image{figures/graphs03,6cm}
+@image{@value{figuresfolder}/graphs03,6cm}
 @end ifhtml
 
 @deffn {関数} hamilton_path (@var{gr})
@@ -1252,13 +1328,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c hp : hamilton_path(p);
 @c draw_graph(p, show_edges=vertices_to_path(hp))$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) hp : hamilton_path(p);
 (%o3)            [0, 5, 7, 2, 1, 6, 8, 3, 4, 9]
@@ -1266,12 +1342,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
 @ifhtml
-@image{figures/graphs04,6cm}
+@image{@value{figuresfolder}/graphs04,6cm}
 @end ifhtml
 
 @deffn {関数} isomorphism (@var{gr1}, @var{gr2})
@@ -1281,12 +1358,12 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c clk5:complement_graph(line_graph(complete_graph(5)))$
 @c isomorphism(clk5, petersen_graph());
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) clk5:complement_graph(line_graph(complete_graph(5)))$
 (%i3) isomorphism(clk5, petersen_graph());
 (%o3) [9 -> 0, 2 -> 1, 6 -> 2, 5 -> 3, 0 -> 4, 1 -> 5, 3 -> 6, 
@@ -1294,7 +1371,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1303,13 +1381,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : path_digraph(3)$
 @c in_neighbors(2, p);
 @c out_neighbors(2, p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : path_digraph(3)$
 (%i3) in_neighbors(2, p);
 (%o3)                          [1]
@@ -1318,7 +1396,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1328,12 +1407,12 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_biconnected(cycle_graph(5));
 @c is_biconnected(path_graph(5));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_biconnected(cycle_graph(5));
 (%o2)                         true
 (%i3) is_biconnected(path_graph(5));
@@ -1341,7 +1420,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1351,12 +1431,12 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_bipartite(petersen_graph());
 @c is_bipartite(heawood_graph());
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_bipartite(petersen_graph());
 (%o2)                         false
 (%i3) is_bipartite(heawood_graph());
@@ -1364,7 +1444,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1374,17 +1455,18 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_connected(graph_union(cycle_graph(4), path_graph(3)));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_connected(graph_union(cycle_graph(4), path_graph(3)));
 (%o2)                         false
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1394,12 +1476,12 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_digraph(path_graph(5));
 @c is_digraph(path_digraph(5));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_digraph(path_graph(5));
 (%o2)                         false
 (%i3) is_digraph(path_digraph(5));
@@ -1407,7 +1489,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1417,7 +1500,7 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c c4 : cycle_graph(4)$
 @c is_edge_in_graph([2,3], c4);
 @c is_edge_in_graph([3,2], c4);
@@ -1425,7 +1508,7 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @c is_edge_in_graph([3,2], cycle_digraph(4));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) c4 : cycle_graph(4)$
 (%i3) is_edge_in_graph([2,3], c4);
 (%o3)                         true
@@ -1438,7 +1521,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1448,12 +1532,12 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_graph(path_graph(5));
 @c is_graph(path_digraph(5));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_graph(path_graph(5));
 (%o2)                         true
 (%i3) is_graph(path_digraph(5));
@@ -1461,7 +1545,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1471,12 +1556,12 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_graph_or_digraph(path_graph(5));
 @c is_graph_or_digraph(path_digraph(5));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_graph_or_digraph(path_graph(5));
 (%o2)                         true
 (%i3) is_graph_or_digraph(path_digraph(5));
@@ -1484,7 +1569,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1497,19 +1583,20 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c clk5:complement_graph(line_graph(complete_graph(5)))$
 @c is_isomorphic(clk5, petersen_graph());
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) clk5:complement_graph(line_graph(complete_graph(5)))$
 (%i3) is_isomorphic(clk5, petersen_graph());
 (%o3)                         true
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1523,13 +1610,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_planar(dodecahedron_graph());
 @c is_planar(petersen_graph());
 @c is_planar(petersen_graph(10,2));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_planar(dodecahedron_graph());
 (%o2)                         true
 (%i3) is_planar(petersen_graph());
@@ -1539,7 +1626,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1549,12 +1637,12 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_sconnected(cycle_digraph(5));
 @c is_sconnected(path_digraph(5));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_sconnected(cycle_digraph(5));
 (%o2)                         true
 (%i3) is_sconnected(path_digraph(5));
@@ -1562,7 +1650,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1572,13 +1661,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c c4 : cycle_graph(4)$
 @c is_vertex_in_graph(0, c4);
 @c is_vertex_in_graph(6, c4);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) c4 : cycle_graph(4)$
 (%i3) is_vertex_in_graph(0, c4);
 (%o3)                         true
@@ -1587,7 +1676,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1597,12 +1687,12 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c is_tree(random_tree(4));
 @c is_tree(graph_union(random_tree(4), random_tree(5)));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) is_tree(random_tree(4));
 (%o2)                         true
 (%i3) is_tree(graph_union(random_tree(4), random_tree(5)));
@@ -1610,7 +1700,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1619,11 +1710,11 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c laplacian_matrix(cycle_graph(5));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) laplacian_matrix(cycle_graph(5));
                    [  2   - 1   0    0   - 1 ]
                    [                         ]
@@ -1637,7 +1728,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1646,19 +1738,20 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : random_graph(100, 0.5)$
 @c max_clique(g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : random_graph(100, 0.5)$
 (%i3) max_clique(g);
 (%o3)          [6, 12, 31, 36, 52, 59, 62, 63, 80]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1667,13 +1760,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : random_graph(100, 0.02)$
 @c max_degree(g);
 @c vertex_degree(95, g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : random_graph(100, 0.02)$
 (%i3) max_degree(g);
 (%o3)                        [6, 79]
@@ -1682,7 +1775,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1695,7 +1789,7 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c net : create_graph(
 @c   [1,2,3,4,5,6],
 @c   [[[1,2], 1.0],
@@ -1714,7 +1808,7 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @c fl;
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) net : create_graph(
   [1,2,3,4,5,6],
   [[[1,2], 1.0],
@@ -1738,7 +1832,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1747,13 +1842,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c d : dodecahedron_graph()$
 @c mi : max_independent_set(d);
 @c draw_graph(d, show_vertices=mi)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) d : dodecahedron_graph()$
 (%i3) mi : max_independent_set(d);
 (%o3)             [0, 3, 5, 9, 10, 11, 18, 19]
@@ -1761,12 +1856,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
 @ifhtml
-@image{figures/graphs05,6cm}
+@image{@value{figuresfolder}/graphs05,6cm}
 @end ifhtml
 
 @deffn {関数} max_matching (@var{gr})
@@ -1774,13 +1870,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c d : dodecahedron_graph()$
 @c m : max_matching(d);
 @c draw_graph(d, show_edges=m)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) d : dodecahedron_graph()$
 (%i3) m : max_matching(d);
 (%o3) [[5, 7], [8, 9], [6, 10], [14, 19], [13, 18], [12, 17], 
@@ -1789,12 +1885,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
 @ifhtml
-@image{figures/graphs06,6cm}
+@image{@value{figuresfolder}/graphs06,6cm}
 @end ifhtml
 
 @deffn {関数} min_degree (@var{gr})
@@ -1802,13 +1899,13 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : random_graph(100, 0.1)$
 @c min_degree(g);
 @c vertex_degree(21, g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : random_graph(100, 0.1)$
 (%i3) min_degree(g);
 (%o3)                        [3, 49]
@@ -1817,7 +1914,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1827,7 +1925,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 @code{edge_connectivity}も参照してください。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1835,7 +1934,8 @@ maxima @code{eigenvalue}関数と同じフォーマットで固有値を返し�
 グラフ @var{gr}の最小頂点被覆を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1846,7 +1946,8 @@ Returns the minimum vertex cut in the graph
 @code{vertex_connectivity}も参照してください。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1855,25 +1956,26 @@ Returns the minimum vertex cut in the graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : graph_product(path_graph(10), path_graph(10))$
 @c t : minimum_spanning_tree(g)$
 @c draw_graph(g, show_edges=edges(t))$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : graph_product(path_graph(10), path_graph(10))$
 (%i3) t : minimum_spanning_tree(g)$
 (%i4) draw_graph(g, show_edges=edges(t))$
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
 @ifhtml
-@image{figures/graphs07,6cm}
+@image{@value{figuresfolder}/graphs07,6cm}
 @end ifhtml
 
 @deffn {関数} neighbors (@var{v}, @var{gr})
@@ -1881,19 +1983,20 @@ Returns the minimum vertex cut in the graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : petersen_graph()$
 @c neighbors(3, p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : petersen_graph()$
 (%i3) neighbors(3, p);
 (%o3)                       [4, 8, 2]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1902,13 +2005,13 @@ Returns the minimum vertex cut in the graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : graph_product(cycle_graph(4), cycle_graph(7))$
 @c girth(g);
 @c odd_girth(g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : graph_product(cycle_graph(4), cycle_graph(7))$
 (%i3) girth(g);
 (%o3)                           4
@@ -1917,7 +2020,8 @@ Returns the minimum vertex cut in the graph
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1926,13 +2030,13 @@ Returns the minimum vertex cut in the graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : path_digraph(3)$
 @c in_neighbors(2, p);
 @c out_neighbors(2, p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : path_digraph(3)$
 (%i3) in_neighbors(2, p);
 (%o3)                          [1]
@@ -1941,7 +2045,8 @@ Returns the minimum vertex cut in the graph
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1957,18 +2062,19 @@ Returns the minimum vertex cut in the graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c planar_embedding(grid_graph(3,3));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) planar_embedding(grid_graph(3,3));
 (%o2) [[3, 6, 7, 8, 5, 2, 1, 0], [4, 3, 0, 1], [3, 4, 7, 6], 
                                       [8, 7, 4, 5], [1, 2, 5, 4]]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -1977,7 +2083,7 @@ Returns the minimum vertex cut in the graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c c5 : cycle_graph(5)$
 @c print_graph(c5)$
 @c dc5 : cycle_digraph(5)$
@@ -1985,7 +2091,7 @@ Returns the minimum vertex cut in the graph
 @c out_neighbors(0, dc5);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) c5 : cycle_graph(5)$
 (%i3) print_graph(c5)$
 Graph on 5 vertices with 5 edges.
@@ -2018,17 +2124,18 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c radius(dodecahedron_graph());
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) radius(dodecahedron_graph());
 (%o2)                           5
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2037,14 +2144,14 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : create_graph([1, 2], [[[1,2], 1.2]])$
 @c get_edge_weight([1,2], g);
 @c set_edge_weight([1,2], 2.1, g);
 @c get_edge_weight([1,2], g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : create_graph([1, 2], [[[1,2], 1.2]])$
 (%i3) get_edge_weight([1,2], g);
 (%o3)                          1.2
@@ -2055,7 +2162,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2065,14 +2173,14 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : create_graph([[1, "One"], [2, "Two"]], [[1,2]])$
 @c get_vertex_label(1, g);
 @c set_vertex_label(1, "oNE", g);
 @c get_vertex_label(1, g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : create_graph([[1, "One"], [2, "Two"]], [[1,2]])$
 (%i3) get_vertex_label(1, g);
 (%o3)                          One
@@ -2083,7 +2191,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2092,13 +2201,13 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c d : dodecahedron_graph()$
 @c path : shortest_path(0, 7, d);
 @c draw_graph(d, show_edges=vertices_to_path(path))$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) d : dodecahedron_graph()$
 (%i3) path : shortest_path(0, 7, d);
 (%o3)                   [0, 1, 19, 13, 7]
@@ -2106,12 +2215,13 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
 @ifhtml
-@image{figures/graphs08,6cm}
+@image{@value{figuresfolder}/graphs08,6cm}
 @end ifhtml
 
 @deffn {関数} shortest_weighted_path (@var{u}, @var{v}, @var{gr})
@@ -2123,13 +2233,13 @@ Adjacencies:
 例:
 
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g: petersen_graph(20, 2)$
 @c for e in edges(g) do set_edge_weight(e, random(1.0), g)$
 @c shortest_weighted_path(0, 10, g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g: petersen_graph(20, 2)$
 (%i3) for e in edges(g) do set_edge_weight(e, random(1.0), g)$
 (%i4) shortest_weighted_path(0, 10, g);
@@ -2137,7 +2247,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2146,13 +2257,13 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c t : random_tournament(4)$
 @c strong_components(t);
 @c vertex_out_degree(3, t);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) t : random_tournament(4)$
 (%i3) strong_components(t);
 (%o3)                 [[1], [0], [2], [3]]
@@ -2161,7 +2272,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2173,7 +2285,7 @@ Returns a topological sorting of the vertices of a directed graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g:create_graph(
 @c          [1,2,3,4,5],
 @c          [
@@ -2184,7 +2296,7 @@ Returns a topological sorting of the vertices of a directed graph
 @c topological_sort(g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g:create_graph(
          [1,2,3,4,5],
          [
@@ -2197,7 +2309,8 @@ Returns a topological sorting of the vertices of a directed graph
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2207,7 +2320,8 @@ Returns a topological sorting of the vertices of a directed graph
 @code{min_vertex_cut}も参照してください。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2215,7 +2329,8 @@ Returns a topological sorting of the vertices of a directed graph
 グラフ @var{gr}の頂点 @var{v}の次数を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2224,13 +2339,13 @@ Returns a topological sorting of the vertices of a directed graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c d : dodecahedron_graph()$
 @c vertex_distance(0, 7, d);
 @c shortest_path(0, 7, d);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) d : dodecahedron_graph()$
 (%i3) vertex_distance(0, 7, d);
 (%o3)                           4
@@ -2239,7 +2354,8 @@ Returns a topological sorting of the vertices of a directed graph
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2249,19 +2365,20 @@ Returns a topological sorting of the vertices of a directed graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g:cycle_graph(7)$
 @c vertex_eccentricity(0, g);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g:cycle_graph(7)$
 (%i3) vertex_eccentricity(0, g);
 (%o3)                           3
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2270,14 +2387,14 @@ Returns a topological sorting of the vertices of a directed graph
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p5 : path_digraph(5)$
 @c print_graph(p5)$
 @c vertex_in_degree(4, p5);
 @c in_neighbors(4, p5);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p5 : path_digraph(5)$
 (%i3) print_graph(p5)$
 Digraph on 5 vertices with 4 arcs.
@@ -2294,7 +2411,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2303,13 +2421,13 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c t : random_tournament(10)$
 @c vertex_out_degree(0, t);
 @c out_neighbors(0, t);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) t : random_tournament(10)$
 (%i3) vertex_out_degree(0, t);
 (%o3)                           2
@@ -2318,7 +2436,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2327,17 +2446,18 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c vertices(complete_graph(4));
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) vertices(complete_graph(4));
 (%o2)                     [3, 2, 1, 0]
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2348,12 +2468,12 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p:petersen_graph()$
 @c vertex_coloring(p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p:petersen_graph()$
 (%i3) vertex_coloring(p);
 (%o3) [3, [[0, 2], [1, 3], [2, 2], [3, 3], [4, 1], [5, 3], 
@@ -2361,7 +2481,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2370,7 +2491,7 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c wiener_index(dodecahedron_graph());
 @c ===end===
 @example
@@ -2379,7 +2500,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - properties}
+@category{Package graphs}
+@category{Package graphs - properties}
 @closecatbox
 @end deffn
 
@@ -2390,14 +2512,14 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c p : path_graph(4)$
 @c neighbors(0, p);
 @c add_edge([0,3], p);
 @c neighbors(0, p);
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) p : path_graph(4)$
 (%i3) neighbors(0, p);
 (%o3)                          [1]
@@ -2408,7 +2530,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - modifications}
+@category{Package graphs}
+@category{Package graphs - modifications}
 @closecatbox
 @end deffn
 
@@ -2417,13 +2540,13 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : empty_graph(3)$
 @c add_edges([[0,1],[1,2]], g)$
 @c print_graph(g)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : empty_graph(3)$
 (%i3) add_edges([[0,1],[1,2]], g)$
 (%i4) print_graph(g)$
@@ -2435,7 +2558,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - modifications}
+@category{Package graphs}
+@category{Package graphs - modifications}
 @closecatbox
 @end deffn
 
@@ -2444,13 +2568,13 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : path_graph(2)$
 @c add_vertex(2, g)$
 @c print_graph(g)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : path_graph(2)$
 (%i3) add_vertex(2, g)$
 (%i4) print_graph(g)$
@@ -2462,7 +2586,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - modifications}
+@category{Package graphs}
+@category{Package graphs - modifications}
 @closecatbox
 @end deffn
 
@@ -2470,7 +2595,8 @@ Adjacencies:
 リスト @var{v_list}の中の頂点すべてをグラフ @var{gr}に加えます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - modifications}
+@category{Package graphs}
+@category{Package graphs - modifications}
 @closecatbox
 @end deffn
 
@@ -2484,13 +2610,13 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g : empty_graph(4)$
 @c connect_vertices(0, [1,2,3], g)$
 @c print_graph(g)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g : empty_graph(4)$
 (%i3) connect_vertices(0, [1,2,3], g)$
 (%i4) print_graph(g)$
@@ -2503,7 +2629,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - modifications}
+@category{Package graphs}
+@category{Package graphs - modifications}
 @closecatbox
 @end deffn
 
@@ -2512,7 +2639,7 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g: create_graph(
 @c       8, [[0,3],[1,3],[2,3],[3,4],[4,5],[4,6],[4,7]])$
 @c print_graph(g)$
@@ -2520,7 +2647,7 @@ Adjacencies:
 @c print_graph(g)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g: create_graph(
       8, [[0,3],[1,3],[2,3],[3,4],[4,5],[4,6],[4,7]])$
 (%i3) print_graph(g)$
@@ -2548,7 +2675,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - modifications}
+@category{Package graphs}
+@category{Package graphs - modifications}
 @closecatbox
 @end deffn
 
@@ -2557,13 +2685,13 @@ Adjacencies:
 
 例:
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c c3 : cycle_graph(3)$
 @c remove_edge([0,1], c3)$
 @c print_graph(c3)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) c3 : cycle_graph(3)$
 (%i3) remove_edge([0,1], c3)$
 (%i4) print_graph(c3)$
@@ -2575,7 +2703,8 @@ Adjacencies:
 @end example
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - modifications}
+@category{Package graphs}
+@category{Package graphs - modifications}
 @closecatbox
 @end deffn
 
@@ -2596,7 +2725,8 @@ Adjacencies:
 オプションのコメントはファイルの頭に加えられます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2605,7 +2735,8 @@ Adjacencies:
 DIMACSフォーマットのファイル @var{fl}からグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2614,7 +2745,8 @@ DIMACSフォーマットのファイル @var{fl}からグラフを返します�
 文字列 @var{str}にgraph6フォーマットで符号化されたグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2623,7 +2755,8 @@ DIMACSフォーマットのファイル @var{fl}からグラフを返します�
 グラフ @var{gr}をgraph6フォーマットに符号化した文字列を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2634,7 +2767,8 @@ graph6フォーマットでエクスポートします。
 
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2643,7 +2777,8 @@ graph6フォーマットでエクスポートします。
 graph6フォーマットのファイル @var{fl}からグラフのリストを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2652,7 +2787,8 @@ graph6フォーマットのファイル @var{fl}からグラフのリストを�
 文字列 @var{str}にsparse6フォーマットで符号化されたグラフを返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2661,7 +2797,8 @@ graph6フォーマットのファイル @var{fl}からグラフのリストを�
 グラフ @var{gr}をsparse6フォーマットに符号化した文字列を返します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2671,7 +2808,8 @@ graph6フォーマットのファイル @var{fl}からグラフのリストを�
 ファイル @var{fl}にsparse6フォーマットでエクスポートします。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2681,7 +2819,8 @@ sparse6フォーマットのファイル @var{fl}からグラフのリストを�
 
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - io}
+@category{Package graphs}
+@category{Package graphs - io}
 @closecatbox
 @end deffn
 
@@ -2701,7 +2840,7 @@ graphvizを別途インストールしなければいけません。
 例 1:
 
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g:grid_graph(10,10)$
 @c m:max_matching(g)$
 @c draw_graph(g,
@@ -2710,7 +2849,7 @@ graphvizを別途インストールしなければいけません。
 @c    vertex_size=0)$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g:grid_graph(10,10)$
 (%i3) m:max_matching(g)$
 (%i4) draw_graph(g,
@@ -2720,13 +2859,13 @@ graphvizを別途インストールしなければいけません。
 @end example
 
 @ifhtml
-@image{figures/graphs09,6cm}
+@image{@value{figuresfolder}/graphs09,6cm}
 @end ifhtml
 
 例 2:
 
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g:create_graph(16,
 @c     [
 @c      [0,1],[1,3],[2,3],[0,2],[3,4],[2,4],
@@ -2745,7 +2884,7 @@ graphvizを別途インストールしなければいけません。
 @c     )$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g:create_graph(16,
     [
      [0,1],[1,3],[2,3],[0,2],[3,4],[2,4],
@@ -2765,13 +2904,13 @@ graphvizを別途インストールしなければいけません。
 @end example
 
 @ifhtml
-@image{figures/graphs10,6cm}
+@image{@value{figuresfolder}/graphs10,6cm}
 @end ifhtml
 
 例 3:
 
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c g:create_graph(16,
 @c     [
 @c      [0,1],[1,3],[2,3],[0,2],[3,4],[2,4],
@@ -2792,7 +2931,7 @@ graphvizを別途インストールしなければいけません。
 @c     )$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) g:create_graph(16,
     [
      [0,1],[1,3],[2,3],[0,2],[3,4],[2,4],
@@ -2814,13 +2953,13 @@ graphvizを別途インストールしなければいけません。
 @end example
 
 @ifhtml
-@image{figures/graphs11,6cm}
+@image{@value{figuresfolder}/graphs11,6cm}
 @end ifhtml
 
 例 4:
 
 @c ===beg===
-@c load (graphs)$
+@c load ("graphs")$
 @c net : create_graph(
 @c     [0,1,2,3,4,5],
 @c     [
@@ -2844,7 +2983,7 @@ graphvizを別途インストールしなければいけません。
 @c     )$
 @c ===end===
 @example
-(%i1) load (graphs)$
+(%i1) load ("graphs")$
 (%i2) net : create_graph(
     [0,1,2,3,4,5],
     [
@@ -2869,18 +3008,18 @@ graphvizを別途インストールしなければいけません。
 @end example
 
 @ifhtml
-@image{figures/graphs12,6cm}
+@image{@value{figuresfolder}/graphs12,6cm}
 @end ifhtml
 
 例 5:
 
 @c ===beg===
-@c load(graphs)$
+@c load("graphs")$
 @c g: petersen_graph(20, 2);
 @c draw_graph(g, redraw=true, program=planar_embedding);
 @c ===end===
 @example
-(%i1) load(graphs)$
+(%i1) load("graphs")$
 (%i2) g: petersen_graph(20, 2);
 (%o2)                         GRAPH
 (%i3) draw_graph(g, redraw=true, program=planar_embedding);
@@ -2888,19 +3027,19 @@ graphvizを別途インストールしなければいけません。
 @end example
 
 @ifhtml
-@image{figures/graphs14,6cm}
+@image{@value{figuresfolder}/graphs14,6cm}
 @end ifhtml
 
 例 6:
 
 @c ===beg===
-@c load(graphs)$
+@c load("graphs")$
 @c t: tutte_graph();
 @c draw_graph(t, redraw=true, 
 @c               fixed_vertices=[1,2,3,4,5,6,7,8,9]);
 @c ===end===
 @example
-(%i1) load(graphs)$
+(%i1) load("graphs")$
 (%i2) t: tutte_graph();
 (%o2)                         GRAPH
 (%i3) draw_graph(t, redraw=true, 
@@ -2909,7 +3048,7 @@ graphvizを別途インストールしなければいけません。
 @end example
 
 @ifhtml
-@image{figures/graphs15,6cm}
+@image{@value{figuresfolder}/graphs15,6cm}
 @end ifhtml
 
 @opencatbox
@@ -2924,7 +3063,8 @@ graphvizを別途インストールしなければいけません。
 @code{draw_graph}プログラムです。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -2934,7 +3074,8 @@ graphvizを別途インストールしなければいけません。
 もし @var{true}なら頂点のidが表示されます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -2944,7 +3085,8 @@ graphvizを別途インストールしなければいけません。
 もし @var{true}なら頂点のラベルが表示されます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -2955,7 +3097,8 @@ graphvizを別途インストールしなければいけません。
 @code{left}, @code{center}, @code{right}であり得ます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -2965,7 +3108,8 @@ graphvizを別途インストールしなければいけません。
 もし @var{true}なら辺の重みを表示します。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -2977,7 +3121,8 @@ graphvizを別途インストールしなければいけません。
 @code{draw}パッケージの @var{point_type}オプションを参照してください。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -2985,7 +3130,8 @@ graphvizを別途インストールしなければいけません。
 頂点のサイズ。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -2993,7 +3139,8 @@ graphvizを別途インストールしなければいけません。
 頂点を表示するのに使う色。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3003,7 +3150,8 @@ graphvizを別途インストールしなければいけません。
 選択された頂点を異なる色を使って表示。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3014,7 +3162,8 @@ graphvizを別途インストールしなければいけません。
 @code{draw}パッケージの @var{point_type}オプションを参照してください。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3022,7 +3171,8 @@ graphvizを別途インストールしなければいけません。
 @var{show_vertices}内の頂点のサイズ
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3030,7 +3180,8 @@ graphvizを別途インストールしなければいけません。
 @var{show_vertices}リスト内の頂点を表示するのに使う色。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3041,7 +3192,8 @@ graphvizを別途インストールしなければいけません。
 分割内のそれぞれのリストの頂点は異なる色で描画されます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3051,7 +3203,8 @@ graphvizを別途インストールしなければいけません。
 @var{vertex_coloring}が返すようなフォーマットで指定されなければいけません。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3059,7 +3212,8 @@ graphvizを別途インストールしなければいけません。
 辺を表示するのに使われる色。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3067,7 +3221,8 @@ graphvizを別途インストールしなければいけません。
 辺の幅。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3076,7 +3231,8 @@ graphvizを別途インストールしなければいけません。
 @code{draw}パッケージの@var{line_type}オプションを参照してください。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3084,7 +3240,8 @@ graphvizを別途インストールしなければいけません。
 異なる色を使ってリスト @var{e_list}内で指定された辺を表示する。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3092,7 +3249,8 @@ graphvizを別途インストールしなければいけません。
 @var{show_edges}リスト内の辺を表示するのに使う色。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3100,7 +3258,8 @@ graphvizを別途インストールしなければいけません。
 @var{show_edges}内の辺の幅。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3109,7 +3268,8 @@ graphvizを別途インストールしなければいけません。
 @code{draw}パッケージの@var{line_type}オプションを参照してください。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3118,7 +3278,8 @@ graphvizを別途インストールしなければいけません。
 分割内のそれぞれのリストの辺は異なる色を使って描画されます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3128,7 +3289,8 @@ graphvizを別途インストールしなければいけません。
 関数 @var{edge_coloring}が返すようなフォーマットで指定しなければいけません。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3139,7 +3301,8 @@ graphvizを別途インストールしなければいけません。
 たとえ位置がグラフの以前の描画から保存されていても頂点位置が再計算されます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3149,7 +3312,8 @@ graphvizを別途インストールしなければいけません。
 (有向グラフの)弧に表示される矢印の角度。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3159,7 +3323,8 @@ graphvizを別途インストールしなければいけません。
 (有向グラフの)弧に表示される矢印の長さ。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3169,7 +3334,8 @@ graphvizを別途インストールしなければいけません。
 バネ埋め込みグラフ描画アルゴリズムでの繰り返し回数
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3178,7 +3344,8 @@ graphvizを別途インストールしなければいけません。
 (@code{draw}パッケージの @var{terminal}オプションを参照してください。)
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3186,7 +3353,8 @@ graphvizを別途インストールしなければいけません。
 端末がスクリーンでないなら、描画のファイル名。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3199,7 +3367,8 @@ graphvizプログラム (dot, neato, twopi, circ, fdp)の1つ,
 固定位置の頂点の集合が @var{fixed_vertices}オプションで指定可能です。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 
@@ -3208,7 +3377,8 @@ graphvizプログラム (dot, neato, twopi, circ, fdp)の1つ,
 @code{program=spring_embedding}の時、使うことができます。
 
 @opencatbox
-@category{Package graphs} @category{Package graphs - draw_graphs options}
+@category{Package graphs}
+@category{Package graphs - draw_graphs options}
 @closecatbox
 @end defvr
 

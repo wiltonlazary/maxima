@@ -107,7 +107,7 @@ mtrig - subst(x=-5.6, append(trig,htrig));
 /* Test half angles */
 
 /* Because we have generalized the half-angle-transformation, we have to
-   restrict the arguments to a positive intervall (0,%pi). We take not %pi
+   restrict the arguments to a positive interval (0,%pi). We take not %pi
    but the number 3 as upper limit, because of problems with assume. */
 
 (assume(x>0,x<3),halfangles : true, 0);
@@ -650,3 +650,30 @@ pderivop(f,1)(y)^2;
 (kill (foo, x),
  trigsimp (foo(1)(x)^3));
 foo(1)(x)^3;
+
+/* maxima-discuss 2023-02-17: "acos(1) works; acos(1.0) doesn't !"
+ * bug appears to be specific to GCL versions < 2.14.
+ * more extensive tests for special cases would be terrific.
+ */
+
+[acos(1), acos(1.0), acos(1b0)];
+[0, 0.0, 0b0];
+
+/* Bug 4346:  csc(0b0) produces a funny message
+ * Test that the error message has the expected value
+ */
+block([errormsg: false], errcatch(csc(0b0)), error);
+["~A: argument ~:M isn't in the domain of ~A.", csc, 0.0b0, csc];
+
+block([errormsg: false], errcatch(cot(0b0)), error);
+["~A: argument ~:M isn't in the domain of ~A.", cot, 0.0b0, cot];
+
+/* Bug 4461: funny error message from sec(%pi/2)
+ *
+ * Test that the error messages are reasonable and correct now.
+ */
+block([errormsg: false], errcatch(sec(%pi/2)), error);
+["~A: argument ~:M isn't in the domain of ~A.",sec,%pi/2,sec];
+
+block([errormsg: false], errcatch(cot(%pi)), error);
+["~A: argument ~:M isn't in the domain of ~A.",cot,%pi,cot];

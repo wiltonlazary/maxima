@@ -1,6 +1,6 @@
 ;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -14,45 +14,20 @@
 
 (load-macsyma-macros mrgmac)
 
-(declare-top (special success $props))
+(declare-top (special success))
 
 (defvar *debug-compar* nil
   "Enables debugging code for this file.")
 
 (defvar %initiallearnflag)
 
-(defvar $context '$global
-  "Whenever a user assumes a new fact, it is placed in the context
-named as the current value of the variable CONTEXT.  Similarly, FORGET
-references the current value of CONTEXT.  To add or DELETE a fact from a
-different context, one must bind CONTEXT to the intended context and then
-perform the desired additions or deletions.  The context specified by the
-value of CONTEXT is automatically activated.  All of MACSYMA's built-in
-relational knowledge is contained in the default context GLOBAL.")
-
-(defvar $contexts '((mlist) $global)
-  "A list of the currently active contexts.")
-
-(defvar $activecontexts '((mlist))
-  "A list of the currently activated contexts")
-
-(defmvar sign-imag-errp t
-  "If T errors out in case COMPAR meets up with an imaginary quantity.
-	  If NIL THROWs in that case."
-  no-reset)
-
 (defmvar complexsign nil
   "If T, COMPAR attempts to work in a complex mode.
 	  This scheme is only very partially developed at this time."
   no-reset)
 
-(defvar *complexsign* nil
-  "If T, COMPAR works in a complex mode.")
-
-(defmvar $prederror nil)
 (defmvar $signbfloat t)
 (defmvar $askexp)
-(defmvar limitp)
 (defmvar $assume_pos nil)
 (defmvar $assume_pos_pred nil)
 
@@ -72,6 +47,9 @@ relational knowledge is contained in the default context GLOBAL.")
 
 (defvar $useminmax t)
 
+;; Remove this (nil'ed out) function after a while.  We should be
+;; using POWER instead of POW.
+#+nil
 (defmacro pow (&rest x)
   `(power ,@x))
 
@@ -323,7 +301,6 @@ relational knowledge is contained in the default context GLOBAL.")
 
 (defun maybe-simplifya-protected (x z)
   (let ((errcatch t) ($errormsg nil))
-    (declare (special errcatch $errormsg))
     (ignore-errors (maybe-simplifya x z) x)))
 
 (defun simp-$is (x yy z)
@@ -334,9 +311,7 @@ relational knowledge is contained in the default context GLOBAL.")
 	`((,(caar x) simp) ,a))))
 
 (defmspec $is (form)
-  (unless (= 1 (length (rest form)))
-    (merror (intl:gettext "is() expects a single argument. Found ~A")
-            (length (rest form))))
+  (oneargcheck form)
   (destructuring-bind (answer patevalled)
       (mevalp1 (cadr form))
     (cond ((member answer '(t nil) :test #'eq) answer)
@@ -345,6 +320,7 @@ relational knowledge is contained in the default context GLOBAL.")
 	  (t '$unknown))))
 
 (defmspec $maybe (form)
+  (oneargcheck form)
   (let* ((pat (cadr form))
 	 (x (let (($prederror nil)) (mevalp1 pat)))
 	 (ans (car x)))
@@ -439,9 +415,8 @@ relational knowledge is contained in the default context GLOBAL.")
 		(t `((mnot simp) ,arg)))))))
 
 ;; =>* N.B. *<=
-;; The function IS-BOOLE-CHECK, used by the translator, depends
-;; on some stuff in here.  Check it out in the transl module
-;; ACALL before proceeding.
+;; The translator depends on some stuff in here.
+;; Check it out in the transl module ACALL before proceeding.
 
 (defun mevalp (pat)
   (let* ((x (mevalp1 pat))
@@ -457,13 +432,13 @@ relational knowledge is contained in the default context GLOBAL.")
     (setq ans
           (cond ((and (not (atom pat))
                       (member (caar pat) '(mnot mand mor) :test #'eq))
-                 (cond ((eq 'mnot (caar pat)) (is-mnot (cadr pat)))
-                       ((eq 'mand (caar pat)) (is-mand (cdr pat)))
-                       (t (is-mor (cdr pat)))))
+                 (cond ((eq 'mnot (caar pat)) (is-mnot #'mevalp (cadr pat)))
+                       ((eq 'mand (caar pat)) (is-mand #'mevalp (cdr pat)))
+                       (t (is-mor #'mevalp (cdr pat)))))
                 ((atom (setq patevalled (specrepcheck (meval pat))))
                  patevalled)
                 ((member (caar patevalled) '(mnot mand mor) :test #'eq)
-                 (mevalp1 patevalled))
+                 (return-from mevalp1 (mevalp1 patevalled)))
                 (t
                  (mevalp2 patevalled
                           (caar patevalled)
@@ -485,8 +460,8 @@ relational knowledge is contained in the default context GLOBAL.")
 (defun pre-err (pat)
   (merror (intl:gettext "Unable to evaluate predicate ~M") pat))
 
-(defun is-mnot (pred)
-  (setq pred (mevalp pred))
+(defun is-mnot (pred-eval pred)
+  (setq pred (funcall pred-eval pred))
   (cond ((eq t pred) nil)
 	((not pred))
 	(t (pred-reverse pred))))
@@ -494,24 +469,24 @@ relational knowledge is contained in the default context GLOBAL.")
 (defun pred-reverse (pred)
   (take '(mnot) pred))
  
-(defun is-mand (pl)
+(defun is-mand (pred-eval pl)
   (do ((dummy)
        (npl))
       ((null pl) (cond ((null npl))
 		       ((null (cdr npl)) (car npl))
 		       (t (cons '(mand) (nreverse npl)))))
-    (setq dummy (mevalp (car pl)) pl (cdr pl))
+    (setq dummy (funcall pred-eval (car pl)) pl (cdr pl))
     (cond ((eq t dummy))
 	  ((null dummy) (return nil))
 	  (t (push dummy npl)))))
 
-(defun is-mor (pl)
+(defun is-mor (pred-eval pl)
   (do ((dummy)
        (npl))
       ((null pl) (cond ((null npl) nil)
 		       ((null (cdr npl)) (car npl))
 		       (t (cons '(mor) (nreverse npl)))))
-    (setq dummy (mevalp (car pl)) pl (cdr pl))
+    (setq dummy (funcall pred-eval (car pl)) pl (cdr pl))
     (cond ((eq t dummy) (return t))
 	  ((null dummy))
 	  (t (push dummy npl)))))
@@ -564,7 +539,12 @@ relational knowledge is contained in the default context GLOBAL.")
 	((eq (caar pat) 'mleqp) (daddgq flag (sub (caddr pat) (cadr pat))))
 	((eq (caar pat) 'mlessp) (daddgr flag (sub (caddr pat) (cadr pat))))
 	(flag (true* (munformat pat)))
-	(t (untrue (munformat pat)))))
+	(t 
+      (cond
+        ((eq (caar pat) '$kind)
+         (unkind (second pat) (third pat)))
+        (t (untrue (munformat pat))))
+      pat)))
 
 ;;; When abs(x)<a is in the pattern, where a is a positive expression,
 ;;; then learn x<a and -x<a too. The additional facts are put into the context
@@ -768,7 +748,7 @@ relational knowledge is contained in the default context GLOBAL.")
 
 ;;; $csign works like $sign but switches the sign-functions into a complex
 ;;; mode. In complex mode complex and imaginary expressions give the results
-;;; imagarinary or complex.
+;;; imaginary or complex.
 
 (defmfun $csign (z)
   (let ((*complexsign* t)
@@ -896,13 +876,17 @@ relational knowledge is contained in the default context GLOBAL.")
 	((eq '$pnz x) '$pnz)	 ;COMPLEX expression encountered here.
 	(t '$zero)))
 
+;; When asksign is called on an expression that involves a symbol with the
+;; internal property and Maxima's sign function can only determine that the
+;; sign is pnz, nz, or similar, asksign1 returns '$pnz. This causes asksign01,
+;; and ultimately $asksign, to return zero. Lesson: be circumspect about calling
+;; asksign on an expression that might involve a symbol with the internal property.
 (defun asksign1 ($askexp)
   (let ($radexpand)
-    (declare (special $radexpand))
     (sign1 $askexp))
   (cond
-    ((has-int-symbols $askexp) '$pnz)
     ((member sign '($pos $neg $zero $imaginary) :test #'eq) sign)
+    ((has-int-symbols $askexp) '$pnz)
     (t
      (let ((domain sign) (squared nil))
        (cond
@@ -913,7 +897,7 @@ relational knowledge is contained in the default context GLOBAL.")
          (t
           (if minus (setq sign (flip sign)))
           (setq $askexp
-                (lmul (nconc odds (mapcar #'(lambda (l) (pow l 2)) evens))))))
+                (lmul (nconc odds (mapcar #'(lambda (l) (power l 2)) evens))))))
        (setq sign (cdr (assol $askexp *local-signs*)))
        (ensure-sign $askexp domain squared)))))
 
@@ -1079,7 +1063,7 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 	   (setq b (specrepcheck b))
 	   (cond ((or (like a b)) (not (member a indefinites)))
 		 ((or (member a indefinites) (member b indefinites)
-		      (member a infinities) (member b infinities)) nil)
+		      (member a *infinities*) (member b *infinities*)) nil)
 		 ((and (symbolp a) (or (eq t a) (eq nil a) (get a 'sysconst))
 		       (symbolp b) (or (eq t b) (eq nil b) (get b 'sysconst))) nil)
 		 ((or (mbagp a) (mrelationp a) (mbagp b) (mrelationp b))
@@ -1171,26 +1155,44 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
       (if (every #'(lambda (s) (eq nil (meqp bk s))) a) (throw 'done t)))
     (throw 'done nil)))
 
+;; MGRP-GENERAL applies when sign of A - B (possibly complex) makes sense.
+
+(defun mgrp-general (a b)
+  (setq a (sub a b))
+  (let ((sgn (csign a)))
+    (cond ((eq sgn '$pos) t)
+	  ((eq sgn t) nil) ;; csign thinks a - b isn't real
+	  ((member sgn '($neg $zero $nz) :test #'eq) nil)
+	  (t `((mgreaterp) ,a 0)))))
+
 (defun mgrp (a b)
-  (let ((*complexsign* t))
-    (setq a (sub a b))
-    (let ((sgn (csign a)))
-      (cond ((eq sgn '$pos) t)
-	    ((eq sgn t) nil) ;; csign thinks a - b isn't real
-	    ((member sgn '($neg $zero $nz) :test #'eq) nil)
-	    (t `((mgreaterp) ,a 0))))))
+  (cond
+    ((or (stringp a) (stringp b))
+     (if (and (stringp a) (stringp b)) (not (null (string< b a)))
+       (when $prederror
+         (merror (intl:gettext "greater than: arguments are incomparable; found: ~:M, ~:M") a b))))
+     (t (mgrp-general a b))))
 
 (defun mlsp (x y)
   (mgrp y x))
 
+;; MGQP-GENERAL applies when sign of A - B (possibly complex) makes sense.
+
+(defun mgqp-general (a b)
+  (setq a (sub a b))
+  (let ((sgn (csign a)))
+    (cond ((member sgn '($pos $zero $pz) :test #'eq) t)
+	  ((eq sgn t) nil) ;; csign thinks a - b isn't real
+	  ((eq sgn '$neg) nil)
+	  (t `((mgeqp) ,a 0)))))
+
 (defun mgqp (a b)
-  (let ((*complexsign* t))
-    (setq a (sub a b))
-    (let ((sgn (csign a)))
-      (cond ((member sgn '($pos $zero $pz) :test #'eq) t)
-	    ((eq sgn t) nil) ;; csign thinks a - b isn't real
-	    ((eq sgn '$neg) nil)
-	    (t `((mgeqp) ,a 0))))))
+  (cond
+    ((or (stringp a) (stringp b))
+     (if (and (stringp a) (stringp b)) (not (null (string<= b a)))
+       (when $prederror
+         (merror (intl:gettext "greater than or equal: arguments are incomparable; found: ~:M, ~:M") a b))))
+     (t (mgqp-general a b))))
 
 (defun mnqp (x y)
   (let ((b (meqp x y)))
@@ -1207,13 +1209,13 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 (defun c-$pos (o e)
   (cond ((null o) (list '(mnot) (list '($equal) (lmul e) 0)))
 	((null e) (list '(mgreaterp) (lmul o) 0))
-	(t (setq e (mapcar #'(lambda (l) (pow l 2)) e))
+	(t (setq e (mapcar #'(lambda (l) (power l 2)) e))
 	   (list '(mgreaterp) (lmul (nconc o e)) 0))))
 
 (defun c-$pz (o e)
   (cond ((null o) (list '(mnot) (list '($equal) (lmul e) 0)))
 	((null e) (list '(mgeqp) (lmul o) 0))
-	(t (setq e (mapcar #'(lambda (l) (pow l 2)) e))
+	(t (setq e (mapcar #'(lambda (l) (power l 2)) e))
 	   (list '(mgeqp) (lmul (nconc o e)) 0))))
 
 (defun sign* (x)
@@ -1221,7 +1223,7 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
     (sign1 x)))
 
 (defun infsimp* (e)
-  (if (or (atom e) (and (free e '$inf) (free e '$minf)))
+  (if (or ($mapatom e) (and (free e '$inf) (free e '$minf)))
       e
       (infsimp e)))
 
@@ -1289,7 +1291,7 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 (defun constp (x)
   (cond ((floatp x) 'float)
 	((numberp x) 'numer)
-	((symbolp x) (if (member x '($%pi $%e $%phi $%gamma) :test #'eq) 'symbol))
+	((symbolp x) (if (member x '($%pi $%e $%phi $%gamma $%catalan) :test #'eq) 'symbol))
     ((atom x) nil)
 	((eq (caar x) 'rat) 'numer)
 	((eq (caar x) 'bigfloat) 'bigfloat)
@@ -1315,6 +1317,10 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 	 (list '$max #'(lambda (x) (sign-minmax (caar x) (cdr x))))
 	 (list '%csc #'(lambda (x) (sign (inv* (cons (ncons (zl-get (caar x) 'recip)) (cdr x))))))
 	 (list '%csch #'(lambda (x) (sign (inv* (cons (ncons (zl-get (caar x) 'recip)) (cdr x))))))
+	 (list '%acos 'sign-asin/acos/atanh)
+	 (list '%asin 'sign-asin/acos/atanh)
+	 (list '%acosh 'sign-acosh)
+	 (list '%atanh 'sign-asin/acos/atanh)
 
 	 (list '%signum #'(lambda (x) (sign (cadr x))))
 	 (list '%erf #'(lambda (x) (sign (cadr x))))
@@ -1487,6 +1493,23 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 	     (setq sgn '$pz))
 		((zerop1 (add xrhs -1))				;; c = -1
 		 (setq sgn '$nz))))
+    
+    ;; sign(signum(x)+c)
+    (when (and (not (atom xlhs))
+	          (eq (caar xlhs) '%signum)
+	          (zerop1 ($imagpart (cadr xlhs))))
+      (cond ((eq (sign* (add xrhs 1)) '$neg) ;; c > 1
+	      (setq sgn '$pos))
+	    ((eq (sign* (add xrhs -1)) '$pos)	;; c < -1
+	      (setq sgn '$neg))
+		  ((zerop1 (add xrhs 1))  ;; c = 1
+	      (setq sgn '$pz))
+		  ((zerop1 (add xrhs -1))  ;; c = -1
+		    (setq sgn '$nz))
+      ((zerop1 xrhs)  ;; c = 0 (necessary?)
+        (setq sgn '$pnz))
+      (t  ;; -1 < c < 1, but c # 0
+        (setq sgn '$pn))))
 	   
     (when (and $useminmax (or (minmaxp xlhs) (minmaxp xrhs)))
       (setq sgn (signdiff-minmax xlhs xrhs)))
@@ -1608,7 +1631,15 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
   (let* ((expt (caddr x)) (base1 (cadr x))
 	 (sign-expt (sign1 expt)) (sign-base (sign1 base1))
 	 (evod (evod expt)))
-    (cond ((and *complexsign* (or (eq sign-expt '$complex)
+    ;; The variable sign is now equal to sign-base. This is used below
+    ;; in some places to avoid an assignment operation for sign.
+    (cond ((and (eq sign-base '$zero)
+		(member sign-expt '($zero $neg $nz) :test #'eq))
+	   (dbzs-err x))
+	  ((eq sign-expt '$zero) (setq sign '$pos))
+	  ((eq sign-base '$zero))
+
+	  ((and *complexsign* (or (eq sign-expt '$complex)
 				  (eq sign-expt '$imaginary)
 				  (eq sign-base '$complex)))
 	   ;; Base is complex or exponent is complex or imaginary.
@@ -1639,12 +1670,14 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 		    minus (if (eql (mod (- expt 1) 4) 0) t nil)))
 	     (t (setq sign '$complex))))
 
-	  ((and (eq sign-base '$zero)
-		(member sign-expt '($zero $neg) :test #'eq))
-	   (dbzs-err x))
-	  ((eq sign-expt '$zero) (setq sign '$pos))
+	  ((and *complexsign*
+		(not evod)
+		(not (ratnump expt))
+		(not (member sign-base '($pos $pz $zero) :test #'eq)))
+	   (when *debug-compar*
+	     (format t "~&in SIGN-MEXPT for ~A, base is not $pos, $pz or $zero.~%" x))
+	   (setq sign (if (maxima-integerp expt) '$pnz '$complex)))
 	  ((eq sign-base '$pos))
-	  ((eq sign-base '$zero))
 	  ((eq evod '$even)
 	   (cond ((eq sign-expt '$neg)
 		  (setq sign '$pos minus nil evens (ncons base1) odds nil))
@@ -1655,16 +1688,24 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 		 (t (setq sign '$pz minus nil
 			  evens (nconc odds evens)
 			  odds nil))))
+    ;; (pnz, pos, pz or pn)^(-odd/even) = pos & (pnz, pos, pz or pn)^(odd/even) = pz.
+    ;; This makes, for example, sign(1/sqrt(x)) = pos & sign(sqrt(x) = pz.
+    ((and (eq sign-expt '$neg) ($ratnump expt) ($evenp ($denom expt))
+          (member sign-base '($pnz $pos $pz $pn) :test #'eq))
+      (setq sign (if (eq sign-expt '$neg)'$pos '$pz)))
 	  ((and (member sign-expt '($neg $nz) :test #'eq)
 		(member sign-base '($nz $pz $pnz) :test #'eq))
-	   (setq sign (cond ((eq sign-base '$pnz) '$pn)
-			    ((eq sign-base '$pz) '$pos)
-			    ((eq sign-expt '$neg) '$neg)
-			    (t '$pn))))
+	   (setq sign (if (eq sign-base '$pz)
+			  '$pos
+			  '$pn)))
 	  ((member sign-expt '($pz $nz $pnz) :test #'eq)
+	   (cond ((member sign-base '($neg $nz) :test #'eq)
+		  (setq odds (ncons x) sign (if (eq sign-base '$neg) '$pn '$pnz)))))
+	  ((eq sign-expt '$pn)
 	   (cond ((eq sign-base '$neg)
-		  (setq odds (ncons x) sign '$pn))))
-	  ((eq sign-expt '$pn))
+		  (setq sign '$pn))
+		 ((eq sign-base '$nz)
+		  (setq sign '$pnz))))
 	  ((ratnump expt)
 	   (cond ((mevenp (cadr expt))
 		  (cond ((member sign-base '($pn $neg) :test #'eq)
@@ -1674,9 +1715,10 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 		  (setq evens (nconc odds evens)
 			odds nil minus nil))
 		 ((mevenp (caddr expt))
-		  (cond ((and *complexsign* (eq sign-base '$neg))
-			 ;; In Complex Mode the sign is $complex.
-			 (setq sign-base (setq sign-expt '$complex)))
+		  (cond (*complexsign*
+			 (when (not (member sign-base '($pos $pz)))
+			   ;; In Complex Mode the sign is $complex.
+			   (setq sign-base (setq sign-expt '$complex))))
 			(complexsign
 			 ;; The only place the variable complexsign
 			 ;; is used. Unfortunately, one routine in
@@ -1699,12 +1741,13 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 			((eq sign-base '$pnz)
 			 (setq sign-base '$pn)))))
 	   (setq sign sign-base))
-	  ((eq sign-base '$pos)
-	   (setq sign '$pos))
-	  ((eq sign-base '$neg)
-	   (if (eq evod '$odd)
-	       (setq sign '$neg)
-	     (setq sign (if *complexsign* '$complex '$pn)))))))
+	  ((member sign-base '($neg $nz) :test #'eq)
+	   (cond ((eq evod '$odd))
+		 (*complexsign*
+		  (setq sign '$complex))
+		 ((eq sign-base '$neg)
+		  (setq sign '$pn))
+		 (t (setq sign '$pnz)))))))
 
 ;;; Determine the sign of log(expr). This function changes the special variable sign.
 
@@ -1724,10 +1767,116 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 	      (t '$pnz))))
 
 (defun sign-mabs (x)
-  (sign (cadr x))
-  (cond ((member sign '($pos $zero) :test #'eq))
-	((member sign '($neg $pn) :test #'eq) (setq sign '$pos))
-	(t (setq sign '$pz minus nil evens (nconc odds evens) odds nil))))
+  (let ((*complexsign* t))
+    (sign (cadr x))
+    (cond ((member sign '($pos $zero) :test #'eq))
+	  ((member sign '($neg $pn) :test #'eq) (setq sign '$pos))
+	  (t (setq sign '$pz minus nil evens (nconc odds evens) odds nil)))))
+
+(defun sign-asin/acos/atanh (x)
+  (cond ((and *complexsign*
+	      (or (not (eq t (mgqp (cadr x) -1)))
+		  (not (eq t (mgqp 1 (cadr x)))))) ; x < -1 or x > 1
+	 (setq sign '$complex))
+	((not (eq (caar x) '%acos))
+	 (sign-oddfun x))
+	((eq t (mlsp (cadr x) 1)) ; x < 1
+	 (sign-posfun x))
+	(t ; x <= 1
+	 (setq sign '$pz))))
+
+(defun sign-acosh (x)
+  (cond ((and *complexsign* (not (eq t (mgqp (cadr x) 1)))) ; x < 1
+	 (setq sign '$complex))
+	((eq t (mgrp (cadr x) 1)) ; x > 1
+	 (sign-posfun x))
+	(t ; x >= 1
+	 (setq sign '$pz))))
+
+;; This code handles sign(sin(x)), where -%pi <= x <= %pi. Of course, at the 
+;; expense of a great deal of additional complexity, this code could catch far 
+;; more cases.
+
+;; Like all sign functions, it works by setting the value of the special variable 
+;; sign.
+
+;; The sign of sin(constant expression) is supposed to be handled elsewhere,
+;; so we don't consider that case here. But running the testsuite,
+;; sometimes sign-sin receives a constant expression. This code could 
+;; handle this case, but I think that's fixing a bug in the wrong place.
+
+;; The general simplifier converts sin(%i*a) to %i*sinh(a), so I don't 
+;; think this code needs to handle the case of sin(x), where x is purely imaginary. 
+
+;; This code could handle sin({zerob, zeroa, ind}), but it doesn't.
+
+;; Finally, sometimes the argument to sin is not simplified; for example,
+;; running the testsuite sometimes this code recieves the expression sin(1/(1/x)). 
+;; We could simplify it, but I think that it would be better to fix the code 
+;; so that the input to sign-sin is always simplified.
+(defun sign-sin (e) ; e = sin(x)
+     (let ((x (cadr e)) (y 0))
+       ;; When *complexsign* is true, find the rectangular form of 
+       ;; the argument to sin.
+       (when *complexsign* 
+          (setq x (risplit x))
+          (setq y (cdr x)
+                x (car x)))
+       (cond 
+             ;; When y = 0 and -%pi <= x <= %pi, sign(sin(x)) = sign(x) 
+             ((and (eql y 0)
+                   (eq t (mgqp x (mul -1 '$%pi))) 
+                   (eq t (mgqp '$%pi x)))
+                (sign x))
+              ;; When *complexsign* is true & y # 0, set sign to complex.
+              ;; To test y # 0, we'll use (not (eql y 0)))
+              ((and *complexsign* (not (eql y 0)))
+                (setf sign '$complex))
+			        (t (setf sign '$pnz))))
+		nil)
+(putprop '%sin 'sign-sin 'sign-function)
+
+(defun sign-cos (e) ; e = cos(x)
+     (let ((x (cadr e)) (y 0))
+       ;; When *complexsign* is true, find the rectangular form of 
+       ;; the argument to cos.
+       (when *complexsign* 
+          (setq x (risplit x))
+          (setq y (cdr x)
+                x (car x)))
+       (cond 
+          ;; When y = 0 and -%pi/2 <= x <= 3 %pi/2, sign(cos(x)) = sign(%pi/2-x)
+          ((and (eql y 0)
+                (eq t (mgqp x (div '$%pi -2))) 
+                (eq t (mgqp (div (mul 3 '$%pi) 2) x)))
+            (sign (sub (div '$%pi 2) x)))
+          ;; When *complexsign* is true & y # 0, set sign to complex.
+          ;; To test y # 0, we'll use (not (eql y 0)))
+          ((and *complexsign* (not (eql y 0)))
+              (setf sign '$complex))
+			    (t (setf sign '$pnz))))
+		nil)
+(putprop '%cos 'sign-cos 'sign-function)
+
+;; When Maxima can deduce that when -1<x<=0, then ceiling(x) simplifies to 0. So this
+;; case is simplified away before it gets to this function.
+(defun sign-ceiling (x)
+   (setq x (cadr x)) ; ceiling(x) --> x
+   (setf sign (cond ((eq t (mgrp x 0)) '$pos)  ; ceiling(> 0) = pos
+                    ((eq t (mgrp x -1)) '$pz)  ; ceiling(> -1) = pz
+                    ((eq t (mgqp -1 x)) '$neg) ; ceiling(<= -1) = neg
+                    ((eq t (mgrp 0 x)) '$nz)   ; ceiling( < 0) = nz
+                    (t '$pnz))))
+(putprop '$ceiling 'sign-ceiling 'sign-function)
+
+(defun sign-floor (x)
+   (setq x (cadr x)) ; floor(x) --> x
+   (setf sign (cond ((eq t (mgqp x 1)) '$pos) ;floor(>= 1) = pos
+                    ((eq t (mgqp x 0)) '$pz)  ;floor(>= 0) = pz
+                    ((eq t (mgrp 0 x)) '$neg) ;floor(< 0) = neg
+                    ((eq t (mgqp 0 x)) '$nz)  ;floor(<= 0) = nz
+                    (t '$pnz))))
+(putprop '$floor 'sign-floor 'sign-function)
 
 ;;; Compare min/max
 
@@ -2373,7 +2522,6 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 ;; whose numerical value we know.
 (defun unknown-atoms (x)
   (let (($listconstvars t))
-    (declare (special $listconstvars))
     (remove-if (lambda (sym) (mget sym '$numer))
                (cdr ($listofvars x)))))
 
@@ -2505,7 +2653,6 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 
 (defun symbols (x)
   (let (($listconstvars %initiallearnflag))
-    (declare (special $listconstvars))
     (cdr ($listofvars x))))
 
 ;; %initiallearnflag is only necessary so that %PI, %E, etc. can be LEARNed.
@@ -2543,9 +2690,12 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
           (kind $%pi $irrational)
 	  (kind $%e $irrational)
 	  (kind $%phi $irrational)
+          (kind $%catalan $noninteger)
+          (kind $%catalan $real)
 	  
           ;; Declarations for functions
 	  (kind %log $increasing)
+	  (kind %asin $increasing) (kind %asin $oddfun)
 	  (kind %atan $increasing) (kind %atan $oddfun)
 	  (kind $delta $evenfun)
 	  (kind %sinh $increasing) (kind %sinh $oddfun)
@@ -2558,7 +2708,7 @@ TDNEG TDZERO TDPN) to store it, and also sets SIGN."
 	  ;; It would be nice to say %acosh is $posfun, but then
 	  ;; assume(xn<0); abs(acosh(xn)) -> acosh(xn), which is wrong
 	  ;; since acosh(xn) is complex.
-	  (kind %acosh $increasing)
+	  (kind %acosh $increasing) (kind %acosh $complex)
 	  (kind %atanh $increasing) (kind %atanh $oddfun)
 	  (kind $li $complex)
 	  (kind $lambert_w $complex)

@@ -15,7 +15,7 @@
 ;;;
 ;;;  You should have received a copy of the GNU General Public License
 ;;;  along with this program; if not, write to the Free Software
-;;;  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+;;;  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 ;;;
 
 
@@ -113,6 +113,18 @@
       (graph-size gr)
       (digraph-size gr)))
 
+(defmfun $get_positions (gr)
+  (require-graph-or-digraph 'get_positions 1 gr)
+  (if (graph-p gr)
+      (graph-vertex-positions gr)
+      (digraph-vertex-positions gr)))
+
+(defmfun $set_positions (pos gr)
+  (require-graph-or-digraph 'set_positions 2 gr)
+  (if (graph-p gr)
+      (setf (graph-vertex-positions gr) pos)
+      (setf (digraph-vertex-positions gr) pos)))
+
 (defmfun $copy_graph (gr)
   (require-graph-or-digraph 'copy_graph 1 gr)
   (if (graph-p gr)
@@ -138,18 +150,6 @@
 	    (if w (set-edge-weight e w g))))
         ($set_positions ($get_positions gr) g)
 	g) ))
-
-(defmfun $get_positions (gr)
-  (require-graph-or-digraph 'get_positions 1 gr)
-  (if (graph-p gr)
-      (graph-vertex-positions gr)
-      (digraph-vertex-positions gr)))
-
-(defmfun $set_positions (pos gr)
-  (require-graph-or-digraph 'set_positions 2 gr)
-  (if (graph-p gr)
-      (setf (graph-vertex-positions gr) pos)
-      (setf (digraph-vertex-positions gr) pos)))
 
 (defmfun $new_graph ()
   (make-graph))
@@ -375,6 +375,29 @@
   (gethash v  (if (graph-p gr)
 		  (graph-vertex-labels gr)
 		  (digraph-vertex-labels gr))))
+
+(defmfun $get_unique_vertex_by_label (l gr)
+  (unless (stringp l) (merror (intl:gettext "get_unique_vertex_by_label: first argument must be a string; found ~M") l))
+  (require-graph-or-digraph 'get_unique_vertex_by_label 2 gr)
+  (get-unique-vertex-by-label l gr))
+
+(defun get-unique-vertex-by-label (l gr)
+  (let ((vv (get-all-vertices-by-label l gr)))
+    (cond 
+      ((null vv) nil)
+      ((= (length vv) 1) (first vv))
+      (t (merror (intl:gettext "get_unique_vertex_by_label: two or more vertices have the same label ~:M") l)))))
+
+(defun get-all-vertices-by-label (l gr)
+  (let (vv)
+    (maphash (lambda (v l1) (when (string= l1 l) (push v vv)))
+             (if (graph-p gr) (graph-vertex-labels gr) (digraph-vertex-labels gr)))
+    (sort vv '<)))
+  
+(defmfun $get_all_vertices_by_label (l gr)
+  (unless (stringp l) (merror (intl:gettext "get_all_vertices_by_label: first argument must be a string; found ~M") l))
+  (require-graph-or-digraph 'get_all_vertices_by_label 2 gr)
+  (cons '(mlist) (get-all-vertices-by-label l gr)))
 
 (defmfun $clear_vertex_label (v gr)
   (require-vertex 'clear_vertex_label 1 v)
@@ -732,7 +755,7 @@
     (add-edge (list 0 (1- n)) g)
     (dotimes (i n)
       (setq pos (cons `((mlist simp) ,i
-                        ((mlist simp) ,(cos (* i 2 pi (/ n))) ,(sin (* i 2 pi (/ n)))))
+                        ((mlist simp) ,($cos (* i 2 pi (/ n))) ,($sin (* i 2 pi (/ n)))))
                       pos)))
     ($set_positions (cons '(mlist simp) pos) g)
     g))
@@ -779,12 +802,12 @@
 	(add-edge `(,e1 ,e2) g)))
     (dotimes (i n)
       (push `((mlist simp) ,i ((mlist simp)
-			       ,(sin (/ (* 2 i pi) n))
-			       ,(cos (/ (* 2 i pi) n))))
+			       ,($sin (/ (* 2 i pi) n))
+			       ,($cos (/ (* 2 i pi) n))))
 	    positions)
       (push `((mlist simp) ,(+ n i) ((mlist simp)
-				     ,(* 0.66 (sin (/ (* 2 i pi) n)))
-				     ,(* 0.66 (cos (/ (* 2 i pi) n)))))
+				     ,(* 0.66 ($sin (/ (* 2 i pi) n)))
+				     ,(* 0.66 ($cos (/ (* 2 i pi) n)))))
 	    positions))
     (setf (graph-vertex-positions g) (cons '(mlist simp) positions))
     g))
@@ -815,8 +838,8 @@
 	(add-edge `(,i ,j) g)))
     (dotimes (i n)
       (push `((mlist simp) ,i ((mlist simp)
-                               ,(cos (/ (* 2 i pi) n))
-                               ,(sin (/ (* 2 i pi) n))))
+                               ,($cos (/ (* 2 i pi) n))
+                               ,($sin (/ (* 2 i pi) n))))
             pos))
     (setf (graph-vertex-positions g) (cons '(mlist simp) pos))
     g))
@@ -953,6 +976,7 @@
     g))
 
 (defmfun $random_graph1 (n m)
+  #+sbcl (declare (notinline $random_graph1))
   (unless (integerp n)
     ($error "Argument 1 to random_graph is not an integer"))
   (unless (integerp m)
@@ -1389,10 +1413,6 @@
 ;;; 2-connectivity
 ;;;
 
-(defmfun $is_biconnected (gr)
-  (require-graph 'is_biconnected 1 gr)
-  (eql ($length ($biconnected_components gr)) 1))
-
 (defmfun $biconnected_components (gr)
   (require-graph 'biconnected_components 1 gr)
   (if (= 0 (graph-order gr))
@@ -1405,6 +1425,10 @@
 	      (setq bicomp ($append bicomp `((mlist simp) ,c)))
 	      (setq bicomp ($append bicomp (bicomponents ($first c) gr)))))
 	bicomp)))
+
+(defmfun $is_biconnected (gr)
+  (require-graph 'is_biconnected 1 gr)
+  (eql ($length ($biconnected_components gr)) 1))
 
 (defvar *dfs-bicomp-depth* 0)
 (defvar *dfs-bicomp-num* ())
@@ -1470,10 +1494,6 @@
 (defvar *scon-vrt* nil)
 (defvar *scon-depth* 0)
 
-(defmfun $is_sconnected (gr)
-  (require-digraph 'strong_components 1 gr)
-  (eql ($length ($strong_components gr)) 1))
-
 (defmfun $strong_components (gr)
   (require-digraph 'strong_components 1 gr)
   (if (= 0 (digraph-order gr))
@@ -1491,6 +1511,10 @@
 		(push c res))
 	      (setq *scon-comp* ()))
 	`((mlist simp) ,@res))))
+
+(defmfun $is_sconnected (gr)
+  (require-digraph 'strong_components 1 gr)
+  (eql ($length ($strong_components gr)) 1))
 
 (defun dfs-strong-components (gr v)
   (incf *scon-depth*)
@@ -1823,17 +1847,6 @@
       (remove-vertex v h)))
   `((mlist simp) ,@(sort *maximum-clique* #'<)))
 
-(defmfun $max_independent_set (gr)
-  (require-graph 'max_independent_set 1 gr)
-  (if ($is_bipartite gr)
-      (let ((mis)
-	    (vc (cdr ($min_vertex_cover gr))))
-	(loop for v in (vertices gr) do
-	     (unless (member v vc)
-	       (setq mis (cons v mis))))
-	`((mlist simp) ,@mis))
-      ($max_clique ($complement_graph gr))))
-
 (defmfun $min_vertex_cover (gr)
   (require-graph 'min_vertex_cover 1 gr)
   (let ((bipart ($bipartition gr)))
@@ -1845,6 +1858,17 @@
 		 (setq vc (cons v vc))))
 	  `((mlist simp) ,@vc))
 	(maximum-matching-bipartite gr (cadr bipart) (caddr bipart) t))))
+
+(defmfun $max_independent_set (gr)
+  (require-graph 'max_independent_set 1 gr)
+  (if ($is_bipartite gr)
+      (let ((mis)
+	    (vc (cdr ($min_vertex_cover gr))))
+	(loop for v in (vertices gr) do
+	     (unless (member v vc)
+	       (setq mis (cons v mis))))
+	`((mlist simp) ,@mis))
+      ($max_clique ($complement_graph gr))))
 
 (defun extend-clique (clique neigh coloring gr)
   (if (= (length neigh) 0)

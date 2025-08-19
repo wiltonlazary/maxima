@@ -11,6 +11,26 @@ include-maxima.texi
 index.hhk
 maxima.html
 maxima-index.lisp
+maxima-index-html.lisp
+category-macros.texi
+
+math.m4
+cobyla.texi
+colnew.texi
+Constants.texi
+Elliptic.texi
+Integration.texi
+Matrices.texi
+MathFunctions.texi
+Special.texi
+distrib.texi
+orthopoly.texi
+zeilberger.texi
+trigtools.texi
+format.texi
+lapack.texi
+minpack.texi
+levin.texi
 
 *.chm
 *.t2p
@@ -26,7 +46,10 @@ maxima-index.lisp
 *chm
 bin
 texi2html.init
+texi2html-7.init
 build_html.sh
 tmp_html
 extract_categories.sh
 tmpfile
+build-html-index.log
+maxima-index-html.lisp

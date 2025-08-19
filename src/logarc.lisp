@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -16,7 +16,7 @@
 (defmfun $logarc (exp)
   (cond ((atom exp) exp)
 	((arcp (caar exp)) (logarc (caar exp) ($logarc (cadr exp))))
-	((eq (caar exp) '$atan2)
+	((eq (caar exp) '%atan2)
 	 (logarc '%atan2 (list ($logarc (second exp)) ($logarc (third exp)))))
 	(t (recur-apply #'$logarc exp))))
 
@@ -53,6 +53,19 @@
 	 (logarc (zl-get (zl-get (get f '$inverse) 'recip) '$inverse) (inv x)))
 	(t (merror "LOGARC: unrecognized argument: ~M" f))))
 
+;; Conditionally apply a logarc transformation to operators that either have the 
+;; arcp property or that are %atan2 expressions but are *not* members of the list `l`.
+;; We could blend this functionality into $logarc, but I'm not sure there is much
+;; demand for it.
+(defun partial-logarc (e l)
+  (cond ((atom e) e)
+        ((and (arcp (caar e)) (not (member (caar e) l)))
+          (logarc (caar e) (partial-logarc (cadr e) l)))
+        ((eq (caar e) '%atan2)
+    	    (logarc '%atan2 (list (partial-logarc (second e) l)
+                                (partial-logarc (third e) l))))
+        (t (recur-apply #'(lambda (q) (partial-logarc q l)) e))))
+        
 (defun halfangle (f a)
   (and (mtimesp a)
        (ratnump (cadr a))

@@ -80,10 +80,44 @@ units(e%) :=
   else if mapatom (e%) then units (op (e%))  /* mapatom but not atom => subscripted */
   else if unitop_p(e%) then second(e%)
   else if featurep (op(e%), 'dimensional) then units(op(e%))
+  else if op(e%) = "*" or op(e%) = "/" then map (units, e%)
   else if op(e%) = "^" then units (first (e%)) ^ second (e%)
+  else if op(e%) = 'sqrt then sqrt (units (e%))
   else if op(e%) = "+" or op(e%) = "-" then apply ("+", unique (map (units, args (e%))))
+  else if member (op(e%), ["=", 'equal, "[", 'matrix, "{"]) then map (units, e%)
+  else if op(e%) = "." then apply ("*", map (units, args (e%)))
+  else if op(e%) = nounify(diff)
+    then units_diff(e%)
+  else if op(e%) = nounify(integrate)
+    then units_integrate(e%)
+  else if op(e%) = nounify(at)
+    then units_at(e%)
   else if nondimensionalp (e%) then 1
-  else apply (op(e%), map (units, args(e%))));
+  else 'units(e%));
+
+units_diff(e%) :=
+  block ([yy: first(e%), xnpairs: by_twos (rest (args (e%)))],
+         lproduct (units(xn[1])^xn[2], xn, xnpairs),
+         units(yy) / %%);
+
+/* by_twos might want to be a built-in function ... */
+by_twos (l) :=
+  block ([n: length(l)],
+         if mod (n, 2) = 0
+           then makelist ([l[2*k - 1], l[2*k]], k, 1, n/2)
+           else error ("by_twos: length of list must be a multiple of 2, not", n));
+
+/* define lproduct as a macro to work around funny evaluation of makelist ...
+ * lproduct might want to be a built-in function ...
+ */
+lproduct (ee, xx, l) ::=
+  buildq ([ee, xx, l], apply ("*", makelist (ee, xx, l)));
+
+units_integrate(e%) :=
+  block ([ii: first(e%), xx: second(e%)],
+         units(ii) * units(xx));
+
+units_at(e%) := units (first (e%));
 
 d(e%) := dimension (units (e%));
 
@@ -420,7 +454,7 @@ block ([L],
  */
 
 matchdeclare
-   (aa%, lambda ([e%], atom (e%) and not symbolp (e%)),
+   (aa%, lambda ([e%], numberp (e%) or (atom (e%) and not symbolp (e%))),
     bb%, lambda ([e%], symbolp (e%) and member (e%, fundamental_dimensions)),
     cc%, lambda ([e%], symbolp (e%) and get (e%, 'units) # false),
     dd%, lambda ([e%], symbolp (e%) and get (e%, 'constvalue) # false),
@@ -429,7 +463,7 @@ matchdeclare
     ff%, lambda ([e%], symbolp (e%)),
     gg%, lambda ([e%], not atom (e%) and op (e%) = "`"),
     hh%, lambda ([e%], not atom (e%) and op (e%) = "^"),
-    ii%, lambda ([e%], not atom (e%) and member (op (e%), ["+", "-", "*", "/"])));
+    ii%, lambda ([e%], not mapatom (e%) and member (op (e%), ["+", "-", "*", "/"])));
 
 simp : false;
 defrule (raa, 'dimensions (aa%), 1);
@@ -452,6 +486,14 @@ defrule (rii, 'dimensions (ii%), map (dimensions, ii%));
 simp : true;
 
 dimensions (expr) :=
+    /* Binding *NOUNSFLAG* is pretty terrible,
+     * but it's the only way to disable ev(..., nouns);
+     * ev(..., nouns=false) has no effect!
+     */
+    block ([?\*nounsflag\*: false],
+           dimensions1 (expr));
+
+dimensions1 (expr) :=
     if not atom (expr) and (setp (expr) or listp (expr) or matrixp (expr) or op (expr) = "=")
         then map (dimensions, expr)
         else apply (apply1, ['dimensions (expr), raa, rbb, rcc, rdd, ree, ree1, rff, rgg, rhh, rii]);
@@ -599,18 +641,22 @@ dimensionally (e%) ::=
 gensym_map (h) := map ("=", rest (arrayinfo (h), 2), listarray (h));
 inverse_gensym_map (h) := map ("=", listarray (h), rest (arrayinfo (h), 2));
 
-/* Degrees to pure number conversion for trigonometric functions.
- * Not sure if this should be enabled by default; maybe it should be optional.
- * Well, go ahead for now, in the absence of evidence to the contrary.
+/* Nondimensional to pure number conversion for trig functions, exp, and log.
+ * Conversion is applied only for explicit "`" expressions;
+ * previous implementation in terms of dimensions(e) could be time-consuming.
  */
 
 simp : false;
 declare_unit_conversion (degree = %pi/180);
-matchdeclare (uu, lambda ([e], not nondimensionalp(e) and dimensions(e) = 1));
-map (lambda ([f], apply (tellsimp, [apply (f, [uu]), apply (f, [uu``1])])), '[sin, cos, tan, csc, sec, cot, atan]);
+matchdeclare (uu, lambda ([e], unitop_p(e) and dimensions(units(e)) = 1));
+map (lambda ([f], apply (tellsimp, [apply (f, [uu]), apply (f, [uu `` 1])])), '[sin, cos, tan, csc, sec, cot, atan]);
 
 tellsimp (%e^uu, %e^(uu `` 1));
 tellsimp (log (uu), log (uu `` 1));
+
+/* Convert atan2 arguments to pure numbers when arguments have same dimensions.
+ * Determining dimensions are the same is potentially time-consuming.
+ */
 
 matchdeclare (aa, unitp, bb, lambda ([e], dimensions (e) = dimensions (aa)));
 tellsimp (atan2 (aa, bb), atan2 (qty (aa), qty (bb `` units (aa))));

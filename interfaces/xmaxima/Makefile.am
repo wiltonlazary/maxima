@@ -5,7 +5,11 @@
 
 include $(top_srcdir)/common.mk
 
-SUBDIRS = msgs doc
+if ENABLE_BUILD_DOCS
+   DOC_DIR = doc
+endif
+
+SUBDIRS = msgs $(DOC_DIR)
 if XMAXIMA_EXE
 SUBDIRS += win32
 else
@@ -18,19 +22,14 @@ genericdir = $(xmaximadir)
 
 genericdirDATA = demos.html examples.html intro.html plotmaxima.html net.sourceforge.maxima.png net.sourceforge.maxima.svg net.sourceforge.maxima.gif maxima-icon.ico maxima-icon.png maxima-icon.gif 
 
-appicondir = $(datarootdir)/pixmaps
-dist_appicon_DATA = net.sourceforge.maxima.png net.sourceforge.maxima.svg
+appicondir = $(datarootdir)/icons
+dist_appicon_DATA = xmaxima.png xmaxima.svg
 
 bin_SCRIPTS = xmaxima
 
 TKSOURCES = \
 	Tkmaxima/COPYING.tcl \
 	Tkmaxima/Cygwin.tcl \
-	Utils/FileDlg.tcl \
-	Utils/Messages.tcl \
-	Utils/Misc.tcl \
-	ObjTcl/Object.tcl \
-	ObjTcl/Feedback.tcl \
 	Tkmaxima/Constants.tcl \
 	Tkmaxima/Preamble.tcl \
 	Tkmaxima/Readdata.tcl \
@@ -50,7 +49,6 @@ TKSOURCES = \
 	Tkmaxima/Plotconf.tcl \
 	Tkmaxima/Adams.tcl \
 	Tkmaxima/Rk.tcl \
-	Tkmaxima/rk4.tcl \
 	Tkmaxima/Plotdf.tcl \
 	Tkmaxima/Plot2d.tcl \
 	Tkmaxima/Matrix.tcl \
@@ -64,7 +62,6 @@ TKSOURCES = \
 	Tkmaxima/Browser.tcl \
 	Tkmaxima/Bindings.tcl \
 	Tkmaxima/Wmenu.tcl \
-	Tkmaxima/Tryftp2.tcl \
 	Tkmaxima/Myhtml.tcl \
 	Tkmaxima/Myhtml1.tcl \
 	Tkmaxima/Base64.tcl \

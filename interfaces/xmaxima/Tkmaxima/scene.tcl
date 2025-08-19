@@ -15,7 +15,7 @@ set sceneOptions {
     {windowtitle {Xmaxima: scene} {Window title}}
     {azimuth 135 {Azimuth angle}}
     {elevation 30 {Elevation angle}}
-    {tstep 10 {Time interval between iterations, in miliseconds}}
+    {tstep 10 {Time interval between iterations, in milliseconds}}
     {restart 0 {If different from zero, the animation will loop forever.}}
     {objects  {} {A list of Objects of the form {{Class {options}} ...}}} 
 }
@@ -124,7 +124,7 @@ proc endAnimation {frame} {
 }
 
 proc makeVTKFrame { w type } {
-    global writefile doExit fontSize buttonfont maxima_priv 
+    global doExit fontSize buttonfont maxima_priv 
     linkLocal $w width height restart renwin windowtitle
     set win $w
     if { "$w" == "." } {

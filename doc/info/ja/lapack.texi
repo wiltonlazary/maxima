@@ -13,7 +13,9 @@ SLATECプロジェクトから得られるようなFortranライブラリLAPACK�
 (訳者注意書き: lapackを使用するには、load("lapack"); load("eigensys");を実行してください。load("lapack")には、初回だけコンパイルで時間がかかるかもしれません。)
 
 @opencatbox
-@category{Numerical methods} @category{Share packages} @category{Package lapack}
+@category{Numerical methods}
+@category{Share packages}
+@category{Package lapack}
 @closecatbox
 
 
@@ -59,7 +61,7 @@ Euclideanノルムが1に等しく、
 例:
 
 @c ===beg===
-@c load (lapack)$
+@c load ("lapack")$
 @c fpprintprec : 6;
 @c M : matrix ([9.5, 1.75], [3.25, 10.45]);
 @c dgeev (M);
@@ -69,7 +71,7 @@ Euclideanノルムが1に等しく、
 @c transpose (u) . M - D . transpose (u);
 @c ===end===
 @example
-(%i1) load (lapack)$
+(%i1) load ("lapack")$
 (%i2) fpprintprec : 6;
 (%o2)                           6
 (%i3) M : matrix ([9.5, 1.75], [3.25, 10.45]);
@@ -120,7 +122,7 @@ All elements of
 ここで "."は非可換乗算演算子です。
 
 @c ===beg===
-@c load (lapack)$
+@c load ("lapack")$
 @c fpprintprec : 6;
 @c M : matrix ([1, -3.2, 8], [-11, 2.7, 5.9]);
 @c [q, r] : dgeqrf (M);
@@ -128,7 +130,7 @@ All elements of
 @c mat_norm (%);
 @c ===end===
 @example
-(%i1) load (lapack) $
+(%i1) load ("lapack") $
 (%i2) fpprintprec : 6 $
 (%i3) M : matrix ([1, -3.2, 8], [-11, 2.7, 5.9]) $
 (%i4) [q, r] : dgeqrf (M);
@@ -254,7 +256,8 @@ All elements of
 @end example
 
 @opencatbox
-@category{Package lapack} @category{Linear equations}
+@category{Package lapack}
+@category{Linear equations}
 @closecatbox
 
 @end deffn
@@ -300,7 +303,7 @@ All elements of
 例:
 
 @c ===beg===
-@c load (lapack)$
+@c load ("lapack")$
 @c fpprintprec : 6;
 @c M: matrix([1, 2, 3], [3.5, 0.5, 8], [-1, 2, -3], [4, 9, 7]);
 @c dgesvd (M);
@@ -315,7 +318,7 @@ All elements of
 @c VT . transpose (VT);
 @c ===end===
 @example
-(%i1) load (lapack)$
+(%i1) load ("lapack")$
 (%i2) fpprintprec : 6;
 (%o2)                           6
 (%i3) M: matrix([1, 2, 3], [3.5, 0.5, 8], [-1, 2, -3], [4, 9, 7]);
@@ -463,7 +466,7 @@ All elements of
 @end table
 
 @c ===beg===
-@c load (lapack)$
+@c load ("lapack")$
 @c A : matrix([1,2,3],[4,5,6],[7,8,9]);
 @c B : matrix([-1,-2,-3],[-4,-5,-6],[-7,-8,-9]);
 @c C : matrix([3,2,1],[6,5,4],[9,8,7]);
@@ -476,7 +479,7 @@ All elements of
 @c dgemm(A,B,c=C,beta=1, alpha=-1);
 @c -A . B + C
 @example
-(%i1) load (lapack)$
+(%i1) load ("lapack")$
 (%i2) A : matrix([1,2,3],[4,5,6],[7,8,9]);
                                   [ 1  2  3 ]
                                   [         ]

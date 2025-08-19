@@ -1,4 +1,4 @@
-#| Copyright 2007, 2008 by Barton Willis
+#| Copyright 2007, 2008, 2021 by Barton Willis
 
   This is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License,
@@ -9,7 +9,6 @@
 |#
 
 
-($load '$polynomialp)
 (if (not ($get '$to_poly '$version)) ($load '$to_poly))
 
 (mfuncall '$declare '$one_to_one '$feature)
@@ -18,17 +17,10 @@
 (mfuncall '$declare '$tanh '$one_to_one)
 (mfuncall '$declare '$log '$increasing)
   
-;; The macro opcons is defined elsewhere; I don't know if opapply is also defined elsewhere.
-;; I need to check...
-
-(defmacro opapply (op args)
-  `(simplify (cons (list ,op) ,args)))
-
-(defmacro opcons (op &rest args)
-  `(simplify (list (list ,op) ,@args)))
+;; The macro opcons is defined in src; opapply is defined in to_poly. So we
+;; no longer define them here.
 
 ;; Maybe I should use csign instead of these functions...
-
 (defun number-sign (x)
   (cond ((or (integerp x) (floatp x))
 	 (cond ((< x 0) '$neg)
@@ -47,7 +39,7 @@
   (let ((f1) (f2) (f3))
    
     ;; I can do better. A big float running error evaluator would be nice.
-    ;; (or interval arithematic).  But for now let's evaluate with 25, 50, 
+    ;; (or interval arithmetic).  But for now let's evaluate with 25, 50, 
     ;; and 75 digits. Provided all three agree, and |f3| > 2^-50, return the common sign.
 
     ;; I need to check for complex...
@@ -91,7 +83,7 @@
             (setq p nil)
             (setq k 0)
             (dolist (li l)
-              (push (apply 'm> (if (logbitp k i) (list 0 li nil) (list li 0 nil))) p)
+              (push (apply 'fe> (if (logbitp k i) (list 0 li nil) (list li 0 nil))) p)
               (incf k))
            
             (setq p (opapply 'mand p))
@@ -107,13 +99,13 @@
 
 	((op-equalp e '%acos '%asin)
 	 (setq e (first (margs e)))
-	 (opapply 'mand (list (m>= e -1) (m>= 1 e))))
+	 (opapply 'mand (list (fe>= e -1) (fe>= 1 e))))
 
 	((op-equalp e '%log)
-	 (m> (first (margs e)) 0))
+	 (fe> (first (margs e)) 0))
 
 	((op-equalp e '%acosh)
-	 (m>= (first (margs e)) 1))
+	 (fe>= (first (margs e)) 1))
 
 	((op-equalp e 'mexpt)
 	 (let ((x (first (margs e))) (n (second (margs e))))
@@ -149,7 +141,7 @@
 
 	  ((op-equalp e 'mabs)
 	   (setq e (first (margs e)))
-	   (list (list (neg e) (m> 0 e)) (list e (m>= e 0))))
+	   (list (list (neg e) (fe> 0 e)) (list e (fe>= e 0))))
 	  
 	  ((op-equalp e 'mexpt)
 	   (mapcar #'(lambda (s) (list (take '(mexpt) (first s) (third e)) (second s))) (splitify (second e))))
@@ -166,7 +158,7 @@
 
 	  (t (list (list e t))))))
 	       
-(defun m> (a b &optional (expand nil) (use-splitify t))
+(defun fe> (a b &optional (expand nil) (use-splitify t))
   (let* ((z) (sgn) (z-split) (acc nil))
     (setq a ($ratdisrep a))
     (setq b ($ratdisrep b))
@@ -191,46 +183,46 @@
 	  ((and (op-equalp a 'mabs) ($freeof 'mabs '$min '$max b))
 	   (setq a (first (margs a)))
 	   (opapply 'mor (list
-			  (opapply 'mand (list (m> 0 b)))
-			  (opapply 'mand (list (m>= b 0) (m> a b)))
-			  (opapply 'mand (list (m>= b 0) (m> (neg a) b))))))
+			  (opapply 'mand (list (fe> 0 b)))
+			  (opapply 'mand (list (fe>= b 0) (fe> a b)))
+			  (opapply 'mand (list (fe>= b 0) (fe> (neg a) b))))))
 		    
 	  ;; Second, a > |b| == a > b and  a > -b.
 
 	  ((and (op-equalp b 'mabs) ($freeof 'mabs '$min '$max a))
 	   (setq b (first (margs b)))
-	   (opapply 'mand (list (m> a b) (m> a (neg b)))))
+	   (opapply 'mand (list (fe> a b) (fe> a (neg b)))))
 	  
           ;; Third, min(a1,a2,..., an) > b --> a1 > b and a2 > b and .. an > b.
 	  
           ((and (op-equalp a '$min) ($freeof 'mabs '$min '$max b))
-	   (opapply 'mand (mapcar #'(lambda (s) (m> s b)) (margs a))))
+	   (opapply 'mand (mapcar #'(lambda (s) (fe> s b)) (margs a))))
 
           ;; Fourth, a > max(b1,b2, ..., bn) --> a > b1 and a > b2 and ... and a > bn.
 	  
           ((and (op-equalp b '$max) ($freeof 'mabs '$min '$max a))
-	   (opapply 'mand (mapcar #'(lambda (s) (m> a s)) (margs b))))
+	   (opapply 'mand (mapcar #'(lambda (s) (fe> a s)) (margs b))))
 	  	  	  
 	  ;; Do z^n > 0 --> z # 0  n even,  z > 0, n odd.
 	  ((and (op-equalp z 'mexpt) (integerp (third z)))
-	   (if (even (third z)) (m-neq (second z) 0) (m> (second z) 0)))
+	   (if (even (third z)) (m-neq (second z) 0) (fe> (second z) 0)))
 
 	  ;; Do f(a) > f(b), where f is increasing --> a > b.
 	  ((and (not ($mapatom a)) (not ($mapatom b)) (eq (mop a) (mop b)) ($featurep (mop a) '$increasing))
 	   (opapply 'mand (list 
-			   (m> (first (margs a)) (first (margs b)))
+			   (fe> (first (margs a)) (first (margs b)))
 			   (in-real-domain a)
 			   (in-real-domain b))))
 	  
 	  ;; Do f(a) > f(b), where f is decreasing --> a < b.
 	  ((and (not ($mapatom a)) (not ($mapatom b)) (eq (mop a) (mop b)) ($featurep (mop a) '$decreasing))
-	   (m> (first (margs b)) (first (margs a))))
+	   (fe> (first (margs b)) (first (margs a))))
 	  	  
 	  ;; Do a^x > a^y, where a > 1 --> x > y,
 	  ((and (not ($mapatom a)) (not ($mapatom b)) (eq (mop a) (mop b)) 
 		(op-equalp a 'mexpt) (eql (second a) (second b))
 		(equal (compare-using-empty-context (second a) 1) ">"))
-	   (m> (third a) (third b)))
+	   (fe> (third a) (third b)))
 	  
 	  ;; Do a * b > 0 --> (a > 0, b > 0) or (a < 0, b < 0). We only do this when
 	  ;; z has two or more non-constant factors. This check seems spendy--is there
@@ -244,7 +236,7 @@
 	  ((and use-splitify (op-equalp z '$max '$min 'mabs 'mtimes 'mplus))
 	   (setq z-split (splitify z))
 	   (dolist (zk z-split)
-	     (push `((mand) ,(m> (first zk) 0 expand nil) ,@(rest zk)) acc))
+	     (push `((mand) ,(fe> (first zk) 0 expand nil) ,@(rest zk)) acc))
 	   (push '(mor) acc)
 	   (simplifya acc nil))
 
@@ -296,16 +288,16 @@
      (progn
        (setq sgn (mnqp a b))
        (cond ((or (eq sgn t) (eq sgn nil)) sgn)
-	     ((eq $domain '$real) (opcons 'mor (m> a b t) (m> b a t)))
+	     ((eq $domain '$real) (opcons 'mor (fe> a b t) (fe> b a t)))
 	     (t (take '(mnot) (m= a b)))))
      (if ($member new-context $contexts) ($killcontext new-context))
      (setq $context save-context))))
 	  
-(defun m>= (a b)
+(defun fe>= (a b)
   (let ((sgn (compare-using-empty-context a b)))
     (cond ((member sgn '(">=" ">") :test 'equal) t)
 	  ((equal sgn "<") nil)
-	  (t (opcons 'mor (m> a b  t) (m= a b))))))
+	  (t (opcons 'mor (fe> a b  t) (m= a b))))))
 
 (defun standardize-inequality (e)
   (let ((a) (b))
@@ -319,11 +311,11 @@
            (setq a (second e))
            (setq b (third e))
 
-           (cond ((op-equalp e 'mlessp) (m> b a t))
-                 ((op-equalp e 'mleqp) (opcons 'mor (m> b a  t) (m= a b )))
+           (cond ((op-equalp e 'mlessp) (fe> b a t))
+                 ((op-equalp e 'mleqp) (opcons 'mor (fe> b a  t) (m= a b )))
                  ((op-equalp e 'mequal '$equal) (m= a b ))
-                 ((op-equalp e 'mgreaterp) (m> a b  t))
-                 ((op-equalp e 'mgeqp) (m>= a b))
+                 ((op-equalp e 'mgreaterp) (fe> a b  t))
+                 ((op-equalp e 'mgeqp) (fe>= a b))
                  ((op-equalp e 'mnotequal) (m-neq a b))
                  (t e)))
           (t e))))
@@ -371,7 +363,7 @@
 
 (defun linear-elimination (l v)
   (let (($linsolve_params nil) ($backsubst t) ($programmode t) 
-	($linsolvewarn nil) ($globalsolve nil) (subs) (vars))
+	      ($linsolvewarn nil) ($globalsolve nil) (subs) (unsolved) (vars))
     
     (setq l ($elim l v))
     (cond (($member 1 ($first l)) '$emptyset)
@@ -379,11 +371,14 @@
 	   (setq subs ($linsolve ($second l) v))
 	   (setq vars (mapcar '$lhs (margs subs)))
 	   (setq vars (push '(mlist) vars))
-	   `((mlist) ,subs ,($first l) ,vars)))))
+     (setq unsolved ($first l))
+     (setq unsolved (cons '(mlist) (mapcar #'(lambda (q) (take '(mequal) q 0)) (cdr ($first l)))))
+     (simplifya (list '(mlist) subs unsolved vars) t)))))
 	  	   
 (defun $fourier_elim (l vars)
  
-  (let ((eq-list nil) (pos-list nil) (other-list nil) (acc) ($listconstvars nil) ($ratprint nil))
+  (let ((eq-list nil) (pos-list nil) (other-list nil) (acc) ($listconstvars nil) 
+        ($ratprint nil) ($domain '$real))
     
     ;; Check the arguments
 
@@ -422,7 +417,7 @@
 		   ((op-equalp li 'mgreaterp) (push ($lhs li) pos-list))
                    (t (push li other-list))))
            
-	   ;; Using eq-list, elimination as many variables as possible.
+	   ;; Using eq-list, eliminate as many variables as possible.
 	   
 	   (push '(mlist) eq-list)
 	   (push '(mlist) pos-list)
@@ -476,14 +471,15 @@
   (let ((vi) (acc nil) (w))
     (while (and (not (eq pos '$emptyset)) (first pos) vars)
       (setq vi (pop vars))
+
       (setq w (fourier-elim-one-variable pos vi))
       (setq acc (append acc (first w)))
       (setq pos (second w)))
     (if (eq '$emptyset pos) '$emptyset
       (progn
-	(setq pos (delete t (mapcar #'(lambda (s) (m> s 0)) pos)))
-	(if (consp (member 'nil pos)) '$emptyset
-	  (opapply 'mlist (post-fourier-elim-simp (append acc pos))))))))
+      	(setq pos (delete t (mapcar #'(lambda (s) (fe> s 0)) pos)))
+      	(if (consp (member 'nil pos)) '$emptyset
+	        (opapply 'mlist (post-fourier-elim-simp (append acc pos))))))))
     
 ;; Do Fourier elimination on a list l of inequalities with respect to the 
 ;; indeterminate x. Each member of l is a polynomial, and each polynomial p in
@@ -551,7 +547,7 @@
     (setq ub-args (delete '$inf ub-args))
     
     ;; Require that each lower bound be smaller than each upper bound. We could use
-    ;; m> instead of sub here. But I think it's not needed, and m> is more spendy.
+    ;; fe> instead of sub here. But I think it's not needed, and fe> is more spendy.
     
     (setq acc (append acc (mapcar #'(lambda (s) (sub (second s) (first s)))
 				  (fourier_elim-cartesian-product (list lb-args ub-args)))))

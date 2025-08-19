@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -12,17 +12,16 @@
 
 (macsyma-module psolve)
 
-(declare-top (special mult *roots *failures $solvefactors))
-(declare-top (special expsumsplit $dispflag checkfactors *g
-		      $algebraic equations ;List of E-labels
-		      *power *varb *flg $derivsubst
-		      $%emode genvar genpairs varlist broken-not-freeof
+(declare-top (special mult *roots *failures))
+(declare-top (special expsumsplit *g
+		      equations ;List of E-labels
+		      *power *varb *flg
+		      broken-not-freeof
 		      mult    ;Some crock which tracks multiplicities.
 		      *roots ;alternating list of solutions and multiplicities
 		      *failures	;alternating list of equations and multiplicities
-		      *myvar $listconstvars
-		      *has*var *var $dontfactor
-		      $keepfloat $ratfac
+		      *myvar
+		      *has*var *var
 		      xm* xn* mul*))
 
 (defmvar flag4 nil)

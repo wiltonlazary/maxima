@@ -423,6 +423,11 @@ Das Paket @code{simplify_sum} enth@"alt die Funktion
 @mrefcomma{simplify_sum} mit der Summen zu einer geschlossenen Form vereinfacht
 werden k@"onnen.
 
+Es ist zu beachten, dass @code{sum} bei symbolischen Summen, die viele Terme
+ergeben, langsam ist, z. B. @code{sum(x^i, i, 1, 10000)}. In solchen F@"allen
+ist die Verwendung von @code{makelist} und @code{tree_reduce} signifikant
+schneller, z. B. @code{tree_reduce("+", makelist(x^i, i, 1, 10000))}.
+
 Siehe auch @mrefcomma{sumcontract}  @mrefcomma{sumexpand}@w{}
 @mrefcomma{intosum} @mrefcomma{bashindices} @mrefcomma{niceindices}@w{}
 @mref{cauchysum} und @mrefdot{zeilberger}
@@ -865,7 +870,7 @@ Unterschied, dass mit dem dritten Argument @var{n} der Grad der neuen
 Taylorreihe explizit angegeben werden kann.  Dieser kann kleiner oder
 gr@"o@ss{}er als der Grad der Taylorreihe @var{expr} sein.
 
-Mit dem Kommando @code{load(revert)} werden die Funktionen geladen.
+Mit dem Kommando @code{load("revert")} werden die Funktionen geladen.
 
 Siehe auch die Funktion @mrefdot{taylor}
 
@@ -876,7 +881,7 @@ Mit dem Kommando @code{revert(taylor(exp(x) - 1, x, 0, 6), x)} wird die
 Taylorreihe der Inversen @code{log(x+1)} berechnet.
 
 @example
-(%i1) load (revert)$
+(%i1) load ("revert")$
 (%i2) t: taylor (exp(x) - 1, x, 0, 6);
                    2    3    4    5     6
                   x    x    x    x     x

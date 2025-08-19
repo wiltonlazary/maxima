@@ -175,7 +175,7 @@ Incorrect syntax: # is not a prefix operator
 (%o9)                       ##(5, 3)
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @category{Syntax}
 @closecatbox
@@ -401,7 +401,7 @@ Arithmetic is carried out element-by-element for lists (depending on
 (%o8)                   [a , c , m , t ]
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
@@ -439,17 +439,15 @@ Examples:
 (%o4)                         done
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
 
 @c -----------------------------------------------------------------------------
 @anchor{^^}
-@deffn {Operator} ^^
-@ifinfo
 @fnindex Noncommutative exponentiation
-@end ifinfo
+@deffn {Operator} ^^
 
 Noncommutative exponentiation operator.
 @code{^^} is the exponentiation operator corresponding to noncommutative
@@ -474,7 +472,7 @@ Examples:
 (%o2)                  a^3*b^2+a^^2 . b^^3
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
@@ -482,9 +480,6 @@ Examples:
 @c -----------------------------------------------------------------------------
 @anchor{.}
 @deffn {Operator} .
-@ifinfo
-@fnindex Noncommutative multiplication
-@end ifinfo
 
 The dot operator, for matrix (non-commutative) multiplication.
 When @code{"."} is used in this way, spaces should be left on both sides of
@@ -504,7 +499,7 @@ See also
 and
 @mrefdot{dotscrules}
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
@@ -602,7 +597,7 @@ values, although the arguments of relational expressions are evaluated.
 (%o3)               [true, true, true, false]
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
@@ -616,10 +611,8 @@ values, although the arguments of relational expressions are evaluated.
 
 @c -----------------------------------------------------------------------------
 @anchor{and}
-@deffn {Operator} and
-@ifinfo
 @fnindex Logical conjunction
-@end ifinfo
+@deffn {Operator} and
 
 The logical conjunction operator.  @code{and} is an n-ary infix operator;
 its operands are Boolean expressions, and its result is a Boolean value.
@@ -641,7 +634,7 @@ accepted, and the result is a Boolean expression.
 @code{and} is not commutative: @code{a and b} might not be equal to
 @code{b and a} due to the treatment of indeterminate operands.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
@@ -650,10 +643,8 @@ accepted, and the result is a Boolean expression.
 
 @c -----------------------------------------------------------------------------
 @anchor{not}
-@deffn {Operator} not
-@ifinfo
 @fnindex Logical negation
-@end ifinfo
+@deffn {Operator} not
 
 The logical negation operator.  @code{not} is a prefix operator;
 its operand is a Boolean expression, and its result is a Boolean value.
@@ -666,7 +657,7 @@ prints an error message when @code{prederror} is @code{true}.  Otherwise,
 operands which do not evaluate to @code{true} or @code{false} are accepted,
 and the result is a Boolean expression.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
@@ -675,10 +666,8 @@ and the result is a Boolean expression.
 
 @c -----------------------------------------------------------------------------
 @anchor{or}
-@deffn {Operator} or
-@ifinfo
 @fnindex Logical disjunction
-@end ifinfo
+@deffn {Operator} or
 
 The logical disjunction operator.  @code{or} is an n-ary infix operator;
 its operands are Boolean expressions, and its result is a Boolean value.
@@ -700,7 +689,7 @@ accepted, and the result is a Boolean expression.
 @code{or} is not commutative: @code{a or b} might not be equal to @code{b or a}
 due to the treatment of indeterminate operands.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
@@ -712,10 +701,8 @@ due to the treatment of indeterminate operands.
 
 @c -----------------------------------------------------------------------------
 @anchor{#}
-@deffn {Operator} #
-@ifinfo
 @fnindex Not equal (syntactic inequality)
-@end ifinfo
+@deffn {Operator} #
 
 Represents the negation of syntactic equality @mrefdot{=}
 
@@ -749,18 +736,16 @@ Examples:
 (%o6)                         true
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
 
 @c -----------------------------------------------------------------------------
 @anchor{=}
-@deffn {Operator} =
-@ifinfo
 @fnindex Equation operator
 @fnindex Equal (syntactic equality)
-@end ifinfo
+@deffn {Operator} =
 
 The equation operator.
 
@@ -890,7 +875,7 @@ Because @code{not @var{expr}} causes evaluation of @var{expr},
 (%o2)                         true
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @closecatbox
 @end deffn
@@ -902,10 +887,8 @@ Because @code{not @var{expr}} causes evaluation of @var{expr},
 
 @c -----------------------------------------------------------------------------
 @anchor{:}
-@deffn {Operator} :
-@ifinfo
 @fnindex Assignment operator
-@end ifinfo
+@deffn {Operator} :
 
 Assignment operator.
 
@@ -1024,7 +1007,7 @@ The values of @code{a} and @code{b} are exchanged in this example.
 (%o4)                          33
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Evaluation}
 @category{Operators}
 @closecatbox
@@ -1033,10 +1016,8 @@ The values of @code{a} and @code{b} are exchanged in this example.
 @c -----------------------------------------------------------------------------
 @need 900
 @anchor{::}
-@deffn {Operator} ::
-@ifinfo
 @fnindex Assignment operator (evaluates left-hand side)
-@end ifinfo
+@deffn {Operator} ::
 
 Assignment operator.
 
@@ -1074,7 +1055,7 @@ Examples:
 (%o8)                          33
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Evaluation}
 @category{Operators}
 @closecatbox
@@ -1082,10 +1063,8 @@ Examples:
 
 @c -----------------------------------------------------------------------------
 @anchor{::=}
-@deffn {Operator} ::=
-@ifinfo
 @fnindex Macro function definition operator
-@end ifinfo
+@deffn {Operator} ::=
 
 Macro function definition operator.
 @code{::=} defines a function (called a "macro" for historical reasons) which
@@ -1189,7 +1168,7 @@ x is equal to 1234 - 1729 w
 (%o7)                            1234 - 1729 w
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Function definition}
 @category{Operators}
 @closecatbox
@@ -1197,10 +1176,8 @@ x is equal to 1234 - 1729 w
 
 @c -----------------------------------------------------------------------------
 @anchor{:=}
-@deffn {Operator} :=
-@ifinfo
 @fnindex Function definition operator
-@end ifinfo
+@deffn {Operator} :=
 
 The function definition operator.
 
@@ -1386,7 +1363,7 @@ the function defined by @code{:=} accepts a variable number of arguments.
 (%o4)                         - 99
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Function definition}
 @category{Operators}
 @closecatbox
@@ -1522,7 +1499,7 @@ if x ## y then
 (%o3)                if x ## y then 1 else 0
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @category{Declarations and inferences}
 @category{Syntax}
@@ -1660,7 +1637,7 @@ Matchfix operators are ordinary user-defined functions.
                                 15
 @end example
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Syntax}
 @category{Operators}
 @closecatbox
@@ -1681,7 +1658,7 @@ to be an @code{nary} operator.  Functions may be declared to be @code{nary}.  If
 
 See also @ref{Introduction to operators}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @category{Syntax}
 @closecatbox
@@ -1702,7 +1679,7 @@ function which declares @code{x} to be a @code{nofix} operator.
 
 See also @ref{Introduction to operators}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @category{Syntax}
 @closecatbox
@@ -1722,7 +1699,7 @@ to be a @code{postfix} operator.
 
 See also @ref{Introduction to operators}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @category{Syntax}
 @closecatbox
@@ -1741,7 +1718,7 @@ which argument immediately follows an occurrence of the operator.
 
 See also @ref{Introduction to operators}.
 
-@opencatbox
+@opencatbox{Categories:}
 @category{Operators}
 @category{Syntax}
 @closecatbox

@@ -224,7 +224,6 @@
 (defun vtkpolydatamapper-code (mn fn con)
   (concatenate 'string
     (format nil "~a=vtk.vtkPolyDataMapper()~%" mn)
-    (format nil "~a.GlobalImmediateModeRenderingOn()~%" mn) 
     (if con
       (format nil "~a.SetInputConnection(~a.GetOutputPort())~%" mn fn)
       "") ))
@@ -1811,7 +1810,7 @@
         (setf lookup-table-name (car lut))
         (format str "~a~%" (cadr lut))))
 
-    ; phyton code
+    ; python code
     (format str "~a=vtk.vtkPolyData()~%" source-name)
     (format str "~a~%" (vtkpoints-code points-name source-name x y z))
     (format str "~a~%" (vtkcellarray-code cellarray-name source-name 1 
@@ -1877,7 +1876,7 @@
        (merror "draw2d (parametric): illegal range"))
     (when (not (string= (string-trim " " key) ""))
        (incf *vtk-2dkey-counter*) )
-    (when (not (subsetp (append (rest ($listofvars xfun)) (rest ($listofvars yfun))) (list par)))
+    (when (not (subsetp (append (rest ($listofvars xfun)) (rest ($listofvars yfun))) (list par) :test #'like))
        (merror "draw2d (parametric): non defined variable"))
     (setq *plot-realpart* (get-option '$draw_realpart))
     (setq f1 (coerce-float-fun xfun `((mlist) ,par)))
@@ -1894,7 +1893,7 @@
              (if (>= tt tmax) (setq tt tmax)) ))
     (setf result-array (make-array (length result) :initial-contents result))
 
-    ; phyton code
+    ; python code
     (format str "~a=vtk.vtkFloatArray()~%" arrayX-name)
     (format str "~a.SetName(\"~a\")~%" arrayX-name arrayX-name)
     (format str "~a=vtk.vtkFloatArray()~%" arrayY-name)
@@ -2687,7 +2686,7 @@
        (merror "draw3d (tube): illegal parametric range"))
     (when (not (subsetp (rest ($append ($listofvars xfun) ($listofvars yfun)
                                        ($listofvars zfun) ($listofvars rad)))
-                        (list par)))
+                        (list par) :test #'like))
        (merror "draw3d (tube): non defined variable"))
     (check-enhanced3d-model "tube" '(0 1 3 99))
     (check-isolines-model "tube" '(0 1 3 99))
@@ -3112,7 +3111,7 @@
     (when (eql cmdstorage nil)
       (merror "draw: Cannot create file '~a'. Probably maxima_tempdir doesn't point to a writable directory." gfn))
 
-    ;; pull in requiered packages
+    ;; pull in required packages
     (format cmdstorage "~a~%~a~%~%~a~%~a~%~%~a~%~%"
       "#!/usr/bin/env python"
       "# -*- coding: UTF-8 -*-"

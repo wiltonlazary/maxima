@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -14,13 +14,6 @@
 
 ;;	THIS IS THE NEW RATIONAL FUNCTION PACKAGE PART 3.
 ;;	IT INCLUDES THE GCD ROUTINES AND THEIR SUPPORTING FUNCTIONS
-
-(declare-top (special $keepfloat $algebraic $ratfac genvar))
-
-;; List of GCD algorithms.  Default one is first.
-(defmvar *gcdl* '($spmod $subres $ez $red $mod $algebraic))
-
-(defmvar $gcd (car *gcdl*))		;Sparse Modular
 
 (defun cgcd (a b)
   (cond (modulus 1)
@@ -161,7 +154,7 @@
 		  (t (return (list 1 pol1 pol2))))))
      (cond (cofac? (desetq (gcdcoef coeff11 coeff12)
 			   (pgcdcofacts gcdab gcdcd))
-		   (cond ((setq gcdcd (testdivide rpol2 rpol1))
+		   (cond ((setq gcdcd (testdivide* rpol2 rpol1))
 			  (return (list (ptimes gcdcoef rpol1)
 					coeff11
 					(ptimes coeff12 gcdcd))))
@@ -169,7 +162,7 @@
 					  (ptimes coeff11 rpol1)
 					  (ptimes coeff12 rpol2))))))
 	   (t (setq gcdcoef (pgcd gcdcd gcdab))
-	      (cond ((testdivide rpol2 rpol1)
+	      (cond ((testdivide* rpol2 rpol1)
 		     (return (list (ptimes gcdcoef rpol1))))
 		    (t (return (list gcdcoef))))))))
 
@@ -295,7 +288,7 @@
 (defun pgcd1 (u v) (caddr (psquorem1 u v nil)))
 
 (defun pgcd2 (u v k &aux (i 0))
-  (declare (special lcu lcv) (fixnum k i))
+  (declare (special lcu lcv) (fixnum i))
   (cond ((null u) (pcetimes1 v k lcu))
 	((null v) (pctimes1 lcv u))
 	((zerop (setq i (+ (pt-le u) (- k) (- (car v)))))
@@ -413,7 +406,7 @@
 
 (defun pgcdu1 (u v pquo*)
   (let ((invv (painvmod (pt-lc v))) (k 0) q*)
-    (declare (special k quo q*) (fixnum k))
+    (declare (special k quo q*))
     (loop until (minusp (setq k (- (pt-le u) (pt-le v))))
 	   do (setq q* (ptimes invv (pt-lc u)))
 	   if pquo* do (setq quo (nconc quo (list k q*)))
@@ -421,15 +414,6 @@
                                   (pt-red u) (pt-red v) q* k)))
 	   return (ptzero)
 	   finally (return u))))
-
-;; it is convenient to have the *bigprimes* be actually less than
-;; half the size of the most positive fixnum, so that arithmetic is easier
-
-(defvar *bigprimes* (loop with p = (ash most-positive-fixnum -1) repeat 20 do
-			 (setq p (next-prime (1- p) -1))
-		       collect p))
-
-(defmvar *alpha (car *bigprimes*))
 
 (defun newprime (p)
   (do ((pl *bigprimes* (cdr pl)))

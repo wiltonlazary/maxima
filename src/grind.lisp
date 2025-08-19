@@ -1,6 +1,6 @@
 ;;; -*-  Mode: Lisp; Package: Maxima; Syntax: Common-Lisp; Base: 10 -*- ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     The data in this file contains enhancments.                    ;;;;;
+;;;     The data in this file contains enhancements.                   ;;;;;
 ;;;                                                                    ;;;;;
 ;;;  Copyright (c) 1984,1987 by William Schelter,University of Texas   ;;;;;
 ;;;     All rights reserved                                            ;;;;;
@@ -12,9 +12,9 @@
 
 (macsyma-module grind)
 
-(declare-top (special lop rop *grind-charlist* chrps $aliases linel))
+(declare-top (special lop rop *grind-charlist* chrps))
 
-(defun chrct* () (- linel chrps))
+(defun chrct* () (- $linel chrps))
 
 (defmspec $grind (x)
   (setq x (cdr x))
@@ -71,7 +71,7 @@
 		 (mprint (cadr x) out)
 		 (cond ((null (cddr x)) (return nil))
 		       ((and (or (atom (cadr x)) (< (caadr x) (chrct*)))
-			     (or (> (chrct*) (truncate linel 2))
+			     (or (> (chrct*) (truncate $linel 2))
 				 (atom (caddr x)) (< (caaddr x) (chrct*))))
 			(setq i chrps)
 			(mprint (caddr x) out))
@@ -101,7 +101,7 @@
 	      (strprint (cadr x))
 	      (cond ((null (cddr x)) (return nil))
 		    ((and (or (atom (cadr x)) (< (caadr x) (chrct*)))
-			  (or (> (chrct*) (truncate linel 2))
+			  (or (> (chrct*) (truncate $linel 2))
 			      (atom (caddr x)) (< (caaddr x) (chrct*))))
 		     (setq i chrps)
 		     (strprint (caddr x)))
@@ -275,19 +275,18 @@
 
 ;;; ----------------------------------------------------------------------------
 
-;; Formating a mlabel-expression
+;; Formatting a mlabel-expression
 
 (defprop mlabel msize-mlabel grind)
 
 (defun msize-mlabel (x l r)
-  (declare (special *display-labels-p*))
   (if *display-labels-p*
       (setq l (cons (msize (cadr x) (list #\( ) (list #\) #\ ) nil nil) l)))
   (msize (caddr x) l r lop rop))
 
 ;;; ----------------------------------------------------------------------------
 
-;; Formating a mtext-expression
+;; Formatting a mtext-expression
 
 (defprop mtext msize-mtext grind)
 
@@ -343,17 +342,25 @@
 
 ;;; ----------------------------------------------------------------------------
 
-;; Formating a mdefine or mdefmacro expression
+;; Formatting a mdefine or mdefmacro expression
 
 (defprop mdefine msz-mdef grind)
 (defprop mdefine (#\: #\=) strsym)
 (defprop mdefine 180 lbp)
 (defprop mdefine  20 rbp)
 
+;; copy binding powers to nounified operator
+(setf (get '%mdefine 'lbp) (get 'mdefine 'lbp))
+(setf (get '%mdefine 'rbp) (get 'mdefine 'rbp))
+
 (defprop mdefmacro msz-mdef grind)
 (defprop mdefmacro (#\: #\: #\=) strsym)
 (defprop mdefmacro 180 lbp)
 (defprop mdefmacro  20 rbp)
+
+;; copy binding powers to nounified operator
+(setf (get '%mdefmacro 'lbp) (get 'mdefmacro 'lbp))
+(setf (get '%mdefmacro 'rbp) (get 'mdefmacro 'rbp))
 
 (defun msz-mdef (x l r)
   (setq l (msize (cadr x) l (copy-list (strsym (caar x))) lop (caar x))
@@ -366,7 +373,7 @@
          (setq x (cons (- (car l) (caadr l)) (cddr l)))
          (if (and (not (atom (cadr r)))
                   (not (atom (caddr r)))
-                  (< (+ (car l) (caadr r) (caaddr r)) linel))
+                  (< (+ (car l) (caadr r) (caaddr r)) $linel))
              (setq x (nconc x (list (cadr r) (caddr r)))
                    r (cons (car r) (cdddr r))))
          (cons (+ (car l) (car r)) (cons (cadr l) (cons x (cdr r)))))
@@ -380,6 +387,7 @@
 
 (defprop mfactorial msize-postfix grind)
 (defprop mfactorial 160. lbp)
+(defprop mfactorial 159. rbp)
 
 (defprop mexpt msz-mexpt grind)
 (defprop mexpt 140. lbp)
@@ -440,7 +448,7 @@
 
 (defprop mminus msize-mminus grind)
 (defprop mminus (#\-) strsym)
-(defprop mminus 100. rbp)
+(defprop mminus 134. rbp)
 (defprop mminus 100. lbp)
 
 (defun msize-mminus (x l r)

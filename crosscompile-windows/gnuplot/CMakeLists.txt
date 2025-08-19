@@ -1,5 +1,7 @@
 # CMake file for crosscompiling Maxima/wxMaxima for Windows
+# SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) by Wolfgang Dautermann
+# Time-stamp: "2022-03-18 20:34:12 villate"
 # License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
@@ -13,9 +15,9 @@
 string(REPLACE "." "" GNUPLOTVERSIONWITHOUTDOTS "${GNUPLOTVERSION}")
 
 if(BUILD_64BIT)
-    set(GNUPLOTVERSION "5.2.8")
+    set(GNUPLOTVERSION "6.0.2")
     string(REPLACE "." "" GNUPLOTVERSIONWITHOUTDOTS "${GNUPLOTVERSION}")
-    set(GNUPLOT_MD5 "52ae95413ecc37edd3d94f5d67d1b654")
+    set(GNUPLOT_MD5 "d4f1ced1f416d8de7ebddd9afa4be6fd")
     set(GNUPLOT_URL "https://sourceforge.net/projects/gnuplot/files/gnuplot/${GNUPLOTVERSION}/gp${GNUPLOTVERSIONWITHOUTDOTS}-win64-mingw.7z")
 else()
     set(GNUPLOTVERSION "5.2.7")

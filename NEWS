@@ -145,17 +145,17 @@ categories: infrastructure, functionality and bug fixes.
 
    j) GCL performance increase
       - Maxima now takes better advantage of GCL's optimization
-        features. The result is a substantially faster exectuable.
+        features. The result is a substantially faster executable.
 
 2) Functionality
 
    a) Enhanced plotting
       - 2D Adaptive plotting allows smooth plotting even in the
         presence of singularities. The 2D plotting algorithms were
-        adapted from Yacas, <http://yacas.sourceforge.net>.
+        adapted from Yacas, <http://www.yacas.org>.
       - Maxima's default plotter is now gnuplot. The gnuplot
         interface has been greatly enhanced; see
-        <http://maxima.sourceforge.net> for examples.
+        <https://maxima.sourceforge.io> for examples.
 
    b) New input/output labels
       - Before this release, the labels input, output, and
